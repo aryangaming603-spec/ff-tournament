@@ -1,347 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>FREE FIRE TOURNAMENTS - Aryan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-    /* BASIC PAGE */
-    body{
-      margin:0;
-      font-family:Arial, sans-serif;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
-      color:#e5e7eb;
-    }
-  <script>
-// BASIC CONFIG
-const CONFIG = {
-  TOTAL_SLOTS: 48,
-  ENTRY_FEE: 25,
-  UPI_ID: "aryangaming603-2@okicici"
-};
+<meta charset="UTF-8" />
+<title>Aryan Gaming Tournament Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-// ✅ agar URL me ?admin=1 hai to admin view ON
-const IS_ADMIN_VIEW = window.location.search.includes("admin=1");
-
-let players = [];
-let count = 0;
-
-// --------- STORAGE ---------
-function loadFromStorage(){
-  try{
-    const data = localStorage.getItem("ffSoloPlayers");
-    if(data){
-      players = JSON.parse(data);
-      count = players.length;
-      renderTable();
-      updateSlotsInfo();
-    }
-  }catch(e){
-    console.warn(e);
-  }
+<style>
+body{
+  margin:0;
+  background:#020617;
+  color:#e2e8f0;
+  font-family:Arial, sans-serif;
+  text-align:center;
 }
 
-function saveToStorage(){
-  try{
-    localStorage.setItem("ffSoloPlayers", JSON.stringify(players));
-  }catch(e){
-    console.warn(e);
-  }
+header{
+  padding:18px;
+  background:#0f172a;
+  border-bottom:2px solid #1e293b;
+}
+header h1{margin:0;font-size:22px;color:#38bdf8;}
+header p{margin:4px;font-size:12px;color:#94a3b8;}
+
+.container{
+  width:92%;
+  max-width:850px;
+  margin:auto;
+  padding:15px 0;
 }
 
-// --------- HELPERS (MASKING) ---------
-function maskUID(uid){
-  if(IS_ADMIN_VIEW) return uid;
-  return "XXXXXXX"; // sabke liye hidden
+.card{
+  background:#0f172a;
+  border:1px solid #1e293b;
+  padding:18px;
+  border-radius:12px;
+  margin-bottom:14px;
+  box-shadow:0 0 12px rgba(0,0,0,0.6);
 }
 
-function maskWhatsApp(wa){
-  if(IS_ADMIN_VIEW) return wa;
-  return "XXXXXXXXXX";
-}
+.card h2{margin:0 0 12px;font-size:18px;color:#38bdf8;}
 
-function maskCode(code){
-  if(IS_ADMIN_VIEW) return code;
-  return "XXXXXX";
-}
-
-// --------- PAYMENT CODE ---------
-function createCode(){
-  const num = Math.floor(100000 + Math.random()*900000);
-  return "FF" + num;
-}
-
-// --------- MAIN FLOW ---------
-function payAndRegister(){
-  const name = document.getElementById("ffName").value.trim();
-  const uid  = document.getElementById("ffUid").value.trim();
-  const wa   = document.getElementById("whatsapp").value.trim();
-
-  if(!name || !uid || !wa){
-    alert("Name, UID aur WhatsApp tino zaroori hai.");
-    return;
-  }
-
-  if(players.length >= CONFIG.TOTAL_SLOTS){
-    alert("All slots filled! Ab naya register nahi ho sakta.");
-    return;
-  }
-
-  const code = createCode();
-
-  count++;
-  const player = {
-    no: count,
-    name,
-    uid,
-    wa,
-    code,
-    status: "Pending"
-  };
-  players.push(player);
-  saveToStorage();
-  renderTable();
-  updateSlotsInfo();
-
-  document.getElementById("ffName").value = "";
-  document.getElementById("ffUid").value = "";
-  document.getElementById("whatsapp").value = "";
-
-  alert("Your payment code: " + code + "\nUPI payment note me yehi code likhna.");
-
-  const url = "upi://pay"
-    + "?pa=" + encodeURIComponent(CONFIG.UPI_ID)
-    + "&pn=" + encodeURIComponent("Aryan Gaming")
-    + "&am=" + encodeURIComponent(CONFIG.ENTRY_FEE)
-    + "&cu=INR"
-    + "&tn=" + encodeURIComponent(code);
-
-  window.location.href = url;
-}
-
-// --------- TABLE RENDER ---------
-function renderTable(){
-  const tbody = document.getElementById("playerList");
-  tbody.innerHTML = "";
-
-  players.forEach((p,i)=>{
-    const statusHtml = IS_ADMIN_VIEW
-      ? `<button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}"
-                  onclick="toggleStatus(${i})">
-           ${p.status}
-         </button>`
-      : p.status;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td>${p.name}</td>
-      <td>${maskUID(p.uid)}</td>
-      <td>${maskWhatsApp(p.wa)}</td>
-      <td>${maskCode(p.code)}</td>
-      <td>${statusHtml}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// --------- STATUS TOGGLE (sirf admin link se) ---------
-function toggleStatus(i){
-  if(!IS_ADMIN_VIEW){
-    alert("Ye option sirf organiser ke liye hai.");
-    return;
-  }
-  const p = players[i];
-  p.status = (p.status === "Paid") ? "Pending" : "Paid";
-  saveToStorage();
-  renderTable();
-}
-
-// --------- SLOTS INFO ---------
-function updateSlotsInfo(){
-  const filled = players.length;
-  const left   = Math.max(CONFIG.TOTAL_SLOTS - filled, 0);
-  const info   = document.getElementById("slotsInfoText");
-  const badge  = document.getElementById("slotBadge");
-  if(info){
-    info.textContent = `Filled: ${filled} / ${CONFIG.TOTAL_SLOTS} | Left: ${left}`;
-  }
-  if(badge){
-    badge.textContent = `Slots: ${CONFIG.TOTAL_SLOTS} Players`;
-  }
-}
-
-// --------- INIT ---------
-document.addEventListener("DOMContentLoaded", ()=>{
-  loadFromStorage();
-  updateSlotsInfo();
-});
-  </script>
-
-    /* HEADER */
-    header{
-      padding:16px 12px 8px;
-      text-align:center;              /* mobile: center */
-    }
-    header h1{
-      margin:0;
-      font-size:22px;
-      letter-spacing:0.08em;
-    }
-    header p{
-      margin:4px 0 0;
-      font-size:12px;
-      color:#9ca3af;
-    }
-    .made-by{
-      font-size:11px;
-      color:#f97373;
-    }
-
-    /* LAYOUT */
-    .container{
-      max-width:900px;
-      margin:0 auto;
-      padding:0 10px 18px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:14px;
-    }
-
-    /* CARDS */
-    .card{
-      background:rgba(2,6,23,0.94);
-      border-radius:14px;
-      padding:14px 12px;
-      border:1px solid #1f2937;
-      box-shadow:0 0 12px rgba(0,0,0,0.7);
-      overflow:hidden;
-      }
-    }
-  
-    .title{
-      font-size:15px;
-      margin:0 0 4px;
-    }
-    .mode{
-      font-size:12px;
-      color:#a5b4fc;
-      margin-bottom:6px;
-    }
-    .info{
-      font-size:12px;
-      margin:2px 0;
-    }
-    .tag{
-      display:inline-block;
-      background:#111827;
-      border-radius:999px;
-      padding:3px 8px;
-      font-size:11px;
-      margin-right:4px;
-      margin-top:4px;
-      color:#e5e7eb;
-    }
-
-    /* BUTTONS */
-    .btn{
-      
-    }
-    .btn:hover{
-      filter:brightness(1.05);
-    }
-    .btn{
+.btn{
   display:block;
   width:100%;
-  padding:12px 0;         /* height + larger tap area */
-  margin-top:12px;
+  padding:12px 0;
+  margin-top:10px;
+  font-size:15px;
+  font-weight:bold;
   border-radius:8px;
-  background:#22c55e;
-  color:#022c22;
-  font-size:14px;
+  border:none;
+  cursor:pointer;
+}
 
+.btn-blue{background:#3b82f6;color:white;}
+.btn-green{background:#22c55e;color:#022c22;}
+.btn-black{background:#111827;color:#cbd5e1;}
+
+.btn-blue:hover,.btn-green:hover,.btn-black:hover{opacity:.9;}
+
+.footer{
+  padding:12px;
+  font-size:12px;
+  color:#64748b;
+}
+</style>
 </head>
+
 <body>
 
 <header>
-  <div class="container">
-    <h1>FREE FIRE TOURNAMENTS</h1>
-    <p>Free Fire Tournament Hub</p>
-    <p class="made-by">Made by Aryan ❤️</p>
-    <p style="font-size:11px;color:#9ca3af;margin-top:4px;">
-      Niche se tournament choose karo. Har custom ka alag page hai jahan se payment &amp; registration hoga.
-    </p>
-  </div>
+  <h1>⚡ Aryan Gaming Tournament ⚡</h1>
+  <p>Free Fire Custom, Registration & UID Verification</p>
 </header>
 
 <div class="container">
-  <div class="grid">
 
-    <!-- TOURNAMENT 1: Solo – Bermuda -->
-    <div class="card">
-      <h2 class="title">Solo – Bermuda (₹25 Entry)</h2>
-      <div class="mode">Room 1 • Main Tournament</div>
-      <p class="info"><b>Prize:</b> ₹150 + ₹6 per kill</p>
-      <p class="info"><b>Slots:</b> 48 players</p>
-      <span class="tag">Custom Room</span>
-      <span class="tag">UPI Payment</span>
-      <span class="tag">Solo</span>
-      <a class="btn" href="solo-bermuda-25.html">Open &amp; Register</a>
-    </div>
-
-    <!-- TOURNAMENT 2: Duo (Coming Soon) -->
-    <div class="card">
-      <h2 class="title">Duo – Bermuda (Coming Soon)</h2>
-      <div class="mode">Room 2 • Coming Soon</div>
-      <p class="info"><b>Prize:</b> TBA</p>
-      <p class="info"><b>Slots:</b> 48 players</p>
-      <span class="tag">Locked</span>
-      <span class="tag">Duo</span>
-      <a class="btn btn-secondary" href="javascript:void(0);">Not available yet</a>
-    </div>
-
-    <!-- TOURNAMENT 3: Squad (Coming Soon) -->
-    <div class="card">
-      <h2 class="title">Squad – Clash Squad (Coming Soon)</h2>
-      <div class="mode">Room 3 • Coming Soon</div>
-      <p class="info"><b>Prize:</b> TBA</p>
-      <p class="info"><b>Slots:</b> 48 players</p>
-      <span class="tag">Locked</span>
-      <span class="tag">Squad</span>
-      <a class="btn btn-secondary" href="javascript:void(0);">Not available yet</a>
-    </div>
-
+  <!-- Tournament Card -->
+  <div class="card">
+    <h2>Solo Bermuda Tournament 🎮</h2>
+    <p>Entry Fee: ₹25 | Prize: ₹150 | Kill: ₹6</p>
+    <button class="btn btn-blue"
+      onclick="location.href='solo-bermuda-25.html'">
+      Register & Pay
+    </button>
+    <button class="btn btn-green"
+      onclick="location.href='solo-bermuda-25.html?admin=1'">
+      Admin Control Panel 🔐
+    </button>
   </div>
 
-  <!-- SUPPORT CARD -->
-  <div class="card" style="margin-top:16px;">
-    <h2 class="title">Support &amp; Help 🛟</h2>
-    <p class="info">Koi dikkat, payment issue ya room ID related problem ho to yahan se contact karo.</p>
-    <p class="info"><b>Organizer:</b> Aryan</p>
-    <p class="info"><b>WhatsApp:</b> 9170856377</p>
-<a class="btn" href="verify.html">
-  🔐 Verify UID & Get Room Details
-</a>
-    <div class="support-actions">
-      <a class="btn" href="https://api.whatsapp.com/send?phone=919170856377&text=Hi%20Aryan%2C%20mujhe%20tournament%20support%20chahiye.">
-        WhatsApp Support
-      </a>
-      <a class="btn btn-secondary" href="mailto:example@email.com?subject=FF%20Tournament%20Support">
-        Email (optional)
-      </a>
-    </div>
-
-    <p class="small-note">
-      Message me apna <b>Free Fire name</b>, <b>UID</b>, <b>payment screenshot</b> aur <b>problem</b> clear likhna.
-    </p>
+  <!-- UID Verify -->
+  <div class="card">
+    <h2>Room Unlock / UID Verify 🔐</h2>
+    <p>Only verified players will get Room ID & Password.</p>
+    <button class="btn btn-blue"
+      onclick="location.href='verify.html'">
+      Verify UID
+    </button>
   </div>
 
-  <p class="small-note">
-    Future me jab naya custom banaoge to bas ek nayi <b>.html</b> file banao
-    (jaise <b>duo-bermuda.html</b>) aur upar card me uska link laga dena.
-  </p>
+  <!-- Support -->
+  <div class="card">
+    <h2>Support & Help 📞</h2>
+    <p>Payment Issue / Match info / Room Details</p>
+    <button class="btn btn-green"
+      onclick="location.href='https://wa.me/9170856377'">
+      Message on WhatsApp
+    </button>
+  </div>
+
+  <div class="footer">
+    ©2025 Aryan Gaming Tournament — Powered by GitHub Pages
+  </div>
+
 </div>
 
 </body>
