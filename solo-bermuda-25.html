@@ -393,6 +393,61 @@ document.addEventListener("DOMContentLoaded", ()=>{
   loadFromStorage();
   updateSlotsInfo();
 });
+  /* ==== SOLO LEADERBOARD SYSTEM ==== */
+
+// admin access check
+const LB_ADMIN = window.location.search.includes("admin=1");
+let LB = JSON.parse(localStorage.getItem("soloLB") || "[]");
+
+// reward rules
+const WIN = 150;  // Rank 1 win money
+const PER_KILL = 6;
+
+// show leaderboard
+function lbRender(){
+    let sorted = [...LB].sort((a,b)=>b.kills-a.kills);
+    let html = "";
+    sorted.forEach((p,i)=>{
+        let reward = (i===0?WIN:0) + (p.kills*PER_KILL);
+        let rankColor = i===0?"background:#fde047;color:#111": i===1?"background:#cbd5e1;color:#111": i===2?"background:#fca5a5;color:#111":"";
+        html += `<tr style="${rankColor}">
+                    <td>${i+1}</td>
+                    <td>${p.name}</td>
+                    <td>${p.kills}</td>
+                    <td>₹${reward}</td>
+                </tr>`;
+    });
+    document.getElementById("lb_table").innerHTML = html;
+}
+
+// add result (admin only)
+function lbAdd(){
+    if(!LB_ADMIN) return alert("Only organiser can update leaderboard!");
+    let n=document.getElementById("lb_name").value.trim();
+    let k=parseInt(document.getElementById("lb_kill").value);
+    if(!n||isNaN(k)) return alert("Name + Kills required.");
+    LB.push({name:n,kills:k});
+    localStorage.setItem("soloLB",JSON.stringify(LB));
+    lbRender();
+    document.getElementById("lb_name").value="";
+    document.getElementById("lb_kill").value="";
+}
+
+function lbClear(){
+    if(!LB_ADMIN) return alert("Only admin can reset!");
+    if(confirm("Clear entire leaderboard?")){ 
+         LB=[]; 
+         localStorage.setItem("soloLB","[]");
+         lbRender();
+    }
+}
+
+// INIT
+document.addEventListener("DOMContentLoaded",()=>{
+    lbRender();
+    if(LB_ADMIN) document.getElementById("lb-admin").style.display="block";
+    else document.getElementById("lb_info").innerText="You can view result only. Leaderboard locked 🔒";
+});
 </script>   
 </body>
 </html>
