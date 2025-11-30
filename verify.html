@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>UID Verify | Aryan Tournament</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 body{
   background:#020617;
@@ -60,48 +59,21 @@ button{
   color:#9ca3af;
   margin-top:6px;
 }
-</style>
-</head>
-<body>
-
-<h1>Free Fire UID Verification 🔐</h1>
-<p>Sirf registered UID ko hi room details milenge.</p>
-
-<input id="uidInput" placeholder="Enter your UID">
-<button onclick="verify()">Verify</button>
-
-<div id="okBox" class="box ok">
-  <h2>Access Granted ✔</h2>
-  <p>Welcome <b>Inferno</b></p>
-  <p class="big">Room ID: <span id="roomIdText">XXXXX</span></p>
-  <p class="big">Password: <span id="roomPassText">YYYYY</span></p>
-  <p class="small">Password kisi ke sath share mat karo.</p>
-</div>
-
-<div id="noBox" class="box no">
-  <h2>Access Denied ❌</h2>
-  <p>Ye UID registered nahi hai.</p>
-</div>
 <script>
 // ================= AUTH SYSTEM =================
 
-// Yahan jitने भी players allow karna chahte ho add करो 👇
-// Format = ["UID", "Name"], comma मत भूलना!!!
+// Yahan jitne bhi players allow karna chahte ho add karo 👇
+// Format = ["UID", "Name"],
 
 const ALLOWED_PLAYERS = [
-  ["3889662216", "Inferno"],          // OLD - already added
-  ["1234567890", "Rohan"],           // NEW Example
-  ["9876543211", "Aman"],            // NEW Example
-  ["5152338911", "Legendx"],         // ADD more any time
-  // yaha bas list badate jao 🔥
+  ["3889662216", "Inferno"],   // 1st player (ye abhi chal raha hai)
+  ["1111111111", "Test2"],     // example 2
+  ["2222222222", "Test3"],     // example 3
 ];
 
-// FREE FIRE ROOM DETAILS (Match create hone ke baad change karna)
-const ROOM_ID   = "XXXXX";     // real room id
-const ROOM_PASS = "YYYYY";     // real password
-
-
-// ================= VERIFY LOGIC =================
+// FREE FIRE ROOM DETAILS
+const ROOM_ID   = "XXXXX";   // yahan asli room id
+const ROOM_PASS = "YYYYY";   // yahan asli password
 
 function verify(){
   const inputUID = document.getElementById("uidInput").value.trim();
@@ -114,10 +86,11 @@ function verify(){
     return;
   }
 
-  const match = ALLOWED_PLAYERS.find(p => p[0] === inputUID);
+  // safe compare
+  const match = ALLOWED_PLAYERS.find(p => String(p[0]).trim() === inputUID);
 
   if(match){
-    document.getElementById("roomIdText").innerText  = ROOM_ID;
+    document.getElementById("roomIdText").innerText   = ROOM_ID;
     document.getElementById("roomPassText").innerText = ROOM_PASS;
     document.getElementById("okBox").style.display = "block";
   } else {
