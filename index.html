@@ -210,11 +210,25 @@ function payViaUPI(){
 
 // 👇 Ye function WhatsApp pe auto message ready karega
 function openWhatsAppForPlayer(player){
-  if (ORGANISER_WHATSAPP === "919170856377") {
-    // Agar tumne number change nahi kiya to error bata dega
-    console.warn("ORGANISER_WHATSAPP set karo pehle!");
+  if (ORGANISER_WHATSAPP === "91XXXXXXXXXX") {
+    alert("Code me apna WhatsApp number set karo (91 + number).");
     return;
   }
+
+  const lines = [
+    "New Free Fire Tournament Registration",
+    "Name: " + player.name,
+    "UID: " + player.uid,
+    "Player WhatsApp: " + player.wa,
+    "Payment Code: " + player.code,
+    "Txn ID: " + player.txn,
+    "Status: " + player.status
+  ];
+
+  const msg = encodeURIComponent(lines.join("\n"));
+  const url = "https://api.whatsapp.com/send?phone=" + ORGANISER_WHATSAPP + "&text=" + msg;
+  window.location.href = url;
+}
 
   const msg =
     "New Free Fire Tournament Registration%0A" +
