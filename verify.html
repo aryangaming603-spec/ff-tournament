@@ -1,180 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Free Fire UID Verification - Aryan</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Free Fire UID Verify | Aryan Tournament</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-  body{
-    margin:0;
+body{
     background:#020617;
     color:white;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
     text-align:center;
-    padding:28px 10px;
-  }
-  h1{
-    font-size:22px;
-    margin-bottom:6px;
-  }
-  p{
-    margin:4px 0;
-    font-size:13px;
-  }
-  input{
-    width:92%;
-    max-width:320px;
-    margin-top:14px;
+    padding:30px 10px;
+}
+h1{ font-size:23px; margin-bottom:12px; }
+input{
+    width:90%;
     padding:10px;
-    border-radius:8px;
-    border:none;
+    margin-top:15px;
     background:#0f172a;
-    color:white;
-    font-size:14px;
-  }
-  button{
-    width:94%;
-    max-width:330px;
-    margin-top:14px;
-    padding:11px;
-    background:#22c55e;
+    color:#fff;
     border:none;
-    color:#022c22;
-    font-weight:bold;
+    border-radius:6px;
     font-size:15px;
-    border-radius:8px;
-  }
-  .box{
-    margin:20px auto 0;
-    max-width:360px;
-    background:#0f172a;
-    padding:18px 14px;
-    border-radius:10px;
+}
+button{
+    width:92%;
+    padding:11px;
+    margin-top:14px;
     font-size:16px;
-    display:none;
-  }
-  .allow{
-    border:1px solid #16a34a;
-  }
-  .deny{
-    border:1px solid #b91c1c;
-    background:#7f1d1d;
-  }
-  .lock{
-    border:1px solid #facc15;
-    background:#78350f;
-  }
-  .room-val{
-    font-size:20px;
-    margin-top:8px;
     font-weight:bold;
-  }
-  .small{
-    font-size:11px;
-    color:#9ca3af;
-    margin-top:8px;
-  }
+    background:#22c55e;
+    color:#022c22;
+    border:none;
+    border-radius:8px;
+}
+.box{
+    margin-top:22px;
+    padding:15px;
+    border-radius:10px;
+    display:none;
+}
+.allow{ background:#064e3b; border:1px solid #10b981; }
+.deny{ background:#7f1d1d; border:1px solid #dc2626; }
+.lock{ background:#78350f; border:1px solid #facc15; }
+.val{ font-size:21px; margin-top:6px; font-weight:bold; }
+.small{ font-size:12px; color:#9ca3af; margin-top:6px; }
 </style>
 </head>
 <body>
 
 <h1>Free Fire UID Verification 🔐</h1>
-<p>Sirf registered UID wale hi room details dekh sakte hain.</p>
-<p style="font-size:11px;color:#9ca3af;">UID exactly game jaisa hi likho (no space).</p>
+<p>Sirf registered UID walon ko room access milega</p>
 
-<input id="uidCheck" placeholder="Enter your UID">
-<button onclick="verifyUID()">Verify</button>
+<input id="uidBox" placeholder="Enter your UID">
+<button onclick="checkUID()">Verify</button>
 
-<div id="lockBox" class="box lock">
-  <h2>Room Locked ⏳</h2>
-  <p>Room ID &amp; Password abhi unlock nahi hua.</p>
-  <p id="unlockTimeText" style="font-size:12px;margin-top:6px;"></p>
+<!-- ALLOWED -->
+<div id="ok" class="box allow">
+    <h2>Access Granted ✔</h2>
+    <p>Welcome <b>Inferno</b></p>
+    <p class="val">Room ID: <span id="roomID"></span></p>
+    <p class="val">Password: <span id="pass"></span></p>
+    <p class="small">Yeh details bahar leak mat karna 🙂</p>
 </div>
 
-<div id="allowBox" class="box allow">
-  <h2>Access Granted ✔</h2>
-  <p id="playerName"></p>
-  <p class="room-val">Room ID: <span id="roomID"></span></p>
-  <p class="room-val">Password: <span id="roomPASS"></span></p>
-  <p class="small">Kisi ke sath password share mat karo. Sirf ek device se join karo.</p>
-</div>
-
-<div id="denyBox" class="box deny">
-  <h2>Access Denied ❌</h2>
-  <p>Ye UID registered list me nahi mila.</p>
-  <p class="small">Ensure karo ki tumne sahi UID likha hai, aur registration + payment complete kiya hai.</p>
+<!-- DENIED -->
+<div id="no" class="box deny">
+    <h2>Access Denied ❌</h2>
+    <p>UID registered list me nahi hai.</p>
 </div>
 
 <script>
-// ================== CONFIG ==================
+//================SET ROOM DETAILS================//
+const ALLOWED_UID = "3889662216";  // ← Only this UID allowed
+const PLAYER_NAME = "Inferno";
 
-// Yahan tum room details daaloge jab ready ho:
-const ROOM_ID    = "499489313";    // 👉 Match ke time pe change karna
-const ROOM_PASS  = "123000";    // 👉 Match ke time pe change karna
+// ROOM SETTING (jab match create hogya ho to update krna)
+const ROOM_ID   = "XXXXX";    // ← yaha asli room ID daalna hai
+const PASSWORD  = "YYYYY";    // ← yaha asli password
 
-// OPTIONAL: Agar room ek fixed time ke baad hi dikhाना hai
-// Format: "2025-11-30T18:00:00"  (YYYY-MM-DDTHH:MM:SS  24h)
-const UNLOCK_AT  = "";  // agar hamesha open rakhna hai to "" (empty) bhi kar sakte ho
+//================LOGIC================//
+function checkUID(){
+    let u = document.getElementById("uidBox").value.trim();
 
-// Yahan sirf REGISTERED UIDs daalna hai:
-const ALLOWED_PLAYERS = [
-   ["3889662216", "PN INFERNO)"],
-   ["5642116186", "ACTIONBOLT"],
-   ["2807715845", "VIBRANT"]
-   yahan real players add karna:
-  // ["514298675", "Aryan"],
-  // ["189725334", "Rohan"],
-];
+    document.getElementById("ok").style.display="none";
+    document.getElementById("no").style.display="none";
 
-// ================== LOGIC ==================
-
-function isUnlocked(){
-  if(!UNLOCK_AT) return true; // no lock
-  const target = new Date(UNLOCK_AT).getTime();
-  if(isNaN(target)) return true;
-  const now = Date.now();
-  return now >= target;
-}
-
-function verifyUID(){
-  const uid = document.getElementById("uidCheck").value.trim();
-
-  // sab result boxes hide se start karo
-  document.getElementById("allowBox").style.display = "none";
-  document.getElementById("denyBox").style.display  = "none";
-  document.getElementById("lockBox").style.display  = "none";
-
-  if(!uid){
-    alert("UID likho bhai.");
-    return;
-  }
-
-  // UID list me hai kya?
-  const match = ALLOWED_PLAYERS.find(p => p[0] === uid);
-
-  if(!match){
-    // Not registered
-    document.getElementById("denyBox").style.display = "block";
-    return;
-  }
-
-  // Registered hai, ab dekhna: room unlock hua ya nahi
-  if(!isUnlocked()){
-    const t = document.getElementById("unlockTimeText");
-    t.textContent = "Room unlock time: " + UNLOCK_AT.replace("T"," ");
-    document.getElementById("lockBox").style.display = "block";
-    return;
-  }
-
-  // Registered + Unlocked -> show room details
-  const name = match[1] || "Registered Player";
-
-  document.getElementById("playerName").textContent = "Welcome, " + name;
-  document.getElementById("roomID").textContent   = ROOM_ID;
-  document.getElementById("roomPASS").textContent = ROOM_PASS;
-  document.getElementById("allowBox").style.display = "block";
+    if(u === ALLOWED_UID){
+        document.getElementById("roomID").innerText = ROOM_ID;
+        document.getElementById("pass").innerText   = PASSWORD;
+        document.getElementById("ok").style.display="block";
+    } else {
+        document.getElementById("no").style.display="block";
+    }
 }
 </script>
-
 </body>
 </html>
