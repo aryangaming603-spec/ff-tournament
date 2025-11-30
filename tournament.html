@@ -161,6 +161,9 @@
 const UPI_ID = "aryangaming603-2@okicici";
 const ENTRY_AMOUNT = 25;
 
+// 👇 YAHAN APNA WHATSAPP NUMBER DAALNA HAI (91 ke saath)
+const ORGANISER_WHATSAPP = "91XXXXXXXXXX"; // e.g. 919170856377
+
 let tempPlayer = null;   // Step 1 ke baad data yahan rakhenge
 let players = [];        // Final registered players yahan store
 let count = 0;
@@ -205,6 +208,27 @@ function payViaUPI(){
   window.location.href = url;
 }
 
+// 👇 Ye function WhatsApp pe auto message ready karega
+function openWhatsAppForPlayer(player){
+  if (ORGANISER_WHATSAPP === "91917085637770856377") {
+    // Agar tumne number change nahi kiya to error bata dega
+    console.warn("ORGANISER_WHATSAPP set karo pehle!");
+    return;
+  }
+
+  const msg =
+    "New Free Fire Tournament Registration%0A" +
+    "Name: " + encodeURIComponent(player.name) + "%0A" +
+    "UID: " + encodeURIComponent(player.uid) + "%0A" +
+    "Player WhatsApp: " + encodeURIComponent(player.wa) + "%0A" +
+    "Payment Code: " + encodeURIComponent(player.code) + "%0A" +
+    "Txn ID: " + encodeURIComponent(player.txn) + "%0A" +
+    "Status: " + encodeURIComponent(player.status);
+
+  const url = `https://wa.me/${ORGANISER_WHATSAPP}?text=${msg}`;
+  window.open(url, "_blank");
+}
+
 function confirmPayment(){
   if(!tempPlayer){
     alert("Pehle Step 1 complete karo.");
@@ -245,6 +269,9 @@ function confirmPayment(){
     </tr>
   `;
   document.getElementById('playerList').insertAdjacentHTML('beforeend', row);
+
+  // ✅ Yahin se WhatsApp auto message trigger hoga
+  openWhatsAppForPlayer(finalPlayer);
 
   // Form clear + step 2 hide
   document.getElementById('ffName').value = "";
