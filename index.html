@@ -16,8 +16,8 @@
     .badge{background:#1e293b;padding:5px 10px;border-radius:999px;font-size:11px;display:inline-block;margin:3px 3px 0 0;}
     p{margin:4px 0;font-size:13px;}
     .label{display:block;margin-top:8px;font-size:13px;}
-    input,textarea,select{width:100%;padding:7px 8px;margin-top:3px;border-radius:5px;border:1px solid #334155;background:#020617;color:#e5e7eb;font-size:13px;box-sizing:border-box;}
-    input::placeholder,textarea::placeholder{color:#6b7280;}
+    input,select{width:100%;padding:7px 8px;margin-top:3px;border-radius:5px;border:1px solid #334155;background:#020617;color:#e5e7eb;font-size:13px;box-sizing:border-box;}
+    input::placeholder{color:#6b7280;}
     button{width:100%;padding:9px 12px;margin-top:10px;border:none;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer;}
     .primary{background:#22c55e;color:#022c22;}
     .secondary{background:#38bdf8;color:#0b1120;}
@@ -32,6 +32,10 @@
     .code-text{font-size:16px;font-weight:bold;color:#bbf7d0;}
     .tag{font-size:11px;color:#a5b4fc;}
     .step-title{font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;}
+    .status-btn{padding:3px 6px;border-radius:4px;border:none;font-size:11px;cursor:pointer;}
+    .status-paid{background:#16a34a;color:#ecfdf5;}
+    .status-pending{background:#f97316;color:#fffbeb;}
+    .slots-text{font-size:12px;color:#a5b4fc;margin-top:6px;}
     @media(min-width:640px){
       header h1{font-size:20px;}
       .container{padding:16px;}
@@ -56,19 +60,23 @@
     <div>
       <span class="badge">Mode: Solo</span>
       <span class="badge">Map: Bermuda</span>
-      <span class="badge">Slots: 48 Players</span>
+      <span class="badge" id="slotBadge">Slots: 48 Players</span>
     </div>
 
     <p style="margin-top:8px;">
       <b>Entry Fee:</b> ₹25 / Player<br>
-      <b>Winner Prize:</b> ₹100<br>
-      <b>Per Kill:</b> ₹0
+      <b>Winner Prize:</b> ₹150<br>
+      <b>Per Kill:</b> ₹6
     </p>
 
     <div class="upi-box">
       <div><b>Pay Entry Fee on this UPI:</b></div>
-      <div class="upi-id">aryangaming603-2@okicici</div>
+      <div class="upi-id" id="upiText">aryangaming603-2@okicici</div>
       <div class="note">UPI payment karte time note/remark me हमेशा payment code likhna (jo niche generate hoga).</div>
+    </div>
+
+    <div class="slots-text" id="slotsInfoText">
+      Filled: 0 / 48 | Left: 48
     </div>
   </div>
 
@@ -103,7 +111,7 @@
       <div>Tumhara Payment Code:</div>
       <div id="payCode" class="code-text">FF000000</div>
       <div class="note">
-        ₹25 send karo is UPI par: <b>aryangaming603-2@okicici</b><br>
+        ₹25 send karo is UPI par: <b id="upiText2">aryangaming603-2@okicici</b><br>
         Aur UPI note/remark me <b>yehi code</b> likho.
       </div>
     </div>
@@ -118,10 +126,6 @@
       <option value="Pending">Pending</option>
       <option value="Paid">Paid</option>
     </select>
-
-    <label class="label">Payment Screenshot (optional)</label>
-    <input id="ss" type="file" accept="image/*">
-    <div class="note">Screenshot file sirf tumhare device pe hai, online server pe store nahi hoti.</div>
 
     <button class="primary" onclick="confirmPayment()">Confirm Payment & Register</button>
     <button class="danger" onclick="cancelPayment()">Cancel / Edit Details</button>
@@ -138,7 +142,9 @@
     <p class="note">
       Ye list sirf organiser (Aryan) ke liye hai. System automatic bank se verify nahi karta,
       tumhe apne UPI app/SMS se payment check karke status dekhna hoga.
+      List browser me save rahegi (refresh ke baad bhi).
     </p>
+
     <table>
       <thead>
         <tr>
@@ -158,43 +164,78 @@
 </div>
 
 <script>
-const UPI_ID = "aryangaming603-2@okicici";
-const ENTRY_AMOUNT = 25;
+// ---- CONFIG (sirf yahan change karna hota hai) ----
+const CONFIG = {
+  MODE: "Solo",
+  MAP: "Bermuda",
+  TOTAL_SLOTS: 48,
+  ENTRY_FEE: 25,
+  WINNER_PRIZE: 150,
+  PER_KILL: 6,
+  UPI_ID: "aryangaming603-2@okicici",
+  ORGANISER_WHATSAPP: "919170856377" // 91 + 9170856377
+};
 
-// 👇 YAHAN APNA WHATSAPP NUMBER DAALNA HAI (91 ke saath)
-const ORGANISER_WHATSAPP = "919170856377"; // e.g. 919170856377
-
-let tempPlayer = null;   // Step 1 ke baad data yahan rakhenge
-let players = [];        // Final registered players yahan store
+// ---- STATE ----
+let tempPlayer = null;
+let players = [];
 let count = 0;
 
-// Random payment code generate
-function createCode() {
-  const num = Math.floor(100000 + Math.random() * 900000); // 6 digit
+// ---- LOCAL STORAGE ----
+function saveToStorage(){
+  try{
+    localStorage.setItem("ffPlayersV2", JSON.stringify(players));
+  }catch(e){
+    console.warn("localStorage save error", e);
+  }
+}
+
+function loadFromStorage(){
+  try{
+    const data = localStorage.getItem("ffPlayersV2");
+    if(data){
+      players = JSON.parse(data);
+      count = players.length;
+      renderTable();
+      updateSlotsInfo();
+    }
+  }catch(e){
+    console.warn("localStorage load error", e);
+  }
+}
+
+// ---- PAY CODE ----
+function createCode(){
+  const num = Math.floor(100000 + Math.random()*900000);
   return "FF" + num;
 }
 
 function generatePaymentCode(){
-  const name = document.getElementById('ffName').value.trim();
-  const uid = document.getElementById('ffUid').value.trim();
-  const wa  = document.getElementById('whatsapp').value.trim();
+  const name = document.getElementById("ffName").value.trim();
+  const uid  = document.getElementById("ffUid").value.trim();
+  const wa   = document.getElementById("whatsapp").value.trim();
 
   if(!name || !uid || !wa){
     alert("Free Fire name, UID aur WhatsApp number तीनों जरूरी हैं!");
     return;
   }
 
+  if(players.length >= CONFIG.TOTAL_SLOTS){
+    alert("All slots filled! Ab new registration nahi ho sakta.");
+    return;
+  }
+
   const code = createCode();
   tempPlayer = { name, uid, wa, code };
 
-  document.getElementById('payCode').innerText = code;
-  document.getElementById('step2Card').style.display = 'block';
-  document.getElementById('statusSelect').value = "Pending";
+  document.getElementById("payCode").innerText = code;
+  document.getElementById("step2Card").style.display = "block";
+  document.getElementById("statusSelect").value = "Pending";
 
-  // Smooth scroll
-  document.getElementById('step2Card').scrollIntoView({behavior:'smooth'});
+  document.getElementById("step2Card").scrollIntoView({behavior:"smooth"});
 }
 
+// ---- UPI DEEP LINK ----
 function payViaUPI(){
   if(!tempPlayer){
     alert("Pehle Step 1 me details भरो aur Pay Now dabao.");
@@ -202,16 +243,20 @@ function payViaUPI(){
   }
 
   const code = tempPlayer.code;
-  const url = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent('Aryan Gaming')}&am=${ENTRY_AMOUNT}&cu=INR&tn=${encodeURIComponent(code)}`;
+  const url = "upi://pay"
+    + "?pa=" + encodeURIComponent(CONFIG.UPI_ID)
+    + "&pn=" + encodeURIComponent("Aryan Gaming")
+    + "&am=" + encodeURIComponent(CONFIG.ENTRY_FEE)
+    + "&cu=INR"
+    + "&tn=" + encodeURIComponent(code);
 
-  // Mobile me best: direct UPI app open
   window.location.href = url;
 }
 
-// 👇 Ye function WhatsApp pe auto message ready karega
+// ---- WHATSAPP AUTO MESSAGE ----
 function openWhatsAppForPlayer(player){
-  if (ORGANISER_WHATSAPP === "91XXXXXXXXXX") {
-    alert("Code me apna WhatsApp number set karo (91 + number).");
+  if(!CONFIG.ORGANISER_WHATSAPP || CONFIG.ORGANISER_WHATSAPP === "91XXXXXXXXXX"){
+    console.warn("ORGANISER_WHATSAPP sahi set nahi hai");
     return;
   }
 
@@ -226,36 +271,30 @@ function openWhatsAppForPlayer(player){
   ];
 
   const msg = encodeURIComponent(lines.join("\n"));
-  const url = "https://api.whatsapp.com/send?phone=" + ORGANISER_WHATSAPP + "&text=" + msg;
+  const url = "https://api.whatsapp.com/send?phone=" + CONFIG.ORGANISER_WHATSAPP + "&text=" + msg;
+
   window.location.href = url;
 }
 
-  const msg =
-    "New Free Fire Tournament Registration%0A" +
-    "Name: " + encodeURIComponent(player.name) + "%0A" +
-    "UID: " + encodeURIComponent(player.uid) + "%0A" +
-    "Player WhatsApp: " + encodeURIComponent(player.wa) + "%0A" +
-    "Payment Code: " + encodeURIComponent(player.code) + "%0A" +
-    "Txn ID: " + encodeURIComponent(player.txn) + "%0A" +
-    "Status: " + encodeURIComponent(player.status);
-
-  const url = `https://wa.me/${ORGANISER_WHATSAPP}?text=${msg}`;
-  window.open(url, "_blank");
-}
-
+// ---- CONFIRM & REGISTER ----
 function confirmPayment(){
   if(!tempPlayer){
     alert("Pehle Step 1 complete karo.");
     return;
   }
 
-  const txnId = document.getElementById('txnId').value.trim();
-  const status = document.getElementById('statusSelect').value;
+  const txnId  = document.getElementById("txnId").value.trim();
+  const status = document.getElementById("statusSelect").value;
 
   if(!txnId){
     if(!confirm("Transaction ID nahi dala. Phir bhi register karna hai?")){
       return;
     }
+  }
+
+  if(players.length >= CONFIG.TOTAL_SLOTS){
+    alert("All slots filled! Ab new registration nahi ho sakta.");
+    return;
   }
 
   count++;
@@ -270,30 +309,19 @@ function confirmPayment(){
   };
 
   players.push(finalPlayer);
+  saveToStorage();
+  renderTable();
+  updateSlotsInfo();
 
-  const row = `
-    <tr>
-      <td>${finalPlayer.no}</td>
-      <td>${finalPlayer.name}</td>
-      <td>${finalPlayer.uid}</td>
-      <td>${finalPlayer.wa}</td>
-      <td>${finalPlayer.code}</td>
-      <td>${finalPlayer.txn}</td>
-      <td>${finalPlayer.status}</td>
-    </tr>
-  `;
-  document.getElementById('playerList').insertAdjacentHTML('beforeend', row);
-
-  // ✅ Yahin se WhatsApp auto message trigger hoga
+  // WhatsApp par auto message
   openWhatsAppForPlayer(finalPlayer);
 
-  // Form clear + step 2 hide
-  document.getElementById('ffName').value = "";
-  document.getElementById('ffUid').value = "";
-  document.getElementById('whatsapp').value = "";
-  document.getElementById('txnId').value = "";
-  document.getElementById('ss').value = "";
-  document.getElementById('step2Card').style.display = 'none';
+  // clear form + step2 hide
+  document.getElementById("ffName").value = "";
+  document.getElementById("ffUid").value = "";
+  document.getElementById("whatsapp").value = "";
+  document.getElementById("txnId").value = "";
+  document.getElementById("step2Card").style.display = "none";
   tempPlayer = null;
 
   alert("Player registered list me add ho gaya! (Payment manually check karna padega bhai)");
@@ -301,10 +329,61 @@ function confirmPayment(){
 
 function cancelPayment(){
   tempPlayer = null;
-  document.getElementById('txnId').value = "";
-  document.getElementById('ss').value = "";
-  document.getElementById('step2Card').style.display = 'none';
+  document.getElementById("txnId").value = "";
+  document.getElementById("step2Card").style.display = "none";
 }
+
+// ---- TABLE + STATUS TOGGLE ----
+function renderTable(){
+  const tbody = document.getElementById("playerList");
+  tbody.innerHTML = "";
+  players.forEach((p, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${p.name}</td>
+      <td>${p.uid}</td>
+      <td>${p.wa}</td>
+      <td>${p.code}</td>
+      <td>${p.txn}</td>
+      <td>
+        <button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}"
+                onclick="toggleStatus(${i})">
+          ${p.status}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleStatus(index){
+  const p = players[index];
+  p.status = p.status === "Paid" ? "Pending" : "Paid";
+  saveToStorage();
+  renderTable();
+}
+
+// ---- SLOTS INFO ----
+function updateSlotsInfo(){
+  const filled = players.length;
+  const left   = Math.max(CONFIG.TOTAL_SLOTS - filled, 0);
+  const info   = document.getElementById("slotsInfoText");
+  if(info){
+    info.textContent = `Filled: ${filled} / ${CONFIG.TOTAL_SLOTS} | Left: ${left}`;
+  }
+}
+
+// ---- INIT ----
+document.addEventListener("DOMContentLoaded", () => {
+  // UPI text sync
+  document.getElementById("upiText").innerText  = CONFIG.UPI_ID;
+  document.getElementById("upiText2").innerText = CONFIG.UPI_ID;
+  document.getElementById("slotBadge").innerText = `Slots: ${CONFIG.TOTAL_SLOTS} Players`;
+
+  loadFromStorage();
+  updateSlotsInfo();
+});
 </script>
 
 </body>
