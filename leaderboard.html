@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Match Leaderboard | Aryan Gaming</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  background:#020617;
+  color:#e2e8f0;
+  font-family:Arial;
+  text-align:center;
+  padding:20px;
+}
+h1{font-size:23px;margin-bottom:10px;color:#38bdf8;}
+table{
+  width:100%;
+  max-width:600px;
+  margin:auto;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th,td{
+  border:1px solid #1e293b;
+  padding:8px;
+}
+th{
+  background:#0f172a;
+  color:#7dd3fc;
+}
+.rank1{background:#fde047;color:#1e1b00;font-weight:bold;}
+.rank2{background:#cbd5e1;color:#111827;font-weight:bold;}
+.rank3{background:#fca5a5;color:#111827;font-weight:bold;}
+input{
+  width:200px;
+  padding:6px;
+  margin:4px;
+  border-radius:6px;
+  border:none;
+  background:#0f172a;
+  color:white;
+}
+button{
+  padding:10px 14px;
+  margin-top:10px;
+  border:none;
+  background:#22c55e;
+  color:#052e16;
+  border-radius:8px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Match Leaderboard 🏆</h1>
+
+<input id="name" placeholder="Player Name">
+<input id="kills" type="number" placeholder="Kills">
+<button onclick="addPlayer()">Add Result</button>
+
+<table>
+<thead>
+<tr>
+  <th>Rank</th>
+  <th>Name</th>
+  <th>Kills</th>
+  <th>Total Reward</th>
+</tr>
+</thead>
+<tbody id="board"></tbody>
+</table>
+
+<script>
+let players=[];
+
+// Prize System
+const winPrize=150;
+const killPrize=6;
+
+function addPlayer(){
+  let n=document.getElementById("name").value.trim();
+  let k=parseInt(document.getElementById("kills").value);
+
+  if(!n || isNaN(k)){alert("Name + Kills दालो!");return;}
+
+  players.push({name:n,kills:k});
+  showTable();
+
+  document.getElementById("name").value="";
+  document.getElementById("kills").value="";
+}
+
+function showTable(){
+  let sorted=[...players].sort((a,b)=>b.kills-a.kills);
+  let html="";
+
+  sorted.forEach((p,i)=>{
+    let reward=(i==0?winPrize:0)+(p.kills*killPrize);
+    let rankClass=i==0?'rank1':i==1?'rank2':i==2?'rank3':'';
+
+    html+=`
+    <tr class="${rankClass}">
+      <td>${i+1}</td>
+      <td>${p.name}</td>
+      <td>${p.kills}</td>
+      <td>₹${reward}</td>
+    </tr>`;
+  });
+
+  document.getElementById("board").innerHTML=html;
+}
+</script>
+
+</body>
+</html>
