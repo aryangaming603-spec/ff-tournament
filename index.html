@@ -2,49 +2,123 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FREE FIRE CUSTOMS - Home</title>
+  <title>FREE FIRE TOURNAMENTS - Aryan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
-  color:#e5e7eb;
+      margin:0;
+      font-family:Arial, sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
+      color:#e5e7eb;
     }
-  background: url("https://i.imgur.com/QkNm2qZ.j
-    header{background:#0b1120;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;}
-    header h1{margin:0;font-size:18px;}
-    header span{font-size:11px;color:#9ca3af;}
-    .container{max-width:900px;margin:0 auto;padding:14px;}
-    .grid{display:grid;grid-template-columns:1fr;gap:12px;}
-    @media(min-width:640px){.grid{grid-template-columns:1fr 1fr;}header h1{font-size:20px;}}
-    .card{background:#020617;border-radius:12px;padding:14px;border:1px solid #1f2937;box-shadow:0 0 10px rgba(0,0,0,0.6);}
-    .title{font-size:16px;margin:0 0 4px;}
-    .mode{font-size:12px;color:#a5b4fc;margin-bottom:6px;}
-    .info{font-size:12px;margin:2px 0;}
-    .tag{display:inline-block;background:#1f2937;border-radius:999px;padding:3px 8px;font-size:11px;margin-right:4px;margin-top:4px;}
-    .btn{margin-top:10px;display:inline-block;text-align:center;width:100%;padding:8px 10px;border-radius:8px;border:none;background:#22c55e;color:#022c22;font-weight:bold;font-size:13px;text-decoration:none;}
-    .btn-secondary{background:#4b5563;color:#e5e7eb;}
-    .small-note{font-size:11px;color:#9ca3af;margin-top:10px;}
+    header{
+      background:transparent;
+      padding:16px;
+    }
+    header h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:0.08em;
+    }
+    header p{
+      margin:2px 0;
+      font-size:12px;
+      color:#9ca3af;
+    }
+    .made-by{
+      font-size:11px;
+      color:#f97373;
+    }
+    .container{
+      max-width:900px;
+      margin:0 auto;
+      padding:0 14px 20px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+    @media(min-width:640px){
+      .grid{grid-template-columns:1fr 1fr;}
+      header h1{font-size:26px;}
+    }
+    .card{
+      background:rgba(2,6,23,0.92);
+      border-radius:12px;
+      padding:14px;
+      border:1px solid #1f2937;
+      box-shadow:0 0 12px rgba(0,0,0,0.7);
+    }
+    .title{
+      font-size:16px;
+      margin:0 0 4px;
+    }
+    .mode{
+      font-size:12px;
+      color:#a5b4fc;
+      margin-bottom:6px;
+    }
+    .info{
+      font-size:12px;
+      margin:2px 0;
+    }
+    .tag{
+      display:inline-block;
+      background:#111827;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:11px;
+      margin-right:4px;
+      margin-top:4px;
+      color:#e5e7eb;
+    }
+    .btn{
+      margin-top:10px;
+      display:inline-block;
+      text-align:center;
+      width:100%;
+      padding:8px 10px;
+      border-radius:8px;
+      border:none;
+      background:#22c55e;
+      color:#022c22;
+      font-weight:bold;
+      font-size:13px;
+      text-decoration:none;
+    }
+    .btn:hover{
+      filter:brightness(1.05);
+    }
+    .btn-secondary{
+      background:#4b5563;
+      color:#e5e7eb;
+      cursor:not-allowed;
+    }
+    .small-note{
+      font-size:11px;
+      color:#9ca3af;
+      margin-top:12px;
+    }
   </style>
 </head>
 <body>
+
 <header>
-  <div>
+  <div class="container">
     <h1>FREE FIRE TOURNAMENTS</h1>
-    <span>Free Fire Tournament Hub</span>
+    <p>Free Fire Tournament Hub</p>
+    <p class="made-by">Made by Aryan ❤️</p>
+    <p style="font-size:11px;color:#9ca3af;margin-top:4px;">
+      Niche se tournament choose karo. Har custom ka alag page hai jahan se payment & registration hoga.
+    </p>
   </div>
-  <span style="font-size:11px;color:#a5b4fc;">Made by X MANIA ❣️</span>
 </header>
 
 <div class="container">
-  <p style="font-size:13px;margin-bottom:10px;">
-    Niche se tournament choose karo. Har custom ka alag page hai jahan se payment & registration hoga.
-  </p>
-
   <div class="grid">
 
-    <!-- TOURNAMENT 1: Tera current Solo Bermuda -->
+    <!-- TOURNAMENT 1: Solo – Bermuda -->
     <div class="card">
       <h2 class="title">Solo – Bermuda (₹25 Entry)</h2>
       <div class="mode">Room 1 • Main Tournament</div>
@@ -52,34 +126,37 @@
       <p class="info"><b>Slots:</b> 48 players</p>
       <span class="tag">Custom Room</span>
       <span class="tag">UPI Payment</span>
+      <span class="tag">Solo</span>
       <a class="btn" href="solo-bermuda-25.html">Open & Register</a>
     </div>
 
-    <!-- TOURNAMENT 2: Future custom (coming soon) -->
+    <!-- TOURNAMENT 2: Duo (Coming Soon) -->
     <div class="card">
       <h2 class="title">Duo – Bermuda (Coming Soon)</h2>
       <div class="mode">Room 2 • Coming Soon</div>
       <p class="info"><b>Prize:</b> TBA</p>
       <p class="info"><b>Slots:</b> 48 players</p>
       <span class="tag">Locked</span>
-      <a class="btn btn-secondary" href="#">Not available yet</a>
+      <span class="tag">Duo</span>
+      <a class="btn btn-secondary" href="javascript:void(0);">Not available yet</a>
     </div>
 
-    <!-- TOURNAMENT 3: Future custom (coming soon) -->
+    <!-- TOURNAMENT 3: Squad (Coming Soon) -->
     <div class="card">
       <h2 class="title">Squad – Clash Squad (Coming Soon)</h2>
       <div class="mode">Room 3 • Coming Soon</div>
       <p class="info"><b>Prize:</b> TBA</p>
       <p class="info"><b>Slots:</b> 48 players</p>
       <span class="tag">Locked</span>
-      <a class="btn btn-secondary" href="#">Not available yet</a>
+      <span class="tag">Squad</span>
+      <a class="btn btn-secondary" href="javascript:void(0);">Not available yet</a>
     </div>
 
   </div>
 
   <p class="small-note">
-    Tip: Aage jaake tum har naye custom ke liye ek nayi <b>.html</b> file bana sakte ho
-    (jaise <b>duo-bermuda.html</b>, <b>squad-purgatory.html</b>) aur yahan se unka link laga sakte ho.
+    Future me jab naya custom banaoge to bas ek nayi <b>.html</b> file banao
+    (jaise <b>duo-bermuda.html</b>) aur yahan card me uska link laga dena.
   </p>
 </div>
 
