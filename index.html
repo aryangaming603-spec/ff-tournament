@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>FREE FIRE TOURNAMENTS - Aryan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
     /* BASIC PAGE */
     body{
       margin:0;
@@ -12,6 +11,171 @@
       background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
       color:#e5e7eb;
     }
+  <script>
+// BASIC CONFIG
+const CONFIG = {
+  TOTAL_SLOTS: 48,
+  ENTRY_FEE: 25,
+  UPI_ID: "aryangaming603-2@okicici"
+};
+
+// ✅ agar URL me ?admin=1 hai to admin view ON
+const IS_ADMIN_VIEW = window.location.search.includes("admin=1");
+
+let players = [];
+let count = 0;
+
+// --------- STORAGE ---------
+function loadFromStorage(){
+  try{
+    const data = localStorage.getItem("ffSoloPlayers");
+    if(data){
+      players = JSON.parse(data);
+      count = players.length;
+      renderTable();
+      updateSlotsInfo();
+    }
+  }catch(e){
+    console.warn(e);
+  }
+}
+
+function saveToStorage(){
+  try{
+    localStorage.setItem("ffSoloPlayers", JSON.stringify(players));
+  }catch(e){
+    console.warn(e);
+  }
+}
+
+// --------- HELPERS (MASKING) ---------
+function maskUID(uid){
+  if(IS_ADMIN_VIEW) return uid;
+  return "XXXXXXX"; // sabke liye hidden
+}
+
+function maskWhatsApp(wa){
+  if(IS_ADMIN_VIEW) return wa;
+  return "XXXXXXXXXX";
+}
+
+function maskCode(code){
+  if(IS_ADMIN_VIEW) return code;
+  return "XXXXXX";
+}
+
+// --------- PAYMENT CODE ---------
+function createCode(){
+  const num = Math.floor(100000 + Math.random()*900000);
+  return "FF" + num;
+}
+
+// --------- MAIN FLOW ---------
+function payAndRegister(){
+  const name = document.getElementById("ffName").value.trim();
+  const uid  = document.getElementById("ffUid").value.trim();
+  const wa   = document.getElementById("whatsapp").value.trim();
+
+  if(!name || !uid || !wa){
+    alert("Name, UID aur WhatsApp tino zaroori hai.");
+    return;
+  }
+
+  if(players.length >= CONFIG.TOTAL_SLOTS){
+    alert("All slots filled! Ab naya register nahi ho sakta.");
+    return;
+  }
+
+  const code = createCode();
+
+  count++;
+  const player = {
+    no: count,
+    name,
+    uid,
+    wa,
+    code,
+    status: "Pending"
+  };
+  players.push(player);
+  saveToStorage();
+  renderTable();
+  updateSlotsInfo();
+
+  document.getElementById("ffName").value = "";
+  document.getElementById("ffUid").value = "";
+  document.getElementById("whatsapp").value = "";
+
+  alert("Your payment code: " + code + "\nUPI payment note me yehi code likhna.");
+
+  const url = "upi://pay"
+    + "?pa=" + encodeURIComponent(CONFIG.UPI_ID)
+    + "&pn=" + encodeURIComponent("Aryan Gaming")
+    + "&am=" + encodeURIComponent(CONFIG.ENTRY_FEE)
+    + "&cu=INR"
+    + "&tn=" + encodeURIComponent(code);
+
+  window.location.href = url;
+}
+
+// --------- TABLE RENDER ---------
+function renderTable(){
+  const tbody = document.getElementById("playerList");
+  tbody.innerHTML = "";
+
+  players.forEach((p,i)=>{
+    const statusHtml = IS_ADMIN_VIEW
+      ? `<button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}"
+                  onclick="toggleStatus(${i})">
+           ${p.status}
+         </button>`
+      : p.status;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${p.name}</td>
+      <td>${maskUID(p.uid)}</td>
+      <td>${maskWhatsApp(p.wa)}</td>
+      <td>${maskCode(p.code)}</td>
+      <td>${statusHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// --------- STATUS TOGGLE (sirf admin link se) ---------
+function toggleStatus(i){
+  if(!IS_ADMIN_VIEW){
+    alert("Ye option sirf organiser ke liye hai.");
+    return;
+  }
+  const p = players[i];
+  p.status = (p.status === "Paid") ? "Pending" : "Paid";
+  saveToStorage();
+  renderTable();
+}
+
+// --------- SLOTS INFO ---------
+function updateSlotsInfo(){
+  const filled = players.length;
+  const left   = Math.max(CONFIG.TOTAL_SLOTS - filled, 0);
+  const info   = document.getElementById("slotsInfoText");
+  const badge  = document.getElementById("slotBadge");
+  if(info){
+    info.textContent = `Filled: ${filled} / ${CONFIG.TOTAL_SLOTS} | Left: ${left}`;
+  }
+  if(badge){
+    badge.textContent = `Slots: ${CONFIG.TOTAL_SLOTS} Players`;
+  }
+}
+
+// --------- INIT ---------
+document.addEventListener("DOMContentLoaded", ()=>{
+  loadFromStorage();
+  updateSlotsInfo();
+});
+  </script>
 
     /* HEADER */
     header{
@@ -97,50 +261,7 @@
   background:#22c55e;
   color:#022c22;
   font-size:14px;
-  font-weight:bold;
-  text-align:center;
-  text-decoration:none;
-  box-sizing:border-box;  /* ← MOST IMPORTANT fix */
-    }
-    }
 
-    .small-note{
-      font-size:11px;
-      color:#9ca3af;
-      margin-top:12px;
-    }
-
-    /* SUPPORT BUTTON LAYOUT */
-    .support-actions{
-      margin-top:8px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .support-actions .btn{
-      width:100%;
-    }
-
-    /* BIGGER SCREEN (TABLET/PC) */
-    @media(min-width:640px){
-      header{
-        text-align:left;
-        padding:18px 16px 10px;
-      }
-      header h1{
-        font-size:26px;
-      }
-      .container{
-        padding:0 16px 22px;
-      }
-      .grid{
-        grid-template-columns:1fr 1fr;  /* 2 columns on PC */
-      }
-      .support-actions .btn{
-        width:48%;
-      }
-    }
-  </style>
 </head>
 <body>
 
