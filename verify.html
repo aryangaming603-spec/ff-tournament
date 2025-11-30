@@ -58,7 +58,7 @@ button{
 <body>
 
 <h1>Free Fire UID Verification 🔐</h1>
-<p>Enter your UID to unlock room access</p>
+<p>Sirf registered UID ko room details milenge.</p>
 
 <input id="uidInput" placeholder="Enter your UID">
 <button onclick="verifyID()">Verify Now</button>
@@ -69,57 +69,57 @@ button{
   <p id="showName"></p>
   <p class="val">Room ID: <span id="roomID"></span></p>
   <p class="val">Password: <span id="roomPASS"></span></p>
-  <p class="small">⚠ Password share mat karna</p>
+  <p class="small">⚠ Password kisi ke sath share mat karo.</p>
 </div>
 
 <!-- DENY RESULT -->
 <div id="denyBox" class="box no">
   <h2>Access Denied ❌</h2>
-  <p>UID registered list me nahi hai.</p>
+  <p>Ye UID registered list me nahi hai.</p>
   <p class="small">Registration + payment zaroori hai.</p>
 </div>
 
 <script>
 // =============== ALLOWED PLAYER LIST ===============
-// Yaha tum jitने bhi UID add करना चाहो कर सकते हो
+// Yahi par sirf 3 UID: Inferno, Action Bolt, V1BRANT
 
 const PLAYERS = [
-  ["3889662216", "Inferno"],  // WORKING UID
-  ["1234567890", "Rohan"],   // Example #1
-  ["9876543211", "Aman"],    // Example #2
-  // ↓ Yaha apne real UID add karte jaana
+  ["3889662216", "Inferno"],
+  ["4344524799", "Action Bolt"],
+  ["2807715845", "V1BRANT"]
 ];
 
 // =============== ROOM DETAILS ===============
-// Match create hote hi yaha set kar dena
+// Match banate time yahan asli ID/PASS daal dena
 
-const ROOM_ID   = "XXXXX";   // Real room id
-const ROOM_PASS = "YYYYY";   // Real password
+const ROOM_ID   = "XXXXX";  // real room id
+const ROOM_PASS = "YYYYY";  // real password
 
 
 // =============== VERIFY FUNCTION ===============
 
 function verifyID(){
-
   const entered = document.getElementById("uidInput").value.trim();
 
-  // Pehle dono hide
+  // pehle dono hide
   document.getElementById("allowBox").style.display="none";
   document.getElementById("denyBox").style.display="none";
 
   if(!entered){
-    alert("UID type karo bhai 😅");
+    alert("UID likho bhai 😅");
     return;
   }
 
-  const found = PLAYERS.find(p => p[0] === entered);
+  // safe match (string + trim)
+  const found = PLAYERS.find(p => String(p[0]).trim() === entered);
 
   if(found){
-    document.getElementById("showName").innerText = "Welcome " + found[1];
+    document.getElementById("showName").innerText =
+      "Welcome " + (found[1] || "Player");
+
     document.getElementById("roomID").innerText   = ROOM_ID;
     document.getElementById("roomPASS").innerText = ROOM_PASS;
     document.getElementById("allowBox").style.display="block";
-
   } else {
     document.getElementById("denyBox").style.display="block";
   }
