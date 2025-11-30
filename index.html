@@ -5,15 +5,18 @@
   <title>FREE FIRE TOURNAMENTS - Aryan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* BASIC PAGE */
     body{
       margin:0;
       font-family:Arial, sans-serif;
       background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
       color:#e5e7eb;
     }
+
+    /* HEADER */
     header{
-      background:transparent;
-      padding:16px;
+      padding:16px 12px 8px;
+      text-align:center;              /* mobile: center */
     }
     header h1{
       margin:0;
@@ -21,7 +24,7 @@
       letter-spacing:0.08em;
     }
     header p{
-      margin:2px 0;
+      margin:4px 0 0;
       font-size:12px;
       color:#9ca3af;
     }
@@ -29,29 +32,30 @@
       font-size:11px;
       color:#f97373;
     }
+
+    /* LAYOUT */
     .container{
       max-width:900px;
       margin:0 auto;
-      padding:0 14px 20px;
+      padding:0 10px 18px;
     }
+
     .grid{
       display:grid;
       grid-template-columns:1fr;
       gap:14px;
     }
-    @media(min-width:640px){
-      .grid{grid-template-columns:1fr 1fr;}
-      header h1{font-size:26px;}
-    }
+
+    /* CARDS */
     .card{
-      background:rgba(2,6,23,0.92);
-      border-radius:12px;
-      padding:14px;
+      background:rgba(2,6,23,0.94);
+      border-radius:14px;
+      padding:14px 12px;
       border:1px solid #1f2937;
       box-shadow:0 0 12px rgba(0,0,0,0.7);
     }
     .title{
-      font-size:16px;
+      font-size:15px;
       margin:0 0 4px;
     }
     .mode{
@@ -73,13 +77,15 @@
       margin-top:4px;
       color:#e5e7eb;
     }
+
+    /* BUTTONS */
     .btn{
       margin-top:10px;
       display:inline-block;
       text-align:center;
       width:100%;
-      padding:8px 10px;
-      border-radius:8px;
+      padding:10px 10px;
+      border-radius:10px;
       border:none;
       background:#22c55e;
       color:#022c22;
@@ -95,21 +101,39 @@
       color:#e5e7eb;
       cursor:not-allowed;
     }
+
     .small-note{
       font-size:11px;
       color:#9ca3af;
       margin-top:12px;
     }
+
+    /* SUPPORT BUTTON LAYOUT */
     .support-actions{
       margin-top:8px;
       display:flex;
-      gap:6px;
+      gap:8px;
       flex-wrap:wrap;
     }
     .support-actions .btn{
       width:100%;
     }
-    @media(min-width:480px){
+
+    /* BIGGER SCREEN (TABLET/PC) */
+    @media(min-width:640px){
+      header{
+        text-align:left;
+        padding:18px 16px 10px;
+      }
+      header h1{
+        font-size:26px;
+      }
+      .container{
+        padding:0 16px 22px;
+      }
+      .grid{
+        grid-template-columns:1fr 1fr;  /* 2 columns on PC */
+      }
       .support-actions .btn{
         width:48%;
       }
@@ -124,7 +148,7 @@
     <p>Free Fire Tournament Hub</p>
     <p class="made-by">Made by Aryan ❤️</p>
     <p style="font-size:11px;color:#9ca3af;margin-top:4px;">
-      Niche se tournament choose karo. Har custom ka alag page hai jahan se payment & registration hoga.
+      Niche se tournament choose karo. Har custom ka alag page hai jahan se payment &amp; registration hoga.
     </p>
   </div>
 </header>
@@ -141,7 +165,7 @@
       <span class="tag">Custom Room</span>
       <span class="tag">UPI Payment</span>
       <span class="tag">Solo</span>
-      <a class="btn" href="solo-bermuda-25.html">Open & Register</a>
+      <a class="btn" href="solo-bermuda-25.html">Open &amp; Register</a>
     </div>
 
     <!-- TOURNAMENT 2: Duo (Coming Soon) -->
@@ -168,8 +192,30 @@
 
   </div>
 
+  <!-- SUPPORT CARD -->
+  <div class="card" style="margin-top:16px;">
+    <h2 class="title">Support &amp; Help 🛟</h2>
+    <p class="info">Koi dikkat, payment issue ya room ID related problem ho to yahan se contact karo.</p>
+    <p class="info"><b>Organizer:</b> Aryan</p>
+    <p class="info"><b>WhatsApp:</b> 9170856377</p>
+
+    <div class="support-actions">
+      <a class="btn" href="https://api.whatsapp.com/send?phone=919170856377&text=Hi%20Aryan%2C%20mujhe%20tournament%20support%20chahiye.">
+        WhatsApp Support
+      </a>
+      <a class="btn btn-secondary" href="mailto:example@email.com?subject=FF%20Tournament%20Support">
+        Email (optional)
+      </a>
+    </div>
+
+    <p class="small-note">
+      Message me apna <b>Free Fire name</b>, <b>UID</b>, <b>payment screenshot</b> aur <b>problem</b> clear likhna.
+    </p>
+  </div>
+
   <p class="small-note">
-    <b>duo-bermuda.html</b>) aur yahan card me uska link laga dena.
+    Future me jab naya custom banaoge to bas ek nayi <b>.html</b> file banao
+    (jaise <b>duo-bermuda.html</b>) aur upar card me uska link laga dena.
   </p>
 </div>
 
