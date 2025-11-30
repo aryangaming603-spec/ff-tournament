@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Free Fire UID Verification - Aryan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body{
+    margin:0;
+    background:#020617;
+    color:white;
+    font-family:Arial, sans-serif;
+    text-align:center;
+    padding:28px 10px;
+  }
+  h1{
+    font-size:22px;
+    margin-bottom:6px;
+  }
+  p{
+    margin:4px 0;
+    font-size:13px;
+  }
+  input{
+    width:92%;
+    max-width:320px;
+    margin-top:14px;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:#0f172a;
+    color:white;
+    font-size:14px;
+  }
+  button{
+    width:94%;
+    max-width:330px;
+    margin-top:14px;
+    padding:11px;
+    background:#22c55e;
+    border:none;
+    color:#022c22;
+    font-weight:bold;
+    font-size:15px;
+    border-radius:8px;
+  }
+  .box{
+    margin:20px auto 0;
+    max-width:360px;
+    background:#0f172a;
+    padding:18px 14px;
+    border-radius:10px;
+    font-size:16px;
+    display:none;
+  }
+  .allow{
+    border:1px solid #16a34a;
+  }
+  .deny{
+    border:1px solid #b91c1c;
+    background:#7f1d1d;
+  }
+  .lock{
+    border:1px solid #facc15;
+    background:#78350f;
+  }
+  .room-val{
+    font-size:20px;
+    margin-top:8px;
+    font-weight:bold;
+  }
+  .small{
+    font-size:11px;
+    color:#9ca3af;
+    margin-top:8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Free Fire UID Verification 🔐</h1>
+<p>Sirf registered UID wale hi room details dekh sakte hain.</p>
+<p style="font-size:11px;color:#9ca3af;">UID exactly game jaisa hi likho (no space).</p>
+
+<input id="uidCheck" placeholder="Enter your UID">
+<button onclick="verifyUID()">Verify</button>
+
+<div id="lockBox" class="box lock">
+  <h2>Room Locked ⏳</h2>
+  <p>Room ID &amp; Password abhi unlock nahi hua.</p>
+  <p id="unlockTimeText" style="font-size:12px;margin-top:6px;"></p>
+</div>
+
+<div id="allowBox" class="box allow">
+  <h2>Access Granted ✔</h2>
+  <p id="playerName"></p>
+  <p class="room-val">Room ID: <span id="roomID"></span></p>
+  <p class="room-val">Password: <span id="roomPASS"></span></p>
+  <p class="small">Kisi ke sath password share mat karo. Sirf ek device se join karo.</p>
+</div>
+
+<div id="denyBox" class="box deny">
+  <h2>Access Denied ❌</h2>
+  <p>Ye UID registered list me nahi mila.</p>
+  <p class="small">Ensure karo ki tumne sahi UID likha hai, aur registration + payment complete kiya hai.</p>
+</div>
+
+<script>
+// ================== CONFIG ==================
+
+// Yahan tum room details daaloge jab ready ho:
+const ROOM_ID    = "XXXXX";    // 👉 Match ke time pe change karna
+const ROOM_PASS  = "YYYYY";    // 👉 Match ke time pe change karna
+
+// OPTIONAL: Agar room ek fixed time ke baad hi dikhाना hai
+// Format: "2025-11-30T18:00:00"  (YYYY-MM-DDTHH:MM:SS  24h)
+const UNLOCK_AT  = "2025-11-30T18:00:00";  // agar hamesha open rakhna hai to "" (empty) bhi kar sakte ho
+
+// Yahan sirf REGISTERED UIDs daalna hai:
+const ALLOWED_PLAYERS = [
+  // ["UID", "Name (optional)"],
+  ["123456789", "Test Player"],
+  // yahan real players add karna:
+  // ["514298675", "Aryan"],
+  // ["189725334", "Rohan"],
+];
+
+// ================== LOGIC ==================
+
+function isUnlocked(){
+  if(!UNLOCK_AT) return true; // no lock
+  const target = new Date(UNLOCK_AT).getTime();
+  if(isNaN(target)) return true;
+  const now = Date.now();
+  return now >= target;
+}
+
+function verifyUID(){
+  const uid = document.getElementById("uidCheck").value.trim();
+
+  // sab result boxes hide se start karo
+  document.getElementById("allowBox").style.display = "none";
+  document.getElementById("denyBox").style.display  = "none";
+  document.getElementById("lockBox").style.display  = "none";
+
+  if(!uid){
+    alert("UID likho bhai.");
+    return;
+  }
+
+  // UID list me hai kya?
+  const match = ALLOWED_PLAYERS.find(p => p[0] === uid);
+
+  if(!match){
+    // Not registered
+    document.getElementById("denyBox").style.display = "block";
+    return;
+  }
+
+  // Registered hai, ab dekhna: room unlock hua ya nahi
+  if(!isUnlocked()){
+    const t = document.getElementById("unlockTimeText");
+    t.textContent = "Room unlock time: " + UNLOCK_AT.replace("T"," ");
+    document.getElementById("lockBox").style.display = "block";
+    return;
+  }
+
+  // Registered + Unlocked -> show room details
+  const name = match[1] || "Registered Player";
+
+  document.getElementById("playerName").textContent = "Welcome, " + name;
+  document.getElementById("roomID").textContent   = ROOM_ID;
+  document.getElementById("roomPASS").textContent = ROOM_PASS;
+  document.getElementById("allowBox").style.display = "block";
+}
+</script>
+
+</body>
+</html>
