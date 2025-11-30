@@ -2,99 +2,118 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Free Fire UID Verify | Aryan Tournament</title>
+<title>UID Verify | Aryan Tournament</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
-    background:#020617;
-    color:white;
-    font-family:Arial;
-    text-align:center;
-    padding:30px 10px;
+  background:#020617;
+  color:#e5e7eb;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  padding:30px 12px;
 }
-h1{ font-size:23px; margin-bottom:12px; }
+h1{
+  font-size:22px;
+  margin-bottom:8px;
+}
+p{font-size:13px;margin:3px 0;}
 input{
-    width:90%;
-    padding:10px;
-    margin-top:15px;
-    background:#0f172a;
-    color:#fff;
-    border:none;
-    border-radius:6px;
-    font-size:15px;
+  width:90%;
+  max-width:320px;
+  padding:10px;
+  margin-top:15px;
+  border-radius:8px;
+  border:none;
+  background:#0f172a;
+  color:white;
+  font-size:15px;
 }
 button{
-    width:92%;
-    padding:11px;
-    margin-top:14px;
-    font-size:16px;
-    font-weight:bold;
-    background:#22c55e;
-    color:#022c22;
-    border:none;
-    border-radius:8px;
+  width:92%;
+  max-width:330px;
+  padding:11px;
+  margin-top:14px;
+  border:none;
+  border-radius:8px;
+  background:#22c55e;
+  color:#022c22;
+  font-weight:bold;
+  font-size:15px;
 }
 .box{
-    margin-top:22px;
-    padding:15px;
-    border-radius:10px;
-    display:none;
+  margin:20px auto 0;
+  max-width:360px;
+  padding:16px 12px;
+  border-radius:10px;
+  display:none;
 }
-.allow{ background:#064e3b; border:1px solid #10b981; }
-.deny{ background:#7f1d1d; border:1px solid #dc2626; }
-.lock{ background:#78350f; border:1px solid #facc15; }
-.val{ font-size:21px; margin-top:6px; font-weight:bold; }
-.small{ font-size:12px; color:#9ca3af; margin-top:6px; }
+.ok{background:#064e3b;border:1px solid #10b981;}
+.no{background:#7f1d1d;border:1px solid #ef4444;}
+.big{
+  font-size:19px;
+  margin-top:6px;
+  font-weight:bold;
+}
+.small{
+  font-size:11px;
+  color:#9ca3af;
+  margin-top:6px;
+}
 </style>
 </head>
 <body>
 
 <h1>Free Fire UID Verification 🔐</h1>
-<p>Sirf registered UID walon ko room access milega</p>
+<p>Sirf registered UID ko hi room details milenge.</p>
 
-<input id="uidBox" placeholder="Enter your UID">
-<button onclick="checkUID()">Verify</button>
+<input id="uidInput" placeholder="Enter your UID">
+<button onclick="verify()">Verify</button>
 
-<!-- ALLOWED -->
-<div id="ok" class="box allow">
-    <h2>Access Granted ✔</h2>
-    <p>Welcome <b>Inferno</b></p>
-    <p class="val">Room ID: <span id="roomID"></span></p>
-    <p class="val">Password: <span id="pass"></span></p>
-    <p class="small">Yeh details bahar leak mat karna 🙂</p>
+<div id="okBox" class="box ok">
+  <h2>Access Granted ✔</h2>
+  <p>Welcome <b>Inferno</b></p>
+  <p class="big">Room ID: <span id="roomIdText">XXXXX</span></p>
+  <p class="big">Password: <span id="roomPassText">YYYYY</span></p>
+  <p class="small">Password kisi ke sath share mat karo.</p>
 </div>
 
-<!-- DENIED -->
-<div id="no" class="box deny">
-    <h2>Access Denied ❌</h2>
-    <p>UID registered list me nahi hai.</p>
+<div id="noBox" class="box no">
+  <h2>Access Denied ❌</h2>
+  <p>Ye UID registered nahi hai.</p>
 </div>
 
 <script>
-//================SET ROOM DETAILS================//
-const ALLOWED_UID = "3889662216";  // ← Only this UID allowed
-const PLAYER_NAME = "Inferno";
+// Sirf ye UID allowed hai:
+const ALLOWED_UID = "3889662216";
 
-// ROOM SETTING (jab match create hogya ho to update krna)
-const ROOM_ID   = "XXXXX";    // ← yaha asli room ID daalna hai
-const PASSWORD  = "YYYYY";    // ← yaha asli password
+// Baad me yahan asli room ID / password daal dena:
+const ROOM_ID   = "XXXXX";
+const ROOM_PASS = "YYYYY";
 
-//================LOGIC================//
-function checkUID(){
-    let u = document.getElementById("uidBox").value.trim();
+function verify(){
+  const input = document.getElementById("uidInput").value.trim();
 
-    document.getElementById("ok").style.display="none";
-    document.getElementById("no").style.display="none";
+  // pehle dono hide
+  document.getElementById("okBox").style.display = "none";
+  document.getElementById("noBox").style.display = "none";
 
-    if(u === ALLOWED_UID){
-        document.getElementById("roomID").innerText = ROOM_ID;
-        document.getElementById("pass").innerText   = PASSWORD;
-        document.getElementById("ok").style.display="block";
-    } else {
-        document.getElementById("no").style.display="block";
-    }
+  if(!input){
+    alert("UID likho bhai.");
+    return;
+  }
+
+  if(input === ALLOWED_UID){
+    // sahi UID
+    document.getElementById("roomIdText").innerText  = ROOM_ID;
+    document.getElementById("roomPassText").innerText = ROOM_PASS;
+    document.getElementById("okBox").style.display = "block";
+  } else {
+    // galat UID
+    document.getElementById("noBox").style.display = "block";
+  }
 }
 </script>
+
 </body>
 </html>
