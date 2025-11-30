@@ -214,7 +214,6 @@
   </div>
 
 </div>
-
 <script>
 // BASIC CONFIG
 const CONFIG = {
@@ -222,6 +221,9 @@ const CONFIG = {
   ENTRY_FEE: 25,
   UPI_ID: "aryangaming603-2@okicici"
 };
+
+// ✅ agar URL me ?admin=1 hai to admin view ON
+const IS_ADMIN_VIEW = window.location.search.includes("admin=1");
 
 let players = [];
 let count = 0;
@@ -313,6 +315,14 @@ function renderTable(){
   const tbody = document.getElementById("playerList");
   tbody.innerHTML = "";
   players.forEach((p,i)=>{
+    // ✅ agar admin ho to button banao, warna sirf text
+    const statusHtml = IS_ADMIN_VIEW
+      ? `<button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}"
+                  onclick="toggleStatus(${i})">
+           ${p.status}
+         </button>`
+      : p.status;
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i+1}</td>
@@ -320,19 +330,18 @@ function renderTable(){
       <td>${p.uid}</td>
       <td>${p.wa}</td>
       <td>${p.code}</td>
-      <td>
-        <button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}"
-                onclick="toggleStatus(${i})">
-          ${p.status}
-        </button>
-      </td>
+      <td>${statusHtml}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// status toggle
+// status toggle – sirf admin view me chalega
 function toggleStatus(i){
+  if(!IS_ADMIN_VIEW){
+    alert("Ye option sirf organiser ke liye hai.");
+    return;
+  }
   const p = players[i];
   p.status = (p.status === "Paid") ? "Pending" : "Paid";
   saveToStorage();
@@ -357,7 +366,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   loadFromStorage();
   updateSlotsInfo();
 });
-</script>
-
+</script>   
 </body>
 </html>
