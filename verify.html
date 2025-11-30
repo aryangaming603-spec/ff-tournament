@@ -2,8 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>UID Verify | Aryan Tournament</title>
+<title>Free Fire UID Verify | Aryan Tournament</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 body{
   background:#020617;
@@ -12,21 +13,19 @@ body{
   text-align:center;
   padding:30px 12px;
 }
-h1{
-  font-size:22px;
-  margin-bottom:8px;
-}
-p{font-size:13px;margin:3px 0;}
+h1{font-size:22px;margin-bottom:10px;}
+p{font-size:14px;margin:4px 0;}
+
 input{
   width:90%;
-  max-width:320px;
-  padding:10px;
+  max-width:330px;
+  padding:11px;
   margin-top:15px;
-  border-radius:8px;
-  border:none;
   background:#0f172a;
   color:white;
+  border:none;
   font-size:15px;
+  border-radius:6px;
 }
 button{
   width:92%;
@@ -38,64 +37,91 @@ button{
   background:#22c55e;
   color:#022c22;
   font-weight:bold;
-  font-size:15px;
+  font-size:16px;
 }
+
 .box{
-  margin:20px auto 0;
+  width:92%;
   max-width:360px;
-  padding:16px 12px;
+  margin:22px auto 0;
+  padding:16px;
   border-radius:10px;
   display:none;
 }
 .ok{background:#064e3b;border:1px solid #10b981;}
 .no{background:#7f1d1d;border:1px solid #ef4444;}
-.big{
-  font-size:19px;
-  margin-top:6px;
-  font-weight:bold;
-}
-.small{
-  font-size:11px;
-  color:#9ca3af;
-  margin-top:6px;
-}
-  
+
+.val{font-size:19px;margin-top:6px;font-weight:bold;}
+.small{font-size:11px;color:#9ca3af;margin-top:6px;}
+</style>
+</head>
+<body>
+
+<h1>Free Fire UID Verification 🔐</h1>
+<p>Enter your UID to unlock room access</p>
+
+<input id="uidInput" placeholder="Enter your UID">
+<button onclick="verifyID()">Verify Now</button>
+
+<!-- ALLOW RESULT -->
+<div id="allowBox" class="box ok">
+  <h2>Access Granted ✔</h2>
+  <p id="showName"></p>
+  <p class="val">Room ID: <span id="roomID"></span></p>
+  <p class="val">Password: <span id="roomPASS"></span></p>
+  <p class="small">⚠ Password share mat karna</p>
+</div>
+
+<!-- DENY RESULT -->
+<div id="denyBox" class="box no">
+  <h2>Access Denied ❌</h2>
+  <p>UID registered list me nahi hai.</p>
+  <p class="small">Registration + payment zaroori hai.</p>
+</div>
+
 <script>
-// ================= AUTH SYSTEM =================
+// =============== ALLOWED PLAYER LIST ===============
+// Yaha tum jitने bhi UID add करना चाहो कर सकते हो
 
-// Yahan jitne bhi players allow karna chahte ho add karo 👇
-// Format = ["UID", "Name"],
-
-const ALLOWED_PLAYERS = [
-  ["3889662216", "Inferno"],   // 1st player (ye abhi chal raha hai)
-  ["5642116186", "ACTIONBOLT"],
-  ["2222222222", "Test3"],
+const PLAYERS = [
+  ["3889662216", "Inferno"],  // WORKING UID
+  ["1234567890", "Rohan"],   // Example #1
+  ["9876543211", "Aman"],    // Example #2
+  // ↓ Yaha apne real UID add karte jaana
 ];
 
-// FREE FIRE ROOM DETAILS
-const ROOM_ID   = "XXXXX";   // yahan asli room id
-const ROOM_PASS = "YYYYY";   // yahan asli password
+// =============== ROOM DETAILS ===============
+// Match create hote hi yaha set kar dena
 
-function verify(){
-  const inputUID = document.getElementById("uidInput").value.trim();
+const ROOM_ID   = "XXXXX";   // Real room id
+const ROOM_PASS = "YYYYY";   // Real password
 
-  document.getElementById("okBox").style.display = "none";
-  document.getElementById("noBox").style.display = "none";
 
-  if(!inputUID){
-    alert("UID dalna bhai 😅");
+// =============== VERIFY FUNCTION ===============
+
+function verifyID(){
+
+  const entered = document.getElementById("uidInput").value.trim();
+
+  // Pehle dono hide
+  document.getElementById("allowBox").style.display="none";
+  document.getElementById("denyBox").style.display="none";
+
+  if(!entered){
+    alert("UID type karo bhai 😅");
     return;
   }
 
-  // safe compare
-  const match = ALLOWED_PLAYERS.find(p => String(p[0]).trim() === inputUID);
+  const found = PLAYERS.find(p => p[0] === entered);
 
-  if(match){
-    document.getElementById("roomIdText").innerText   = ROOM_ID;
-    document.getElementById("roomPassText").innerText = ROOM_PASS;
-    document.getElementById("okBox").style.display = "block";
+  if(found){
+    document.getElementById("showName").innerText = "Welcome " + found[1];
+    document.getElementById("roomID").innerText   = ROOM_ID;
+    document.getElementById("roomPASS").innerText = ROOM_PASS;
+    document.getElementById("allowBox").style.display="block";
+
   } else {
-    document.getElementById("noBox").style.display = "block";
+    document.getElementById("denyBox").style.display="block";
   }
 }
 </script>
