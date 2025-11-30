@@ -82,34 +82,45 @@ button{
   <h2>Access Denied ❌</h2>
   <p>Ye UID registered nahi hai.</p>
 </div>
-
 <script>
-// Sirf ye UID allowed hai:
-const ALLOWED_UID = "3889662216";
+// ================= AUTH SYSTEM =================
 
-// Baad me yahan asli room ID / password daal dena:
-const ROOM_ID   = "XXXXX";
-const ROOM_PASS = "YYYYY";
+// Yahan jitने भी players allow karna chahte ho add करो 👇
+// Format = ["UID", "Name"], comma मत भूलना!!!
+
+const ALLOWED_PLAYERS = [
+  ["3889662216", "Inferno"],          // OLD - already added
+  ["1234567890", "Rohan"],           // NEW Example
+  ["9876543211", "Aman"],            // NEW Example
+  ["5152338911", "Legendx"],         // ADD more any time
+  // yaha bas list badate jao 🔥
+];
+
+// FREE FIRE ROOM DETAILS (Match create hone ke baad change karna)
+const ROOM_ID   = "XXXXX";     // real room id
+const ROOM_PASS = "YYYYY";     // real password
+
+
+// ================= VERIFY LOGIC =================
 
 function verify(){
-  const input = document.getElementById("uidInput").value.trim();
+  const inputUID = document.getElementById("uidInput").value.trim();
 
-  // pehle dono hide
   document.getElementById("okBox").style.display = "none";
   document.getElementById("noBox").style.display = "none";
 
-  if(!input){
-    alert("UID likho bhai.");
+  if(!inputUID){
+    alert("UID dalna bhai 😅");
     return;
   }
 
-  if(input === ALLOWED_UID){
-    // sahi UID
+  const match = ALLOWED_PLAYERS.find(p => p[0] === inputUID);
+
+  if(match){
     document.getElementById("roomIdText").innerText  = ROOM_ID;
     document.getElementById("roomPassText").innerText = ROOM_PASS;
     document.getElementById("okBox").style.display = "block";
   } else {
-    // galat UID
     document.getElementById("noBox").style.display = "block";
   }
 }
