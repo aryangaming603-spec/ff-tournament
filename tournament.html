@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FF Solo Tournament - Aryan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body{margin:0;font-family:Arial, sans-serif;background:#020617;color:#e5e7eb;}
+    header{background:#0b1120;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;}
+    header h1{margin:0;font-size:18px;}
+    header span{font-size:11px;color:#9ca3af;}
+    .container{max-width:800px;margin:0 auto;padding:12px;}
+    .card{background:#020617;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 0 8px rgba(0,0,0,0.6);border:1px solid #1f2937;}
+    h2{margin:0 0 8px;font-size:17px;}
+    .badge{background:#1e293b;padding:5px 10px;border-radius:999px;font-size:11px;display:inline-block;margin:3px 3px 0 0;}
+    p{margin:4px 0;font-size:13px;}
+    .label{display:block;margin-top:8px;font-size:13px;}
+    input,textarea,select{width:100%;padding:7px 8px;margin-top:3px;border-radius:5px;border:1px solid #334155;background:#020617;color:#e5e7eb;font-size:13px;box-sizing:border-box;}
+    input::placeholder,textarea::placeholder{color:#6b7280;}
+    button{width:100%;padding:9px 12px;margin-top:10px;border:none;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer;}
+    .primary{background:#22c55e;color:#022c22;}
+    .secondary{background:#38bdf8;color:#0b1120;}
+    .danger{background:#ef4444;color:#fee2e2;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11px;}
+    th,td{border:1px solid #1f2937;padding:4px 6px;text-align:left;word-break:break-all;}
+    th{background:#020617;font-weight:600;}
+    .note{font-size:11px;color:#9ca3af;margin-top:4px;}
+    .upi-box{background:#020617;border-radius:8px;padding:8px;margin-top:6px;border:1px dashed #334155;font-size:13px;}
+    .upi-id{color:#4ade80;font-weight:bold;}
+    .code-box{background:#0b1120;border-radius:8px;padding:8px;margin-top:8px;border:1px solid #4ade80;}
+    .code-text{font-size:16px;font-weight:bold;color:#bbf7d0;}
+    .tag{font-size:11px;color:#a5b4fc;}
+    .step-title{font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;}
+    @media(min-width:640px){
+      header h1{font-size:20px;}
+      .container{padding:16px;}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div>
+    <h1>FF Solo Tournament</h1>
+    <span>Organised by Aryan</span>
+  </div>
+  <span class="tag">Custom Room</span>
+</header>
+
+<div class="container">
+
+  <!-- TOURNAMENT DETAILS -->
+  <div class="card">
+    <h2>Tournament Details ⚡</h2>
+    <div>
+      <span class="badge">Mode: Solo</span>
+      <span class="badge">Map: Bermuda</span>
+      <span class="badge">Slots: 48 Players</span>
+    </div>
+
+    <p style="margin-top:8px;">
+      <b>Entry Fee:</b> ₹25 / Player<br>
+      <b>Winner Prize:</b> ₹100<br>
+      <b>Per Kill:</b> ₹0
+    </p>
+
+    <div class="upi-box">
+      <div><b>Pay Entry Fee on this UPI:</b></div>
+      <div class="upi-id">aryangaming603-2@okicici</div>
+      <div class="note">UPI payment karte time note/remark me हमेशा payment code likhna (jo niche generate hoga).</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 : PLAYER DETAILS -->
+  <div class="card">
+    <div class="step-title">Step 1 – Player Details</div>
+    <h2>Fill Your Details 🎮</h2>
+
+    <label class="label">Free Fire Name</label>
+    <input id="ffName" placeholder="Your Free Fire name">
+
+    <label class="label">Free Fire UID</label>
+    <input id="ffUid" placeholder="Your UID">
+
+    <label class="label">WhatsApp Number</label>
+    <input id="whatsapp" placeholder="For Room ID & Updates">
+
+    <button class="primary" onclick="generatePaymentCode()">Pay Now (Generate Code)</button>
+
+    <p class="note">
+      Pehle details भरो → फिर <b>Pay Now</b> दबाओ → system ek unique payment code बनाएगा.
+      UPI se ₹25 send karte waqt note/remark me wahi code likhna hai.
+    </p>
+  </div>
+
+  <!-- STEP 2 : PAYMENT + TRANSACTION DETAILS -->
+  <div class="card" id="step2Card" style="display:none;">
+    <div class="step-title">Step 2 – Payment & Confirmation</div>
+    <h2>Complete Payment 💸</h2>
+
+    <div class="code-box">
+      <div>Tumhara Payment Code:</div>
+      <div id="payCode" class="code-text">FF000000</div>
+      <div class="note">
+        ₹25 send karo is UPI par: <b>aryangaming603-2@okicici</b><br>
+        Aur UPI note/remark me <b>yehi code</b> likho.
+      </div>
+    </div>
+
+    <button class="secondary" onclick="payViaUPI()">Pay via UPI App</button>
+
+    <label class="label" style="margin-top:10px;">Transaction / UTR ID</label>
+    <input id="txnId" placeholder="UPI/Payment app ka transaction ID">
+
+    <label class="label">Status (Confirm / Pending)</label>
+    <select id="statusSelect">
+      <option value="Pending">Pending</option>
+      <option value="Paid">Paid</option>
+    </select>
+
+    <label class="label">Payment Screenshot (optional)</label>
+    <input id="ss" type="file" accept="image/*">
+    <div class="note">Screenshot file sirf tumhare device pe hai, online server pe store nahi hoti.</div>
+
+    <button class="primary" onclick="confirmPayment()">Confirm Payment & Register</button>
+    <button class="danger" onclick="cancelPayment()">Cancel / Edit Details</button>
+
+    <p class="note">
+      Agar tumne details galat भर दी to <b>Cancel/Edit</b दबाकर step 1 se दुबारा शुरू kar sakte ho.
+    </p>
+  </div>
+
+  <!-- REGISTERED PLAYERS LIST -->
+  <div class="card">
+    <div class="step-title">Registered Players</div>
+    <h2>Players List ✔</h2>
+    <p class="note">
+      Ye list sirf organiser (Aryan) ke liye hai. System automatic bank se verify nahi karta,
+      tumhe apne UPI app/SMS se payment check karke status dekhna hoga.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>FF Name</th>
+          <th>UID</th>
+          <th>WhatsApp</th>
+          <th>Pay Code</th>
+          <th>Txn ID</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="playerList"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const UPI_ID = "aryangaming603-2@okicici";
+const ENTRY_AMOUNT = 25;
+
+let tempPlayer = null;   // Step 1 ke baad data yahan rakhenge
+let players = [];        // Final registered players yahan store
+let count = 0;
+
+// Random payment code generate
+function createCode() {
+  const num = Math.floor(100000 + Math.random() * 900000); // 6 digit
+  return "FF" + num;
+}
+
+function generatePaymentCode(){
+  const name = document.getElementById('ffName').value.trim();
+  const uid = document.getElementById('ffUid').value.trim();
+  const wa  = document.getElementById('whatsapp').value.trim();
+
+  if(!name || !uid || !wa){
+    alert("Free Fire name, UID aur WhatsApp number तीनों जरूरी हैं!");
+    return;
+  }
+
+  const code = createCode();
+  tempPlayer = { name, uid, wa, code };
+
+  document.getElementById('payCode').innerText = code;
+  document.getElementById('step2Card').style.display = 'block';
+  document.getElementById('statusSelect').value = "Pending";
+
+  // Smooth scroll
+  document.getElementById('step2Card').scrollIntoView({behavior:'smooth'});
+}
+
+function payViaUPI(){
+  if(!tempPlayer){
+    alert("Pehle Step 1 me details भरो aur Pay Now dabao.");
+    return;
+  }
+
+  const code = tempPlayer.code;
+  const url = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent('Aryan Gaming')}&am=${ENTRY_AMOUNT}&cu=INR&tn=${encodeURIComponent(code)}`;
+
+  // Mobile me best: direct UPI app open
+  window.location.href = url;
+}
+
+function confirmPayment(){
+  if(!tempPlayer){
+    alert("Pehle Step 1 complete karo.");
+    return;
+  }
+
+  const txnId = document.getElementById('txnId').value.trim();
+  const status = document.getElementById('statusSelect').value;
+
+  if(!txnId){
+    if(!confirm("Transaction ID nahi dala. Phir bhi register karna hai?")){
+      return;
+    }
+  }
+
+  count++;
+  const finalPlayer = {
+    no: count,
+    name: tempPlayer.name,
+    uid: tempPlayer.uid,
+    wa: tempPlayer.wa,
+    code: tempPlayer.code,
+    txn: txnId || "Not given",
+    status: status
+  };
+
+  players.push(finalPlayer);
+
+  const row = `
+    <tr>
+      <td>${finalPlayer.no}</td>
+      <td>${finalPlayer.name}</td>
+      <td>${finalPlayer.uid}</td>
+      <td>${finalPlayer.wa}</td>
+      <td>${finalPlayer.code}</td>
+      <td>${finalPlayer.txn}</td>
+      <td>${finalPlayer.status}</td>
+    </tr>
+  `;
+  document.getElementById('playerList').insertAdjacentHTML('beforeend', row);
+
+  // Form clear + step 2 hide
+  document.getElementById('ffName').value = "";
+  document.getElementById('ffUid').value = "";
+  document.getElementById('whatsapp').value = "";
+  document.getElementById('txnId').value = "";
+  document.getElementById('ss').value = "";
+  document.getElementById('step2Card').style.display = 'none';
+  tempPlayer = null;
+
+  alert("Player registered list me add ho gaya! (Payment manually check karna padega bhai)");
+}
+
+function cancelPayment(){
+  tempPlayer = null;
+  document.getElementById('txnId').value = "";
+  document.getElementById('ss').value = "";
+  document.getElementById('step2Card').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
