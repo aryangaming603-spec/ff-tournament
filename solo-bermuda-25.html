@@ -212,7 +212,34 @@
       <tbody id="playerList"></tbody>
     </table>
   </div>
+<!-- ===================== SOLO KILL RESULT LEADERBOARD ===================== -->
 
+<div class="card" style="margin-top:20px;">
+  <h2>Solo Match Leaderboard 🏆</h2>
+  <p class="note">Leaderboard final kills पर आधारित है — सिर्फ organiser अपडेट कर सकता है।</p>
+
+  <!-- ADMIN INPUT (sirf admin link me दिखेगा) -->
+  <div id="lb-admin" style="display:none;margin-top:10px;">
+    <input id="lb_name" placeholder="Player Name">
+    <input id="lb_kill" type="number" placeholder="Kills">
+    <button class="btn" onclick="lbAdd()">Add Result</button>
+    <button class="btn btn-black" style="margin-top:6px;background:#64748b;" onclick="lbClear()">Reset Leaderboard</button>
+  </div>
+
+  <p id="lb_info" class="note"></p>
+
+  <table style="margin-top:12px;">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Kills</th>
+        <th>Reward</th>
+      </tr>
+    </thead>
+    <tbody id="lb_table"></tbody>
+  </table>
+</div>
 </div>
 <script>
 // BASIC CONFIG
