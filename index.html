@@ -36,6 +36,9 @@
     .status-paid{background:#16a34a;color:#ecfdf5;}
     .status-pending{background:#f97316;color:#fffbeb;}
     .slots-text{font-size:12px;color:#a5b4fc;margin-top:6px;}
+    .countdown{font-size:13px;color:#facc15;margin-top:6px;}
+    ul.rules{margin:6px 0 0 16px;padding:0;font-size:12px;color:#e5e7eb;}
+    ul.rules li{margin-bottom:3px;}
     @media(min-width:640px){
       header h1{font-size:20px;}
       .container{padding:16px;}
@@ -69,6 +72,10 @@
       <b>Per Kill:</b> ₹6
     </p>
 
+    <div class="countdown">
+      Match starts in: <span id="countdownText">calculating...</span>
+    </div>
+
     <div class="upi-box">
       <div><b>Pay Entry Fee on this UPI:</b></div>
       <div class="upi-id" id="upiText">aryangaming603-2@okicici</div>
@@ -78,6 +85,19 @@
     <div class="slots-text" id="slotsInfoText">
       Filled: 0 / 48 | Left: 48
     </div>
+  </div>
+
+  <!-- RULES CARD -->
+  <div class="card">
+    <h2>Rules & Important Notes 📜</h2>
+    <ul class="rules">
+      <li>Custom room time se pahle online rahna zaroori hai.</li>
+      <li>Wrong UID / naam hoga to prize cancel ho sakta hai.</li>
+      <li>Hacking / emulator / third party apps strictly banned.</li>
+      <li>Net issue, device lag, phone switch – organiser responsible nahi hoga.</li>
+      <li>Payment non-refundable hai (agar aap match miss karte ho).</li>
+      <li>Organizer ka decision final hoga.</li>
+    </ul>
   </div>
 
   <!-- STEP 1 : PLAYER DETAILS -->
@@ -145,6 +165,8 @@
       List browser me save rahegi (refresh ke baad bhi).
     </p>
 
+    <button class="secondary" onclick="downloadCSV()">Download CSV (Excel)</button>
+
     <table>
       <thead>
         <tr>
@@ -173,7 +195,8 @@ const CONFIG = {
   WINNER_PRIZE: 150,
   PER_KILL: 6,
   UPI_ID: "aryangaming603-2@okicici",
-  ORGANISER_WHATSAPP: "919170856377" // 91 + 9170856377
+  ORGANISER_WHATSAPP: "919170856377", // 91 + 9170856377
+  TOURNAMENT_TIME: "2025-12-01T21:00:00" // yyyy-mm-ddThh:mm:ss (24h)
 };
 
 // ---- STATE ----
@@ -369,9 +392,73 @@ function updateSlotsInfo(){
   const filled = players.length;
   const left   = Math.max(CONFIG.TOTAL_SLOTS - filled, 0);
   const info   = document.getElementById("slotsInfoText");
+  const badge  = document.getElementById("slotBadge");
   if(info){
     info.textContent = `Filled: ${filled} / ${CONFIG.TOTAL_SLOTS} | Left: ${left}`;
   }
+  if(badge){
+    badge.textContent = `Slots: ${CONFIG.TOTAL_SLOTS} Players`;
+  }
+}
+
+// ---- CSV DOWNLOAD ----
+function downloadCSV(){
+  if(players.length === 0){
+    alert("Abhi koi player register nahi hua.");
+    return;
+  }
+  const header = ["No","Name","UID","WhatsApp","PayCode","TxnID","Status"];
+  const rows = players.map((p,i)=>[
+    i+1,p.name,p.uid,p.wa,p.code,p.txn,p.status
+  ]);
+  const all = [header, ...rows];
+  const csv = all.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ff_tournament_players.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ---- COUNTDOWN TIMER ----
+function startCountdown(){
+  const el = document.getElementById("countdownText");
+  if(!el) return;
+
+  const target = new Date(CONFIG.TOURNAMENT_TIME).getTime();
+  if(isNaN(target)){
+    el.textContent = "time not set";
+    return;
+  }
+
+  function tick(){
+    const now = Date.now();
+    let diff = target - now;
+
+    if(diff <= 0){
+      el.textContent = "Starting / already started";
+      return;
+    }
+
+    const sec = Math.floor(diff/1000)%60;
+    const min = Math.floor(diff/(1000*60))%60;
+    const hr  = Math.floor(diff/(1000*60*60))%24;
+    const day = Math.floor(diff/(1000*60*60*24));
+
+    const pad = n => String(n).padStart(2,"0");
+    let txt = "";
+    if(day>0) txt += day + "d ";
+    txt += pad(hr)+":"+pad(min)+":"+pad(sec);
+
+    el.textContent = txt;
+    requestAnimationFrame(tick);
+  }
+  tick();
 }
 
 // ---- INIT ----
@@ -383,6 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadFromStorage();
   updateSlotsInfo();
+  startCountdown();
 });
 </script>
 
