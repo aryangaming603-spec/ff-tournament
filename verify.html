@@ -53,6 +53,64 @@ button{
 
 .val{font-size:19px;margin-top:6px;font-weight:bold;}
 .small{font-size:11px;color:#9ca3af;margin-top:6px;}
+
+<script>
+/* verify.html — read tournament settings from localStorage and show Room ID / verify password */
+(function(){
+  const SETTINGS_KEY = "existG_settings_v2"; // must match main page key
+  const container = document.getElementById("verifyRoom");
+  if(!container) return;
+
+  // read settings
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); } catch(e) { s = {}; }
+
+  const rid = s.roomId || "";
+  const rpass = s.roomPass || "";
+
+  if(!rid){
+    container.innerHTML = '<div style="color:#ffd166">Room details not set by admin.</div>';
+    return;
+  }
+
+  // UI: show room id (masked pass) and verify input
+  container.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px">Room ID: <span style="color:#34d399">${rid}</span></div>
+    <div style="margin-bottom:8px">Room Password: <strong style="color:#ffd166">${rpass ? "••••••" : "(no password set)"}</strong></div>
+
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="userRoomPass" placeholder="Enter room password to verify" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#041826;color:#eafcff">
+      <button id="verifyBtn" style="padding:8px 10px;border-radius:6px;background:#16a34a;color:#02120a;border:none;font-weight:700">Verify</button>
+      <button id="copyRoomBtn" style="padding:8px 10px;border-radius:6px;background:#2563eb;color:#fff;border:none;font-weight:700">Copy Room</button>
+    </div>
+
+    <div id="verifyMsg" style="margin-top:8px;color:#ffd166;font-weight:600"></div>
+  `;
+
+  // handlers
+  document.getElementById("verifyBtn").addEventListener("click", function(){
+    const input = (document.getElementById("userRoomPass")||{}).value || "";
+    const msg = document.getElementById("verifyMsg");
+    if(!rpass){
+      msg.style.color = "#34d399"; msg.textContent = "No password set — room open.";
+      return;
+    }
+    if(input === rpass){
+      msg.style.color = "#34d399"; msg.textContent = "Verified ✅ You can join the room.";
+    } else {
+      msg.style.color = "#ff6b6b"; msg.textContent = "Wrong password ❌";
+    }
+  });
+
+  document.getElementById("copyRoomBtn").addEventListener("click", function(){
+    const text = `Room ID: ${rid}${rpass ? " | Password: " + rpass : ""}`;
+    navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(()=> {
+      const msg = document.getElementById("verifyMsg");
+      msg.style.color = "#34d399"; msg.textContent = "Copied room details to clipboard.";
+    }).catch(()=> alert(text)) : alert(text);
+  });
+})();
+</script>  
 </style>
 </head>
 <body>
@@ -94,7 +152,9 @@ const PLAYERS = [
 
 const ROOM_ID   = "XXXXX";  // real room id
 const ROOM_PASS = "YYYYY";  // real password
-
+<div id="verifyRoom" class="card" style="padding:12px;margin:12px 0;background:#071826;border-radius:8px;color:#dff6ff">
+  Loading room details...
+</div>
 
 // =============== VERIFY FUNCTION ===============
 
