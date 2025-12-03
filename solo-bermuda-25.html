@@ -49,19 +49,18 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 .table-wrap table{
   width:100%;
   border-collapse:collapse;
-  table-layout:auto; /* let columns size naturally */
+  table-layout:auto;
 }
 .table-wrap th, .table-wrap td{
   padding:10px;
   border-bottom:1px solid rgba(255,255,255,0.04);
   text-align:center;
   vertical-align:middle;
-  white-space:nowrap;       /* prevent breaking single letters into new lines */
+  white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  max-width:260px;          /* allow more width so words don't wrap letter-by-letter */
+  max-width:260px;
 }
-/* allow specific columns to wrap if absolutely needed (like long notes) */
 .table-wrap td.wrap-allow{
   white-space:normal;
   word-break:break-word;
@@ -70,58 +69,37 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 }
 .table-wrap th{color:var(--muted);font-weight:700;font-size:13px}
 
-.admin-only {
-    display: none !important;
-}  
+/* admin hidden by default */
+.admin-only{ display:none !important; }
 
-  /* MOBILE: convert table to stacked cards to avoid horizontal scrolling */
+/* mobile: compact table (no horizontal scroll) */
 @media (max-width:700px){
-  .table-wrap table, .table-wrap thead, .table-wrap tbody, .table-wrap th, .table-wrap td, .table-wrap tr {
-    display:block;
-  }
-  .table-wrap thead { display:none; }
-  .table-wrap tr { 
-    background: transparent;
-    margin: 0 0 12px 0;
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.03);
-  }
-  .table-wrap td {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:8px 10px;
-    white-space:normal;
-    border-bottom: none;
-  }
-  .table-wrap td[data-label]::before{
-    content: attr(data-label);
-    color: var(--muted);
-    font-weight:700;
-    margin-right:8px;
-    flex:0 0 auto;
-    width:40%;
-    text-align:left;
-  }
-  .table-wrap td .cell-value{
-    flex:1 1 auto;
-    text-align:right;
-    word-break:break-word;
-    max-width:60%;
-  }
+  .table-wrap{ overflow-x:hidden; }
+  .table-wrap table{ table-layout:fixed; font-size:13px; }
+  .table-wrap thead th{ padding:8px 6px; font-size:12px; white-space:nowrap; }
+  .table-wrap td, .table-wrap th { padding:8px 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:middle; }
+  .table-wrap td:nth-child(1){ width:6%; }
+  .table-wrap td:nth-child(2){ width:28%; }
+  .table-wrap td:nth-child(3){ width:18%; }
+  .table-wrap td:nth-child(4){ width:18%; }
+  .table-wrap td:nth-child(5){ width:14%; }
+  .table-wrap td:nth-child(6){ width:10%; }
+  .table-wrap td:nth-child(7){ width:12%; }
+  .table-wrap td .btn{ padding:6px 8px; font-size:12px; display:inline-block; margin:0 3px 4px 0; }
+  .table-wrap td .status-paid, .table-wrap td .status-pend { font-size:12px; padding:6px 8px; }
+}
 
-  /* make admin actions stack neatly */
-  .admin-only button { display:inline-block; margin-left:6px; margin-top:4px; padding:6px 8px; font-size:13px; }
-
-
-/* Admin only style toggling */
-.admin-only{display:none}
-  
-/* tiny badges */
+/* small badges */
 .bad{background:#1f2937;color:#fff;padding:6px 8px;border-radius:999px;font-weight:700}
 .status-paid{background:#134e4a;color:#d1fae5;padding:6px 8px;border-radius:8px;font-weight:700}
 .status-pend{background:#44337a;color:#f3e8ff;padding:6px 8px;border-radius:8px;font-weight:700}
+
+/* floating admin button (hidden when admin active) */
+#adminFloating {
+  position:fixed; right:12px; bottom:12px; z-index:9999; padding:10px 12px;
+  border-radius:10px; border:none; font-weight:700; cursor:pointer;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#02120a;
+}
 </style>
 </head>
 <body>
@@ -134,9 +112,10 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
     </div>
 
     <div style="text-align:right">
-      <div class="muted">Admin quick</div>
+      <div class="muted">Tools</div>
       <div style="margin-top:8px">
-        <a class="btn btn-ghost" href="solo-bermuda-25.html?admin=1">Open Admin</a>
+        <!-- Admin opens via PIN prompt -->
+        <button class="btn btn-ghost" onclick="tryAdmin()">Admin</button>
         <a class="btn btn-ghost" href="leaderboard.html">Leaderboard</a>
       </div>
     </div>
@@ -221,7 +200,6 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
       </div>
 
       <div id="qrArea" style="display:none;margin-top:12px;text-align:center">
-        <!-- image must exist in repo or user can replace with their qr -->
         <img id="qrImg" src="aryan-upi-qr.png" alt="QR" style="width:220px;border-radius:12px;border:1px solid var(--glass)">
         <div style="height:8px"></div>
         <button class="btn btn-primary" onclick="openUPI()">Open UPI App</button>
@@ -315,13 +293,20 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
       <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
       <button class="btn btn-ghost" onclick="importSample()">Import Sample Players</button>
       <button class="btn btn-danger" onclick="clearAll()">Clear Players</button>
+      <button class="btn btn-ghost" onclick="adminLogout()">Logout Admin</button>
     </div>
-    <div class="hint">Admin mode: visible when URL contains <code>?admin=1</code>. Changes saved to browser localStorage.</div>
+    <div class="hint">Admin mode: unlock with PIN via the top Admin button. Changes saved to browser localStorage.</div>
   </div>
 
 </div>
 
+<!-- floating admin button for quick access on all pages (visible only when not admin) -->
+<button id="adminFloating" onclick="tryAdmin()" title="Admin">Admin</button>
+
 <script>
+/* ======================
+   SETTINGS & STORAGE KEYS
+   ====================== */
 const SKEY = "existG_settings_v2";
 const PKEY = "existG_players_v2";
 const LKEY = "existG_lb_v2";
@@ -340,23 +325,36 @@ const DEFAULTS = {
   roomPass: ""
 };
 
+/* ADMIN PIN - change this to your secret */
+const ADMIN_PIN = "786786";
+
+/* check admin flag from localStorage */
+let IS_ADMIN = localStorage.getItem("exist_isAdmin") === "1";
+
+/* app data */
 let settings = {...DEFAULTS};
 let players = [];
 
 /* init */
 (function init(){
   // load saved
-  const s = JSON.parse(localStorage.getItem(SKEY) || "null");
-  const p = JSON.parse(localStorage.getItem(PKEY) || "null");
-  if(s) settings = {...settings, ...s};
-  if(p) players = p;
+  try {
+    const s = JSON.parse(localStorage.getItem(SKEY) || "null");
+    const p = JSON.parse(localStorage.getItem(PKEY) || "null");
+    if(s) settings = {...settings, ...s};
+    if(p) players = p;
+  } catch(e){
+    console.warn("load error", e);
+  }
+
+  // hide floating button if admin already
+  document.getElementById('adminFloating').style.display = IS_ADMIN ? 'none' : 'block';
 
   applySettingsToUI();
 
-  // admin mode?
-  const isAdmin = location.search.includes("admin=1");
-  if(isAdmin){
-    document.querySelectorAll(".admin-only").forEach(x=>x.style.display="block");
+  if(IS_ADMIN){
+    // reveal admin elements
+    document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'block');
     loadAdminForm();
   }
 })();
@@ -386,20 +384,17 @@ function renderPlayersTable(){
   if(!tbody) return;
   let html = "";
   players.forEach((p,i)=>{
-    // create each cell with data-label and inner span for value (class="cell-value")
     html += `<tr>
-      <td data-label="#" ><span class="cell-value">${i+1}</span></td>
-      <td data-label="Name" class="wrap-allow" style="text-align:left"><span class="cell-value">${escapeHtml(p.name)}</span></td>
-      <td data-label="UID"><span class="cell-value">${hideValue(p.uid)}</span></td>
-      <td data-label="WhatsApp"><span class="cell-value">${hideValue(p.wp)}</span></td>
-      <td data-label="Code"><span class="cell-value">${escapeHtml(p.code)}</span></td>
-      <td data-label="Status"><span class="cell-value">${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</span></td>
-      <td data-label="Actions" class="admin-only">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-primary" onclick="markPaid(${i})">Paid</button>
-          <button class="btn btn-ghost" onclick="viewPlayer(${i})">View</button>
-          <button class="btn btn-danger" onclick="deletePlayer(${i})">Delete</button>
-        </div>
+      <td>${i+1}</td>
+      <td class="wrap-allow" style="text-align:left">${escapeHtml(p.name)}</td>
+      <td>${hideValue(p.uid)}</td>
+      <td>${hideValue(p.wp)}</td>
+      <td>${escapeHtml(p.code)}</td>
+      <td>${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</td>
+      <td class="admin-only">
+         <button class="btn btn-primary" onclick="markPaid(${i})">Paid</button>
+         <button class="btn btn-ghost" onclick="viewPlayer(${i})">View</button>
+         <button class="btn btn-danger" onclick="deletePlayer(${i})">Delete</button>
       </td>
     </tr>`;
   });
@@ -410,7 +405,6 @@ function renderPlayersTable(){
 function hideValue(s){
   s = (s||"")+"";
   if(!s) return "";
-  // show last 3 digits only for clarity
   if(s.length <= 4) return "•••" + s;
   return "•••" + s.slice(-4);
 }
@@ -432,17 +426,14 @@ function regNow(){
   const wp = document.getElementById("rWp").value.trim();
   if(!name || !uid || !wp) return alert("Please fill all fields.");
 
-  // small validation
   if(wp.length < 8) return alert("Enter a valid WhatsApp number.");
-  
-const code = (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,4)).toUpperCase();
+
+  const code = (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,4)).toUpperCase();
   players.push({name, uid, wp, code, paid: 0});
   localStorage.setItem(PKEY, JSON.stringify(players));
   applySettingsToUI();
 
-  // show QR area
   document.getElementById("qrArea").style.display = "block";
-  // scroll to QR
   setTimeout(()=>document.getElementById("qrArea").scrollIntoView({behavior:"smooth"}),200);
   alert("Registered. Scan QR or open UPI to pay.");
 }
@@ -453,16 +444,41 @@ function openUPI(){
   const amt = settings.fee || DEFAULTS.fee;
   const tn = "Tournament Fee";
   const link = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amt)}&cu=INR&tn=${encodeURIComponent(tn)}`;
-  // try to open
   location.href = link;
 }
-
-/* show QR/popup area from header */
 function openUPIBlock(){ document.getElementById("qrArea").style.display = "block"; document.getElementById("qrArea").scrollIntoView({behavior:"smooth"}); }
 
-/* Admin functions */
+/* ADMIN: unlock via PIN prompt */
+function tryAdmin(){
+  try{
+    const pin = prompt("Enter Admin PIN:");
+    if(pin === null) return; // cancelled
+    if(pin === ADMIN_PIN){
+      localStorage.setItem("exist_isAdmin","1");
+      IS_ADMIN = true;
+      // reveal admin UI
+      document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'block');
+      document.getElementById('adminFloating').style.display = 'none';
+      loadAdminForm();
+      alert("Admin mode activated.");
+    } else {
+      alert("Wrong PIN.");
+    }
+  }catch(e){
+    console.error(e);
+    alert("Error: " + e.message);
+  }
+}
+function adminLogout(){
+  localStorage.removeItem('exist_isAdmin');
+  IS_ADMIN = false;
+  document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'none');
+  document.getElementById('adminFloating').style.display = 'block';
+  alert("Admin logged out.");
+}
+
+/* Admin form load/save */
 function loadAdminForm(){
-  // map values: note stored keys are lower-case as in DEFAULTS
   document.getElementById("setName").value = settings.name || "";
   document.getElementById("setMap").value = settings.map || "";
   document.getElementById("setFee").value = settings.fee || "";
@@ -475,17 +491,16 @@ function loadAdminForm(){
   document.getElementById("setReg").value = settings.regOpen ? "1" : "0";
   document.getElementById("setRoomId").value = settings.roomId || "";
   document.getElementById("setRoomPass").value = settings.roomPass || "";
-  // mask toggle default
   document.getElementById("toggleRoomShow").textContent = "Show";
   document.getElementById("setRoomPass").type = "password";
 }
 function toggleRoomMask(){
   const el = document.getElementById("setRoomPass");
   const btn = document.getElementById("toggleRoomShow");
+  if(!el) return;
   if(el.type === "password"){ el.type = "text"; btn.textContent = "Hide"; } else { el.type = "password"; btn.textContent = "Show"; }
 }
 function saveSettings(){
-  // read values (validate)
   settings.name = document.getElementById("setName").value || settings.name;
   settings.map = document.getElementById("setMap").value || settings.map;
   settings.fee = Number(document.getElementById("setFee").value) || settings.fee;
@@ -506,7 +521,6 @@ function saveSettings(){
 
 /* admin utilities */
 function importSample(){
-  // sample players for quick testing
   players = [
     {name:"Inferno", uid:"3889662216", wp:"917000000001", code:"A1B2C3", paid:1},
     {name:"Action Bolt", uid:"4344524799", wp:"917000000002", code:"D4E5F6", paid:0},
@@ -548,19 +562,11 @@ function getSettingsForExternal(){
 function getPlayersForExternal(){
   return JSON.parse(localStorage.getItem(PKEY) || "[]");
 }
-  
-/* sample restore / debug helpers (not required) */
-function debugShow(){
-  console.log("settings", settings);
-  console.log("players", players);
-}
 
-/* small safety: prevent overflow clicks to go weird */
+/* small safety: prevent errors leaking */
 window.addEventListener("error", function(e){ console.warn("client error:", e.message); });
 
-// end of script
+// end script
 </script>
-
 </body>
 </html>
-  
