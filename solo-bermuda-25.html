@@ -45,6 +45,62 @@
   .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:780px){ .settings-grid{grid-template-columns:1fr} .row{flex-direction:column} table{min-width:520px} }
   @media(max-width:520px){ header h1{font-size:18px} }
+
+  /* --- Mobile compact tweaks --- */
+@media (max-width: 700px) {
+
+  html, body {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .wrap { padding: 8px !important; }
+  .card { padding: 10px !important; margin-bottom: 12px !important; border-radius: 10px; }
+  header { padding: 12px !important; }
+  header h1 { font-size: 18px !important; }
+  h2 { font-size: 16px !important; }
+  .small { font-size: 12px !important; }
+
+  input, select, textarea {
+    padding: 8px !important;
+    font-size: 14px !important;
+  }
+
+  .btn {
+    padding: 9px 10px !important;
+    font-size: 14px !important;
+  }
+
+  /* tables internal scroll (reduce webpage height) */
+  .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-height: 260px;
+  }
+
+  table { min-width: auto !important; }
+  th, td { padding: 6px !important; font-size: 13px !important; }
+
+  /* ellipsis for long names */
+  td:nth-child(2), th:nth-child(2) {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* admin settings hide on phone */
+  #adminSettingsCard { display: none !important; }
+  #lbAdmin { display: none !important; }
+
+  /* modal responsive */
+  #upiModal > div {
+    max-height: 88vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 </style>
 </head>
 <body>
@@ -519,6 +575,40 @@ document.addEventListener("DOMContentLoaded", ()=> {
     }, 1000);
   }
 });
+
+  // --- Mobile Admin Toggle Button ---
+(function(){
+  if (!window.location.search.includes("admin=1")) return; 
+  if (window.innerWidth > 700) return;
+
+  const btn = document.createElement('button');
+  btn.textContent = "Admin";
+  btn.style.position = "fixed";
+  btn.style.right = "12px";
+  btn.style.bottom = "12px";
+  btn.style.zIndex = 99999;
+  btn.style.padding = "8px 10px";
+  btn.style.borderRadius = "8px";
+  btn.style.border = "none";
+  btn.style.background = "#2563eb";
+  btn.style.color = "#fff";
+  btn.style.fontWeight = "700";
+  btn.style.boxShadow = "0 6px 18px rgba(0,0,0,0.4)";
+  document.body.appendChild(btn);
+
+  btn.addEventListener('click', function(){
+    const adminCard = document.getElementById('adminSettingsCard');
+    if(!adminCard) return alert("Admin panel not found.");
+    if(adminCard.style.display === 'block'){
+      adminCard.style.display = 'none';
+      btn.textContent = "Admin";
+    } else {
+      adminCard.style.display = 'block';
+      adminCard.scrollIntoView({behavior:'smooth', block:'center'});
+      btn.textContent = "Hide";
+    }
+  });
+})();
 </script>
 </body>
 </html>
