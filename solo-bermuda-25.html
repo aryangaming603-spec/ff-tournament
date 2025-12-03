@@ -94,6 +94,34 @@
       <p id="slotsInfoText" style="color:#9ca3af;font-size:13px">Filled: 0 / 48 | Left: 48</p>
     </div>
 
+    <div id="upiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="width:94%;max-width:440px;background:#071026;padding:16px;border-radius:12px;color:#e6eef6;">
+    <h3 style="margin:0 0 8px;">Payment options</h3>
+
+    <p style="margin:0 0 10px;color:#9ca3af;font-size:13px">Scan the QR or copy UPI details & code.</p>
+
+    <div style="text-align:center;margin-bottom:10px;">
+      <img src="upi-qr.png" alt="UPI QR" style="max-width:200px;border-radius:8px;border:1px solid #123;">
+      <div style="margin-top:8px;font-size:13px;color:#cbd5e1;">Scan to pay</div>
+    </div>
+
+    <div style="background:#061026;padding:10px;border-radius:8px;margin-bottom:10px;">
+      <div style="font-size:13px;color:#9ca3af;">UPI ID</div>
+      <div id="upiIdDisplay" style="font-weight:700;margin-top:6px;">9170856377-3@ybl</div>
+
+      <div style="margin-top:8px;font-size:13px;color:#9ca3af;">Payment Code</div>
+      <div id="upiCodeDisplay" style="font-weight:700;margin-top:6px;">XXXXX</div>
+
+      <button onclick="copyUPIInfo()" style="margin-top:10px;padding:10px;border-radius:8px;border:none;background:#22c55e;color:#04200e;font-weight:700;width:100%;">Copy UPI & Code</button>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button onclick="openUpiApp()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#2563eb;color:#eaf2ff;font-weight:700;">Open UPI app</button>
+      <button onclick="closeUpiModal()" style="padding:10px;border-radius:8px;border:none;background:#64748b;color:#fff;">Close</button>
+    </div>
+  </div>
+    </div>
+     
     <!-- REGISTER -->
     <div class="card">
       <h2>Register & Pay</h2>
@@ -234,6 +262,7 @@ showUpiModal(code);
       }
 
       const code = createCode();
+      showUpiModal(code);
       players.push({ name, uid, wa, code, status: "Pending" });
       savePlayers();
       renderPlayers();
@@ -248,7 +277,6 @@ showUpiModal(code);
                    + "&pn=" + encodeURIComponent("Aryan Gaming")
                    + "&am=" + encodeURIComponent(CONFIG.ENTRY_FEE)
                    + "&cu=INR&tn=" + encodeURIComponent(code);
-      window.location.href = upiURL;
     }
 
     /* PLAYERS TABLE & ADMIN ACTIONS */
@@ -441,6 +469,40 @@ function copyUPIInfo(){
   navigator.clipboard.writeText(upi + " | Code: " + code).then(()=>{
       alert("Copied! Now open any UPI App and pay.");
   });
+}
+
+    let __LAST_UPI_URL = "";
+let __LAST_PAY_CODE = "";
+
+function showUpiModal(code){
+  __LAST_PAY_CODE = code;
+  const upiId = settings.upi || "aryangaming603-2@okicici";
+
+  document.getElementById('upiCodeDisplay').textContent = code;
+  document.getElementById('upiIdDisplay').textContent = upiId;
+
+  __LAST_UPI_URL =
+    "upi://pay?pa=" + encodeURIComponent(upiId) +
+    "&pn=" + encodeURIComponent(settings.name || "Tournament") +
+    "&am=" + encodeURIComponent(settings.fee || 25) +
+    "&cu=INR&tn=" + encodeURIComponent(code);
+
+  document.getElementById('upiModal').style.display = "flex";
+}
+
+function closeUpiModal(){
+  document.getElementById("upiModal").style.display = "none";
+}
+
+function openUpiApp(){
+  if(__LAST_UPI_URL){
+    window.location.href = __LAST_UPI_URL;
+  }
+}
+
+function copyUPIInfo(){
+  const text = document.getElementById("upiIdDisplay").textContent + " | Code: " + __LAST_PAY_CODE;
+  navigator.clipboard.writeText(text).then(()=> alert("Copied! Open UPI App & Paste"));
 }
   </script>
 </body>
