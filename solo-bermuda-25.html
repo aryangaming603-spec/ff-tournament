@@ -70,6 +70,46 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 }
 .table-wrap th{color:var(--muted);font-weight:700;font-size:13px}
 
+  /* MOBILE: convert table to stacked cards to avoid horizontal scrolling */
+@media (max-width:700px){
+  .table-wrap table, .table-wrap thead, .table-wrap tbody, .table-wrap th, .table-wrap td, .table-wrap tr {
+    display:block;
+  }
+  .table-wrap thead { display:none; }
+  .table-wrap tr { 
+    background: transparent;
+    margin: 0 0 12px 0;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+  .table-wrap td {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 10px;
+    white-space:normal;
+    border-bottom: none;
+  }
+  .table-wrap td[data-label]::before{
+    content: attr(data-label);
+    color: var(--muted);
+    font-weight:700;
+    margin-right:8px;
+    flex:0 0 auto;
+    width:40%;
+    text-align:left;
+  }
+  .table-wrap td .cell-value{
+    flex:1 1 auto;
+    text-align:right;
+    word-break:break-word;
+    max-width:60%;
+  }
+  /* make admin actions stack neatly */
+  .admin-only button { display:inline-block; margin-left:6px; margin-top:4px; padding:6px 8px; font-size:13px; }
+
+
 /* Admin only style toggling */
 .admin-only{display:none}
 
