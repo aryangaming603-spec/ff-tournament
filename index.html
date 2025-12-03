@@ -1,115 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Aryan Gaming Tournament Hub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<style>
-body{
-  margin:0;
-  background:#020617;
-  color:#e2e8f0;
-  font-family:Arial, sans-serif;
-  text-align:center;
-}
-
-header{
-  padding:18px;
-  background:#0f172a;
-  border-bottom:2px solid #1e293b;
-}
-header h1{margin:0;font-size:22px;color:#38bdf8;}
-header p{margin:4px;font-size:12px;color:#94a3b8;}
-
-.container{
-  width:92%;
-  max-width:850px;
-  margin:auto;
-  padding:15px 0;
-}
-
-.card{
-  background:#0f172a;
-  border:1px solid #1e293b;
-  padding:18px;
-  border-radius:12px;
-  margin-bottom:14px;
-  box-shadow:0 0 12px rgba(0,0,0,0.6);
-}
-
-.card h2{margin:0 0 12px;font-size:18px;color:#38bdf8;}
-
-.btn{
-  display:block;
-  width:100%;
-  padding:12px 0;
-  margin-top:10px;
-  font-size:15px;
-  font-weight:bold;
-  border-radius:8px;
-  border:none;
-  cursor:pointer;
-}
-
-.btn-blue{background:#3b82f6;color:white;}
-.btn-green{background:#22c55e;color:#022c22;}
-.btn-black{background:#111827;color:#cbd5e1;}
-
-.btn-blue:hover,.btn-green:hover,.btn-black:hover{opacity:.9;}
-
-.footer{
-  padding:12px;
-  font-size:12px;
-  color:#64748b;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EXIST GAMER — Tournaments</title>
+  <style>
+    :root{
+      --bg:#041426; --panel:#082034; --muted:#9fbfcc; --accent:#06b6d4;
+      --accent2:#16a34a; --glass:rgba(255,255,255,0.03); --radius:12px;
+      --pad:14px; --maxw:1100px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#031827);color:#eafcff}
+    .wrap{max-width:var(--maxw);margin:18px auto;padding:18px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    h1{margin:0;font-size:26px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:6px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:18px}
+    .card{background:var(--panel);padding:var(--pad);border-radius:var(--radius);border:1px solid var(--glass);box-shadow:0 6px 24px rgba(0,0,0,0.45)}
+    .card h3{margin:0 0 6px 0}
+    .meta{color:var(--muted);font-size:13px;margin-bottom:8px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:10px 12px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#02120a}
+    .btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.04)}
+    footer{margin-top:22px;color:var(--muted);font-size:13px;text-align:center}
+    @media(max-width:520px){h1{font-size:20px}}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>EXIST GAMER — Tournaments</h1>
+        <div class="subtitle">Open tournaments, register, pay and verify players. Use admin links to manage.</div>
+      </div>
+      <div style="text-align:right">
+        <div class="subtitle">Admin quick</div>
+        <div style="margin-top:8px">
+          <a class="btn btn-ghost" href="solo-bermuda-25.html?admin=1">Admin (Solo)</a>
+          <a class="btn btn-ghost" href="leaderboard.html?admin=1">Admin (Leaderboard)</a>
+        </div>
+      </div>
+    </header>
 
-<header>
-  <h1>⚡ Aryan Gaming Tournament ⚡</h1>
-  <p>Free Fire Custom, Registration & UID Verification</p>
-</header>
+    <div class="grid">
+      <div class="card">
+        <h3>Solo — Bermuda</h3>
+        <div class="meta">Mode: Solo • Slots: 48 • Entry: ₹25</div>
+        <div class="meta">Prize: ₹150 / ₹100 / ₹50 • Per kill: ₹6</div>
+        <div style="height:8px"></div>
+        <div class="actions">
+          <a class="btn btn-primary" href="solo-bermuda-25.html">Open & Register</a>
+          <a class="btn btn-ghost" href="verify.html">Verify (Players)</a>
+          <a class="btn btn-ghost" href="leaderboard.html">Leaderboard</a>
+        </div>
+      </div>
 
-<div class="container">
+      <div class="card">
+        <h3>Duo — Coming Soon</h3>
+        <div class="meta">Will be added later</div>
+        <div style="height:8px"></div>
+        <div class="actions">
+          <button class="btn btn-ghost" disabled>Coming Soon</button>
+        </div>
+      </div>
 
-  <!-- Tournament Card -->
-  <div class="card">
-    <h2>Solo Bermuda Tournament 🎮</h2>
-    <p>Entry Fee: ₹25 | Prize: ₹150 | Kill: ₹6</p>
-    <button class="btn btn-blue"
-      onclick="location.href='solo-bermuda-25.html'">
-      Register & Pay
-    </button>
+      <div class="card">
+        <h3>Squad — Coming Soon</h3>
+        <div class="meta">Will be added later</div>
+        <div style="height:8px"></div>
+        <div class="actions">
+          <button class="btn btn-ghost" disabled>Coming Soon</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Payment & Tools</h3>
+        <div class="meta">QR & UPI helper, share links</div>
+        <div style="height:8px"></div>
+        <div class="actions">
+          <a class="btn btn-primary" href="qr.html">Open QR / Pay</a>
+          <a class="btn btn-ghost" href="index.html">Home</a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div>Made with ❤️ by EXIST GAMER</div>
+      <div style="margin-top:6px">Note: Admin changes saved in browser (localStorage). Use same device to manage & verify.</div>
+    </footer>
   </div>
-
-  <!-- UID Verify -->
-  <div class="card">
-    <h2>Room Unlock / UID Verify 🔐</h2>
-    <p>Only verified players will get Room ID & Password.</p>
-    <button class="btn btn-blue"
-      onclick="location.href='verify.html'">
-      Verify UID
-    </button>
-  </div>
-
-  <!-- Support -->
-  <div class="card">
-    <h2>Support & Help 📞</h2>
-    <p>Payment Issue / Match info / Room Details</p>
-    <button class="btn btn-green"
-      onclick="location.href='https://wa.me/9170856377'">
-      Message on WhatsApp
-    </button>
-  </div>
-
-  <div class="footer">
-    ©2025 Aryan Gaming Tournament — Powered by GitHub Pages
-  </div>
-  
-</div>
-
 </body>
 </html>
