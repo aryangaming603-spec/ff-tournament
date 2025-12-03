@@ -378,19 +378,23 @@ function applySettingsToUI(){
 /* render players */
 function renderPlayersTable(){
   const tbody = document.getElementById("playersTable");
+  if(!tbody) return;
   let html = "";
   players.forEach((p,i)=>{
+    // create each cell with data-label and inner span for value (class="cell-value")
     html += `<tr>
-      <td>${i+1}</td>
-      <td class="wrap-allow" style="text-align:left">${escapeHtml(p.name)}</td>
-      <td>${hideValue(p.uid)}</td>
-      <td>${hideValue(p.wp)}</td>
-      <td>${escapeHtml(p.code)}</td>
-      <td>${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</td>
-      <td class="admin-only"> 
-         <button class="btn btn-primary" onclick="markPaid(${i})">Paid</button>
-         <button class="btn btn-ghost" onclick="viewPlayer(${i})">View</button>
-         <button class="btn btn-danger" onclick="deletePlayer(${i})">Delete</button>
+      <td data-label="#" ><span class="cell-value">${i+1}</span></td>
+      <td data-label="Name" class="wrap-allow" style="text-align:left"><span class="cell-value">${escapeHtml(p.name)}</span></td>
+      <td data-label="UID"><span class="cell-value">${hideValue(p.uid)}</span></td>
+      <td data-label="WhatsApp"><span class="cell-value">${hideValue(p.wp)}</span></td>
+      <td data-label="Code"><span class="cell-value">${escapeHtml(p.code)}</span></td>
+      <td data-label="Status"><span class="cell-value">${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</span></td>
+      <td data-label="Actions" class="admin-only">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="markPaid(${i})">Paid</button>
+          <button class="btn btn-ghost" onclick="viewPlayer(${i})">View</button>
+          <button class="btn btn-danger" onclick="deletePlayer(${i})">Delete</button>
+        </div>
       </td>
     </tr>`;
   });
