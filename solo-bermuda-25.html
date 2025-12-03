@@ -263,6 +263,7 @@ function applySettings(){
 
 /* admin functions */
 function saveSettings(){
+  // Read values from admin UI and store into settings object
   settings.name = document.getElementById("setName").value || DEFAULTS.name;
   settings.mode = document.getElementById("setMode").value || DEFAULTS.mode;
   settings.map = document.getElementById("setMap").value || DEFAULTS.map;
@@ -276,8 +277,14 @@ function saveSettings(){
   settings.upi = document.getElementById("setUpi").value || DEFAULTS.upi;
   settings.regOpen = document.getElementById("setReg").value === "1";
   settings.primary = document.getElementById("setColor").value || DEFAULTS.primary;
-  saveSettings();
+
+  // Persist to localStorage (this is the actual save)
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+
+  // Apply values to UI immediately
   applySettings();
+
+  // Feedback
   alert("Settings saved.");
 }
 function resetSettings(){ if(!confirm("Reset to defaults?")) return; settings = {...DEFAULTS}; saveSettings(); applySettings(); alert("Defaults restored"); }
