@@ -126,7 +126,52 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 .status-pend{background:#44337a;color:#f3e8ff;padding:6px 8px;border-radius:8px;font-weight:700}
 </style>
 </head>
-<body>
+<!-- ADMIN QUICK FIX: paste this just before </body> -->
+<script>
+  // set your secret pin here
+  const ADMIN_PIN = "786786";
+
+  function tryAdmin(){
+    try{
+      const pin = prompt("Enter Admin PIN:");
+      if(pin === null) return; // user cancelled
+      if(pin === ADMIN_PIN){
+        localStorage.setItem("exist_isAdmin","1");
+        alert("Admin mode activated — reload to show admin.");
+        location.reload();
+      } else {
+        alert("Wrong PIN");
+      }
+    }catch(e){
+      alert("Error: " + e.message);
+      console.error(e);
+    }
+  }
+
+  // make sure there is an admin link — create one if not present
+  (function attachAdminLink(){
+    // try to find an existing element with id=adminBtn
+    let a = document.getElementById("adminBtn");
+    if(!a){
+      // create a small floating admin button bottom-right (visible)
+      a = document.createElement('button');
+      a.id = "adminBtn";
+      a.textContent = "Admin";
+      a.style.position = "fixed";
+      a.style.right = "12px";
+      a.style.bottom = "12px";
+      a.style.zIndex = 9999;
+      a.style.padding = "10px 12px";
+      a.style.borderRadius = "10px";
+      a.style.background = "#0ea5a1"; a.style.color="#02120a";
+      a.style.border = "none";
+      a.style.fontWeight = "700";
+      document.body.appendChild(a);
+    }
+    a.onclick = tryAdmin;
+  })();
+</script>
+  <body>
 <div class="container">
 
   <div class="header">
