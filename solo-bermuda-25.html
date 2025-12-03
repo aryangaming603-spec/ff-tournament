@@ -1,246 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Solo Bermuda Tournament</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <title>Solo – Bermuda Tournament - Aryan</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* Basic reset + prevent overflow issues */
+    * { box-sizing: border-box; }
+    html,body{height:100%;margin:0;padding:0;background:#020617;color:#e5e7eb;font-family:Arial, sans-serif;}
+    header{background:#0f172a;padding:14px 12px;text-align:center;border-bottom:1px solid #111827;}
+    header h1{margin:0;font-size:20px;color:#7dd3fc;}
+    header p{margin:6px 0 0;font-size:12px;color:#9ca3af;}
 
-<style>
-body{
-  margin:0;
-  background:#020617;
-  color:#e2e8f0;
-  font-family:Arial;
-}
-header{
-  text-align:center;
-  padding:14px;
-  background:#0f172a;
-  border-bottom:2px solid #1e293b;
-}
-header h1{margin:0;font-size:22px;color:#38bdf8;}
-header p{margin:2px;font-size:12px;color:#94a3b8;}
-.container{width:92%;max-width:900px;margin:auto;padding:12px;}
+    .container{max-width:980px;margin:18px auto;padding:12px;}
 
-.card{
-  background:#0f172a;
-  margin-bottom:12px;
-  padding:15px;
-  border-radius:10px;
-  box-shadow:0 0 12px rgba(0,0,0,.4);
-  border:1px solid #1e293b;
-}
+    .card{
+      background:linear-gradient(180deg, rgba(16,24,40,0.8), rgba(2,6,23,0.85));
+      border:1px solid #111827;
+      padding:14px;
+      border-radius:12px;
+      margin-bottom:14px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.5);
+      overflow:hidden;
+    }
 
-h2{margin:0 0 10px;color:#38bdf8;font-size:18px;}
+    h2{margin:0 0 10px;color:#7dd3fc;font-size:17px;}
+    p{margin:4px 0;color:#cbd5e1;font-size:13px;}
 
-input{
-  width:100%;
-  background:#020617;
-  border:1px solid #334155;
-  padding:8px;
-  color:white;
-  border-radius:6px;
-  margin-bottom:8px;
-}
+    .badges{margin:6px 0;}
+    .badge{display:inline-block;background:#111827;padding:6px 10px;border-radius:999px;font-size:12px;margin-right:8px;color:#94a3b8;}
 
-button{
-  width:100%;
-  padding:10px;
-  border:none;
-  font-weight:bold;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:15px;
-}
+    label{display:block;margin-top:8px;font-size:13px;color:#9ca3af;}
+    input[type="text"], input[type="number"]{
+      width:100%;
+      padding:9px;
+      margin-top:6px;
+      border-radius:8px;
+      border:1px solid #273449;
+      background:#061026;
+      color:#e5e7eb;
+      font-size:14px;
+    }
+    input::placeholder{color:#6b7280;}
 
-.btn-green{background:#22c55e;color:#022c22;}
-.btn-blue{background:#3b82f6;color:white;}
-.btn-red{background:#dc2626;color:white;}
-.btn-grey{background:#475569;color:white;}
+    .btn{
+      display:inline-block;
+      width:100%;
+      text-align:center;
+      padding:11px;
+      margin-top:12px;
+      border-radius:10px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      font-size:15px;
+    }
+    .btn-green{background:#16a34a;color:#04200e;}
+    .btn-blue{background:#2563eb;color:#eaf2ff;}
+    .btn-grey{background:#475569;color:#eaf2ff;}
+    .btn-red{background:#dc2626;color:#fff;}
 
-table{
-  width:100%;
-  margin-top:10px;
-  border-collapse:collapse;
-  font-size:12px;
-  display:block;
-  overflow-x:auto;   /* zarurat pade to andar hi scroll hoga */
-}
-th,td{
-  border:1px solid #1e293b;padding:6px;text-align:center;
-}
-th{background:#020617;}
+    /* Tables responsive: keep inside card */
+    .table-wrap{display:block;overflow-x:auto;width:100%;margin-top:8px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px;}
+    th, td{padding:8px;border:1px solid #111827;text-align:left;color:#e5e7eb;background:transparent;}
+    th{background:#071028;color:#9dd3f0;font-weight:700;position:sticky;top:0;}
 
-.status-paid{background:#16a34a;color:white;border:none;padding:5px;}
-.status-pending{background:#f97316;color:white;border:none;padding:5px;}
+    .status-btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer;font-weight:700;}
+    .status-paid{background:#16a34a;color:#04200e;}
+    .status-pending{background:#f97316;color:#2b0500;}
+    .status-edit{background:#2563eb;color:#eaf2ff;margin-top:6px;}
+    .status-remove{background:#dc2626;color:#fff;margin-top:6px;}
 
-.rank1{background:#fde047;color:#111827;font-weight:bold;}
-.rank2{background:#cbd5e1;color:#111827;font-weight:bold;}
-.rank3{background:#fca5a5;color:#111827;font-weight:bold;}
+    /* Leaderboard row highlights */
+    .rank1{background:#fde047;color:#111827;font-weight:700;}
+    .rank2{background:#cbd5e1;color:#111827;font-weight:700;}
+    .rank3{background:#fca5a5;color:#111827;font-weight:700;}
 
-  *{
-  box-sizing: border-box;
-  }
-</style>
+    /* Small screens adjustments */
+    @media (max-width:520px){
+      header h1{font-size:18px;}
+      .card{padding:12px;}
+      th,td{padding:8px 6px;font-size:12px;}
+      .btn{font-size:14px;padding:10px;}
+      input{padding:8px;font-size:14px;}
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>Solo – Bermuda (₹25 Entry)</h1>
+    <p>Entry ₹25 • Winner prize + kill rewards • Admin control via ?admin=1</p>
+  </header>
 
-<header>
-  <h1>Solo Bermuda Tournament</h1>
-  <p>Entry ₹25 • Prize ₹150 • Kill ₹6</p>
-</header>
+  <div class="container">
 
-<div class="container">
+    <!-- Tournament info -->
+    <div class="card" id="infoCard">
+      <h2>Tournament Info</h2>
+      <div class="badges">
+        <span class="badge">Mode: Solo</span>
+        <span class="badge">Map: Bermuda</span>
+        <span class="badge" id="slotBadge">Slots: 48</span>
+      </div>
 
-<!-- REGISTRATION -->
-<div class="card">
-  <h2>Register & Pay 🎮</h2>
-  <input id="name" placeholder="Free Fire Name">
-  <input id="uid" placeholder="UID">
-  <input id="wa" placeholder="WhatsApp Number">
+      <p><strong>Entry Fee:</strong> ₹25 &nbsp;&nbsp; <strong>Winner Prize:</strong> ₹150 &nbsp;&nbsp; <strong>Per Kill:</strong> ₹6</p>
+      <p><strong>UPI:</strong> <span style="color:#34d399;font-weight:800">aryangaming603-2@okicici</span></p>
+      <p id="slotsInfoText" style="color:#9ca3af;font-size:13px">Filled: 0 / 48 | Left: 48</p>
+    </div>
 
-  <button class="btn-green" onclick="registerPlayer()">Pay & Register</button>
-  <p style="font-size:11px;color:#94a3b8;">UPI ID: <b style="color:#22c55e;">aryangaming603-2@okicici</b></p>
-  <p style="font-size:11px;color:#64748b;">Normal users cannot see other's details — secured view.</p>
-</div>
+    <!-- Register form -->
+    <div class="card">
+      <h2>Register & Pay</h2>
+      <label>Free Fire Name</label>
+      <input id="ffName" type="text" placeholder="Your Free Fire name">
 
-<!-- PLAYER LIST -->
-<div class="card">
-  <h2>Registered Players ✔</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>UID</th>
-        <th>Whatsapp</th>
-        <th>Code</th>
-        <th>Status/Actions</th>
-      </tr>
-    </thead>
-    <tbody id="list"></tbody>
-  </table>
-</div>
+      <label>Free Fire UID</label>
+      <input id="ffUid" type="text" placeholder="Example: 1234567890">
 
-<!-- LEADERBOARD -->
-<div class="card">
-  <h2>Match Leaderboard 🏆</h2>
+      <label>WhatsApp Number</label>
+      <input id="ffWa" type="text" placeholder="10-digit number">
 
-  <div id="adminBox" style="display:none;">
-    <input id="lbName" placeholder="Player Name">
-    <input id="lbKill" type="number" placeholder="Kills">
-    <button class="btn-blue" onclick="addLB()">ADD RESULT</button>
-    <button class="btn-grey" style="margin-top:6px;" onclick="clearLB()">RESET LEADERBOARD</button>
+      <button class="btn btn-green" onclick="payAndRegister()">Pay ₹25 & Register</button>
+      <p style="color:#9ca3af;font-size:13px;margin-top:10px;">After clicking, a payment code will be generated and UPI will open. Put that code in payment note.</p>
+    </div>
+
+    <!-- Registered players -->
+    <div class="card">
+      <h2>Registered Players</h2>
+      <p style="color:#9ca3af;font-size:13px;margin:6px 0;">Normal view masks UID/WhatsApp/Code. Admin: append <code>?admin=1</code> to URL to manage.</p>
+
+      <div class="table-wrap">
+        <table aria-live="polite">
+          <thead>
+            <tr>
+              <th style="width:48px">#</th>
+              <th style="min-width:140px">Name</th>
+              <th style="min-width:120px">UID</th>
+              <th style="min-width:130px">WhatsApp</th>
+              <th style="min-width:110px">Pay Code</th>
+              <th style="min-width:160px">Status / Actions</th>
+            </tr>
+          </thead>
+          <tbody id="playerList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Leaderboard (Solo) -->
+    <div class="card">
+      <h2>Solo Match Leaderboard</h2>
+      <p id="lb_info" style="color:#9ca3af;font-size:13px;margin:6px 0;">Loading...</p>
+
+      <div id="lb-admin" style="display:none;margin-bottom:10px;">
+        <label>Player Name</label>
+        <input id="lb_name" type="text" placeholder="Player name">
+        <label>Kills</label>
+        <input id="lb_kill" type="number" placeholder="Kills">
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-blue" style="flex:1" onclick="lbAdd()">Add Result</button>
+          <button class="btn btn-grey" style="flex:1" onclick="lbClear()">Reset</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:10px;">
+        <table>
+          <thead>
+            <tr><th style="width:64px">Rank</th><th>Name</th><th style="width:90px">Kills</th><th style="width:140px">Reward</th></tr>
+          </thead>
+          <tbody id="lb_table"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
-  <table>
-    <thead>
-      <tr><th>Rank</th><th>Name</th><th>Kills</th><th>Prize</th></tr>
-    </thead>
-    <tbody id="lb"></tbody>
-  </table>
-  <p id="notify" style="font-size:11px;color:#94a3b8;text-align:center;"></p>
-</div>
+  <script>
+    /* ================== Config & state ================== */
+    const CONFIG = { TOTAL_SLOTS: 48, ENTRY_FEE: 25, UPI_ID: "aryangaming603-2@okicici" };
+    const IS_ADMIN = window.location.search.includes("admin=1");
 
-</div>
+    // players stored in localStorage key 'ffSoloPlayers'
+    let players = JSON.parse(localStorage.getItem("ffSoloPlayers") || "[]");
+    let leaderboard = JSON.parse(localStorage.getItem("soloLB") || "[]");
 
-<script>
-//== ADMIN CHECK
-const admin = location.search.includes("admin=1");
+    /* ================== Helpers ================== */
+    function savePlayers(){ localStorage.setItem("ffSoloPlayers", JSON.stringify(players)); }
+    function saveLB(){ localStorage.setItem("soloLB", JSON.stringify(leaderboard)); }
 
-//== Player Storage
-let P = JSON.parse(localStorage.getItem("players") || "[]");
-let L = JSON.parse(localStorage.getItem("leader") || "[]");
+    function maskUID(u){ return IS_ADMIN ? u : "XXXXXXX"; }
+    function maskWA(w){ return IS_ADMIN ? w : "XXXXXXXXXX"; }
+    function maskCode(c){ return IS_ADMIN ? c : "XXXXXX"; }
 
-function registerPlayer(){
- let n=name.value.trim(), u=uid.value.trim(), w=wa.value.trim();
- if(!n||!u||!w) return alert("Fill all fields!");
+    function updateSlotsInfo(){
+      const filled = players.length;
+      const left = Math.max(CONFIG.TOTAL_SLOTS - filled, 0);
+      const s = document.getElementById("slotsInfoText");
+      const b = document.getElementById("slotBadge");
+      if(s) s.textContent = `Filled: ${filled} / ${CONFIG.TOTAL_SLOTS} | Left: ${left}`;
+      if(b) b.textContent = `Slots: ${CONFIG.TOTAL_SLOTS}`;
+    }
 
- let code="FF"+Math.floor(100000+Math.random()*900000);
+    /* ================== Register & Payment ================== */
+    function createCode(){ return "FF" + Math.floor(100000 + Math.random()*900000); }
 
- P.push({name:n,uid:u,wa:w,code,status:"PENDING"});
- localStorage.setItem("players",JSON.stringify(P));
+    function payAndRegister(){
+      const name = document.getElementById("ffName").value.trim();
+      const uid  = document.getElementById("ffUid").value.trim();
+      const wa   = document.getElementById("ffWa").value.trim();
 
- let upi=`upi://pay?pa=aryangaming603-2@okicici&pn=AryanGaming&am=25&cu=INR&tn=${code}`;
- alert("Payment Note Code : "+code);
- location.href=upi;
- render();
-}
+      if(!name || !uid || !wa){
+        alert("Please fill name, UID & WhatsApp.");
+        return;
+      }
+      if(players.length >= CONFIG.TOTAL_SLOTS){
+        alert("Slots full.");
+        return;
+      }
 
-//== TABLE RENDER
-function render(){
- let h="";
- P.forEach((p,i)=>{
-  let status = admin
-      ? `<button class="${p.status=='PAID'?'status-paid':'status-pending'}" onclick="toggle(${i})">${p.status}</button>
-         <button class="btn-red" style="margin-top:5px;" onclick="rem(${i})">DELETE</button>`
-      : p.status;
+      const code = createCode();
+      players.push({ name, uid, wa, code, status: "Pending" });
+      savePlayers();
+      renderPlayers();
+      updateSlotsInfo();
 
-  h+=`
-   <tr>
-    <td>${i+1}</td>
-    <td>${p.name}</td>
-    <td>${admin?p.uid:'XXXXXXX'}</td>
-    <td>${admin?p.wa:'XXXXXXXXXX'}</td>
-    <td>${admin?p.code:'XXXXXX'}</td>
-    <td>${status}</td>
-   </tr>`;
- });
- list.innerHTML=h;
-}
+      // Clear inputs
+      document.getElementById("ffName").value = "";
+      document.getElementById("ffUid").value = "";
+      document.getElementById("ffWa").value = "";
 
-//== REMOVE PLAYER
-function rem(i){
- if(!admin) return;
- if(confirm("Delete player?")) P.splice(i,1);
- localStorage.setItem("players",JSON.stringify(P));
- render();
-}
+      alert("Payment code created: " + code + "\nUPI will open now. Put this code in UPI remark.");
+      const upiURL = "upi://pay?pa=" + encodeURIComponent(CONFIG.UPI_ID)
+                   + "&pn=" + encodeURIComponent("Aryan Gaming")
+                   + "&am=" + encodeURIComponent(CONFIG.ENTRY_FEE)
+                   + "&cu=INR&tn=" + encodeURIComponent(code);
 
-//== STATUS CHANGE
-function toggle(i){
- if(!admin) return;
- P[i].status=P[i].status=="PAID"?"PENDING":"PAID";
- localStorage.setItem("players",JSON.stringify(P));
- render();
-}
+      // redirect to UPI intent (on mobile may open UPI app)
+      window.location.href = upiURL;
+    }
 
-//=============== LEADERBOARD ================
-function addLB(){
- if(!admin) return;
- let n=lbName.value,k=parseInt(lbKill.value);
- if(!n||isNaN(k)) return alert("Name+Kills required");
- L.push({name:n,kills:k});
- localStorage.setItem("leader",JSON.stringify(L));
- lbName.value="";lbKill.value="";
- showLB();
-}
+    /* ================== Players table (render / admin actions) ================== */
+    function renderPlayers(){
+      const tbody = document.getElementById("playerList");
+      tbody.innerHTML = "";
+      players.forEach((p, i) => {
+        const statusHtml = IS_ADMIN
+          ? `<button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}" onclick="toggleStatus(${i})">${p.status}</button>`
+          : `<span style="font-weight:700;color:${p.status==='Paid'?'#34d399':'#f97316'}">${p.status}</span>`;
 
-function clearLB(){
- if(!admin) return;
- if(confirm("RESET leaderboard?")){L=[];localStorage.setItem("leader","[]");showLB();}
-}
+        const adminActions = IS_ADMIN
+          ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+               <button class="status-btn status-edit" onclick="editPlayer(${i})">Edit</button>
+               <button class="status-btn status-remove" onclick="removePlayer(${i})">Remove</button>
+             </div>`
+          : "";
 
-function showLB(){
- let sorted=[...L].sort((a,b)=>b.kills-a.kills);
- let html="";
- sorted.forEach((p,i)=>{
-  let prize = (i==0?150:0)+(p.kills*6);
-  html+=`
-  <tr class="rank${i+1}">
-   <td>${i+1}</td><td>${p.name}</td>
-   <td>${p.kills}</td><td>₹${prize}</td>
-  </tr>`;
- });
- lb.innerHTML=html;
-}
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td style="min-width:140px">${escapeHtml(p.name)}</td>
+          <td style="min-width:110px">${maskUID(p.uid)}</td>
+          <td style="min-width:120px">${maskWA(p.wa)}</td>
+          <td style="min-width:110px">${maskCode(p.code)}</td>
+          <td style="min-width:160px">${statusHtml}${adminActions}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-// INIT
-if(admin){adminBox.style.display="block";notify.innerHTML="ADMIN MODE ENABLED 🔐";}
-else notify.innerHTML="Public view only – update possible only by admin 🔒";
+    function toggleStatus(index){
+      if(!IS_ADMIN){ alert("Only admin can change status."); return; }
+      players[index].status = players[index].status === "Paid" ? "Pending" : "Paid";
+      savePlayers();
+      renderPlayers();
+    }
 
-render();showLB();
-</script>
+    function removePlayer(index){
+      if(!IS_ADMIN){ alert("Only admin can remove."); return; }
+      const p = players[index];
+      if(!p) return;
+      if(!confirm(`Delete player ${p.name}?`)) return;
+      players.splice(index,1);
+      savePlayers();
+      renderPlayers();
+      updateSlotsInfo();
+    }
 
+    function editPlayer(index){
+      if(!IS_ADMIN){ alert("Only admin can edit."); return; }
+      const p = players[index];
+      if(!p) return;
+      const newName = prompt("Edit name:", p.name);
+      if(newName === null) return; // cancel
+      const newUid = prompt("Edit UID:", p.uid);
+      if(newUid === null) return;
+      const newWa = prompt("Edit WhatsApp:", p.wa);
+      if(newWa === null) return;
+
+      players[index].name = (newName.trim() || p.name);
+      players[index].uid = (newUid.trim() || p.uid);
+      players[index].wa = (newWa.trim() || p.wa);
+      savePlayers();
+      renderPlayers();
+    }
+
+    /* ================== Leaderboard system ================== */
+    const WIN1 = 150, WIN2 = 100, WIN3 = 50, PER_KILL = 6;
+
+    function lbRender(){
+      const tbody = document.getElementById("lb_table");
+      const sorted = [...leaderboard].sort((a,b)=>b.kills - a.kills);
+      let html = "";
+      sorted.forEach((p, i) => {
+        let base = 0;
+        if(i === 0) base = WIN1;
+        else if(i === 1) base = WIN2;
+        else if(i === 2) base = WIN3;
+        const reward = base + (Number(p.kills) * PER_KILL);
+        const rowClass = i===0 ? "rank1" : i===1 ? "rank2" : i===2 ? "rank3" : "";
+        const actions = IS_ADMIN
+          ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+               <button class="status-btn status-edit" onclick="lbEdit(${i})">Edit</button>
+               <button class="status-btn status-remove" onclick="lbRemove(${i})">Remove</button>
+             </div>`
+          : "";
+        html += `<tr class="${rowClass}">
+                  <td style="text-align:center">${i+1}</td>
+                  <td>${escapeHtml(p.name)}${actions}</td>
+                  <td style="text-align:center">${p.kills}</td>
+                  <td style="text-align:center">₹${reward}</td>
+                </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function lbAdd(){
+      if(!IS_ADMIN){ alert("Only admin can add results."); return; }
+      const n = document.getElementById("lb_name").value.trim();
+      const k = parseInt(document.getElementById("lb_kill").value);
+      if(!n || isNaN(k)){ alert("Provide name and kills."); return; }
+      leaderboard.push({ name: n, kills: k });
+      saveLB();
+      document.getElementById("lb_name").value = "";
+      document.getElementById("lb_kill").value = "";
+      lbRender();
+    }
+
+    function lbClear(){
+      if(!IS_ADMIN){ alert("Only admin can reset."); return; }
+      if(!confirm("Clear full leaderboard?")) return;
+      leaderboard = [];
+      saveLB();
+      lbRender();
+    }
+
+    function lbEdit(index){
+      if(!IS_ADMIN) return;
+      const p = leaderboard[index];
+      if(!p) return;
+      const newName = prompt("Edit name:", p.name);
+      if(newName === null) return;
+      const newKills = prompt("Edit kills:", p.kills);
+      if(newKills === null) return;
+      const knum = parseInt(newKills);
+      leaderboard[index].name = newName.trim() || p.name;
+      leaderboard[index].kills = isNaN(knum) ? p.kills : knum;
+      saveLB();
+      lbRender();
+    }
+
+    function lbRemove(index){
+      if(!IS_ADMIN) return;
+      const p = leaderboard[index];
+      if(!p) return;
+      if(!confirm(`Remove ${p.name} from leaderboard?`)) return;
+      leaderboard.splice(index, 1);
+      saveLB();
+      lbRender();
+    }
+
+    /* ================== Utilities ================== */
+    function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+
+    /* ================== Init on load ================== */
+    document.addEventListener("DOMContentLoaded", function(){
+      // fill UI based on admin or not
+      if(IS_ADMIN){
+        const adminBox = document.getElementById("lb-admin");
+        if(adminBox) adminBox.style.display = "block";
+        const info = document.getElementById("lb_info");
+        if(info) info.textContent = "ADMIN MODE ON — Add / Edit / Remove results and players.";
+      } else {
+        const info = document.getElementById("lb_info");
+        if(info) info.textContent = "Public view — results visible; admin updates only via ?admin=1";
+      }
+
+      renderPlayers();
+      lbRender();
+      updateSlotsInfo();
+    });
+
+    // Expose some functions to global (for inline onclick)
+    window.payAndRegister = payAndRegister;
+    window.renderPlayers = renderPlayers;
+    window.toggleStatus = toggleStatus;
+    window.removePlayer = removePlayer;
+    window.editPlayer = editPlayer;
+    window.lbAdd = lbAdd;
+    window.lbClear = lbClear;
+    window.lbEdit = lbEdit;
+    window.lbRemove = lbRemove;
+  </script>
 </body>
 </html>
+```0
