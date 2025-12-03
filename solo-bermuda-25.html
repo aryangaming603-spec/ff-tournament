@@ -217,7 +217,8 @@
 
     /* REGISTER & PAYMENT */
     function createCode(){ return "FF" + Math.floor(100000 + Math.random()*900000); }
-
+    // after code = "FFxxxxx"
+showUpiModal(code);
     function payAndRegister(){
       const name = document.getElementById("ffName").value.trim();
       const uid  = document.getElementById("ffUid").value.trim();
@@ -424,6 +425,23 @@
     window.lbClear = lbClear;
     window.lbEdit = lbEdit;
     window.lbRemove = lbRemove;
+
+  function showUpiModal(code){
+  document.getElementById("upiCodeDisplay").textContent = code;
+  document.getElementById("upiModal").style.display = "flex";
+}
+
+function closeUpiModal(){
+  document.getElementById("upiModal").style.display = "none";
+}
+
+function copyUPIInfo(){
+  const upi = "aryangaming603-2@okicici";
+  const code = document.getElementById("upiCodeDisplay").textContent;
+  navigator.clipboard.writeText(upi + " | Code: " + code).then(()=>{
+      alert("Copied! Now open any UPI App and pay.");
+  });
+}
   </script>
 </body>
 </html>
