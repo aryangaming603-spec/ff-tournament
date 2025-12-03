@@ -609,6 +609,72 @@ document.addEventListener("DOMContentLoaded", ()=> {
     }
   });
 })();
+
+  /* ==== EMERGENCY SCROLL FIX ==== 
+   Paste inside <script> before </script> and commit.
+*/
+(function(){
+  try{
+    // 1) Ensure html/body allow vertical scroll
+    document.documentElement.style.overflowY = 'auto';
+    document.body.style.overflowY = 'auto';
+    document.documentElement.style.height = 'auto';
+    document.body.style.height = 'auto';
+    document.documentElement.style.maxHeight = 'none';
+    document.body.style.maxHeight = 'none';
+
+    // 2) Hide any UPI modal if accidentally visible
+    const m = document.getElementById('upiModal');
+    if(m){
+      m.style.display = 'none';
+      m.style.pointerEvents = 'none';
+    }
+
+    // 3) Remove overflow:hidden / touch-action restrictions from any element that may block scroll
+    const all = document.querySelectorAll('body, html, *');
+    for(let i=0;i<all.length;i++){
+      const el = all[i];
+      const st = window.getComputedStyle(el);
+      // if element is full-screen overlay and visible, hide it
+      if((st.position === 'fixed' || st.position === 'absolute') && (st.zIndex !== 'auto' && parseInt(st.zIndex) > 1000) && st.display !== 'none'){
+        // hide overlays that might block scroll (but avoid hiding header/footer if small)
+        if(el.id !== 'titleHeader' && el.id !== 'adminSettingsCard'){
+          el.style.pointerEvents = 'none';
+          // don't forcibly display:none to avoid breaking UI; just make non-blocking
+        }
+      }
+      // force allow touch scroll
+      el.style.touchAction = el.style.touchAction || 'auto';
+      // remove accidental overflow hiding
+      if(st.overflow === 'hidden' && el !== document.body && el !== document.documentElement){
+        // only change if element is large (could be culprit)
+        const rect = el.getBoundingClientRect();
+        if(rect.height > window.innerHeight*0.6 || rect.width > window.innerWidth*0.8){
+          el.style.overflow = 'auto';
+        }
+      }
+    }
+
+    // 4) Small CSS injection to ensure page-level horiz overflow hidden but vertical allowed
+    const style = document.createElement('style');
+    style.innerHTML = `
+      html,body{ overflow-x:hidden !important; overflow-y:auto !important; height:auto !important; }
+      .table-wrap{ -webkit-overflow-scrolling: touch !important; }
+      #upiModal{ display:none !important; pointer-events:none !important; }
+    `;
+    document.head.appendChild(style);
+
+    // 5) If scroll still not working, try small programmatic scroll to kickstart browser
+    window.scrollTo(0,1);
+    setTimeout(()=> window.scrollTo(0,0),150);
+
+    console.log("Emergency scroll-fix applied");
+    alert("Fix applied — page scroll फिर से चालू होना चाहिए। यदि नहीं, तो refresh करो।");
+  }catch(e){
+    console.error("Scroll-fix error:", e);
+    alert("Fix failed — send screenshot. ("+ (e.message||e) +")");
+  }
+})();
 </script>
 </body>
 </html>
