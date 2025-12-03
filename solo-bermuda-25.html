@@ -107,6 +107,33 @@
       <p style="color:#9ca3af;font-size:13px;margin-top:10px;">After clicking, a payment code will be generated and UPI will open. Put that code in the payment note.</p>
     </div>
 
+    <!-- UPI Payment Modal -->
+<div id="upiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="width:92%;max-width:420px;background:#071026;padding:14px;border-radius:12px;color:#e6eef6;">
+    <h3 style="margin:0 0 6px;">Payment Options</h3>
+    <p style="margin:0 0 8px;color:#9ca3af;font-size:13px">Scan QR or copy UPI ID & payment code.</p>
+
+    <div style="text-align:center;margin-bottom:8px;">
+      <img src="upi-qr.png" alt="UPI QR" style="max-width:180px;border-radius:8px;border:1px solid #123;">
+      <div style="margin-top:8px;font-size:13px;color:#cbd5e1;">Scan to pay</div>
+    </div>
+
+    <div style="background:#061026;padding:8px;border-radius:8px;margin-bottom:8px;">
+      <div style="font-size:13px;color:#9ca3af;">UPI ID</div>
+      <div id="upiIdDisplay" style="font-weight:700;margin-top:4px;">aryangaming603-2@okicici</div>
+
+      <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Payment Code</div>
+      <div id="upiCodeDisplay" style="font-weight:700;margin-top:4px;">XXXXXX</div>
+
+      <button onclick="copyUPIInfo()" style="margin-top:8px;padding:8px;border-radius:8px;border:none;background:#22c55e;color:#04200e;font-weight:700;width:100%;">Copy Details</button>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeUpiModal()" style="padding:9px;border-radius:8px;border:none;background:#64748b;color:#fff;">Close</button>
+    </div>
+  </div>
+</div>
+    
     <!-- REGISTERED PLAYERS -->
     <div class="card">
       <h2>Registered Players</h2>
