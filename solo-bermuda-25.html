@@ -324,6 +324,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 </div>
 
 <script>
+const ADMIN_PIN = "1186";
 const SKEY = "existG_settings_v2";
 const PKEY = "existG_players_v2";
 const LKEY = "existG_lb_v2";
@@ -356,7 +357,7 @@ let players = [];
   applySettingsToUI();
 
   // admin mode?
-  const isAdmin = location.search.includes("admin=1");
+  const IS_ADMIN = localStorage.getItem("exist_isAdmin") === "1";
   if(isAdmin){
     document.querySelectorAll(".admin-only").forEach(x=>x.style.display="block");
     loadAdminForm();
@@ -560,7 +561,16 @@ function debugShow(){
 /* small safety: prevent overflow clicks to go weird */
 window.addEventListener("error", function(e){ console.warn("client error:", e.message); });
 
-// end of script
+function tryAdmin(){
+  const pin = prompt("Enter Admin PIN:");
+  if(pin === ADMIN_PIN){
+    localStorage.setItem("exist_isAdmin", "1");
+    alert("Admin mode activated");
+    location.reload();
+  } else {
+    alert("Wrong PIN");
+  }
+}
 </script>
 
 </body>
