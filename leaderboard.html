@@ -1,116 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Match Leaderboard | Aryan Gaming</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard — EXIST GAMER</title>
 
 <style>
+:root{
+    --bg:#071423; --card:#0b2430; --text:#e6fbff;
+    --muted:#9fbfcc; --accent:#16a34a; --danger:#d64040;
+    --pad:14px; --radius:12px; --glass:rgba(255,255,255,0.05);
+}
 body{
-  background:#020617;
-  color:#e2e8f0;
-  font-family:Arial;
-  text-align:center;
-  padding:20px;
+    margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:Inter,Arial,Helvetica,sans-serif;
 }
-h1{font-size:23px;margin-bottom:10px;color:#38bdf8;}
-table{
-  width:100%;
-  max-width:600px;
-  margin:auto;
-  border-collapse:collapse;
-  font-size:14px;
+.wrap{max-width:1150px;margin:0 auto;padding:14px;}
+.card{
+    background:var(--card);
+    padding:var(--pad);margin-top:16px;border-radius:var(--radius);
+    border:1px solid var(--glass);
+    box-shadow:0 4px 16px rgba(0,0,0,0.4);
 }
-th,td{
-  border:1px solid #1e293b;
-  padding:8px;
-}
-th{
-  background:#0f172a;
-  color:#7dd3fc;
-}
-.rank1{background:#fde047;color:#1e1b00;font-weight:bold;}
-.rank2{background:#cbd5e1;color:#111827;font-weight:bold;}
-.rank3{background:#fca5a5;color:#111827;font-weight:bold;}
+h2{margin:0 0 12px;}
+label{font-size:13px;color:var(--muted);}
 input{
-  width:200px;
-  padding:6px;
-  margin:4px;
-  border-radius:6px;
-  border:none;
-  background:#0f172a;
-  color:white;
+    width:100%;padding:10px;border-radius:8px;
+    background:#051823;color:white;border:1px solid rgba(255,255,255,0.1);
+    margin-bottom:8px;
 }
-button{
-  padding:10px 14px;
-  margin-top:10px;
-  border:none;
-  background:#22c55e;
-  color:#052e16;
-  border-radius:8px;
-  font-weight:bold;
+.btn{
+    padding:10px 12px;border:none;border-radius:8px;
+    cursor:pointer;font-weight:700;
 }
+.btn-primary{background:var(--accent);color:#02210b;}
+.btn-ghost{
+    background:transparent;color:#aee0ff;
+    border:1px solid rgba(255,255,255,0.08);
+}
+.btn-danger{background:var(--danger);color:white;}
+
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px;}
+th,td{
+    padding:10px;border-bottom:1px solid rgba(255,255,255,0.08);
+    text-align:center;
+}
+.admin-only{display:none;}
 </style>
 </head>
 
 <body>
+<div class="wrap">
 
-<h1>Match Leaderboard 🏆</h1>
+<div class="card">
+    <h2>Leaderboard</h2>
+    <p style="font-size:13px;color:var(--muted);">
+        Top 3 rewards are auto calculated from tournament settings.<br>
+        Admin can edit kills, add players, or clear leaderboard using admin mode.
+    </p>
+</div>
 
-<input id="name" placeholder="Player Name">
-<input id="kills" type="number" placeholder="Kills">
-<button onclick="addPlayer()">Add Result</button>
+<!-- TABLE -->
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th><th>Name</th><th>Kills</th><th>Reward</th><th class="admin-only">Action</th>
+            </tr>
+        </thead>
+        <tbody id="lb_table"></tbody>
+    </table>
+</div>
 
-<table>
-<thead>
-<tr>
-  <th>Rank</th>
-  <th>Name</th>
-  <th>Kills</th>
-  <th>Total Reward</th>
-</tr>
-</thead>
-<tbody id="board"></tbody>
-</table>
+<!-- ADMIN PANEL -->
+<div class="card admin-only" id="adminPanel">
+
+    <h2>Admin Tools</h2>
+
+    <label>Player Name</label>
+    <input id="aName" placeholder="Enter name">
+
+    <label>Kills</label>
+    <input id="aKills" type="number" placeholder="0">
+
+    <button class="btn btn-primary" onclick="addLB()">Add to Leaderboard</button>
+    <button class="btn btn-danger" onclick="clearLB()">Clear Leaderboard</button>
+</div>
+
+</div>
 
 <script>
-let players=[];
+/* KEYS */
+const SKEY="existG_settings_v2";
+const LKEY="existG_lb_v2";
 
-// Prize System
-const winPrize=150;
-const killPrize=6;
+/* LOAD SETTINGS */
+let settings = JSON.parse(localStorage.getItem(SKEY) || "{}");
+if(!settings.p1) settings.p1=150;
+if(!settings.p2) settings.p2=100;
+if(!settings.p3) settings.p3=50;
+if(!settings.perKill) settings.perKill=6;
 
-function addPlayer(){
-  let n=document.getElementById("name").value.trim();
-  let k=parseInt(document.getElementById("kills").value);
+/* LOAD LEADERBOARD */
+let lb = JSON.parse(localStorage.getItem(LKEY) || "[]");
 
-  if(!n || isNaN(k)){alert("Name + Kills दालो!");return;}
-
-  players.push({name:n,kills:k});
-  showTable();
-
-  document.getElementById("name").value="";
-  document.getElementById("kills").value="";
+/* CHECK ADMIN */
+const IS_ADMIN = location.search.includes("admin=1");
+if(IS_ADMIN){
+    document.querySelectorAll(".admin-only").forEach(x=>x.style.display="table-cell");
+    document.getElementById("adminPanel").style.display="block";
 }
 
-function showTable(){
-  let sorted=[...players].sort((a,b)=>b.kills-a.kills);
-  let html="";
+/* RENDER LB */
+function renderLB(){
+    let sorted=[...lb].sort((a,b)=>b.kills-a.kills);
+    let html="";
 
-  sorted.forEach((p,i)=>{
-    let reward=(i==0?winPrize:0)+(p.kills*killPrize);
-    let rankClass=i==0?'rank1':i==1?'rank2':i==2?'rank3':'';
+    sorted.forEach((p,i)=>{
+        let base = i==0?settings.p1 : i==1?settings.p2 : i==2?settings.p3 : 0;
+        let reward = base + (p.kills * settings.perKill);
 
-    html+=`
-    <tr class="${rankClass}">
-      <td>${i+1}</td>
-      <td>${p.name}</td>
-      <td>${p.kills}</td>
-      <td>₹${reward}</td>
-    </tr>`;
-  });
+        html += `
+        <tr>
+            <td>${i+1}</td>
+            <td>${p.name}</td>
+            <td>
+                ${IS_ADMIN ? `<input type='number' value='${p.kills}' 
+                  style='width:60px;text-align:center' 
+                  onchange='updateKills(${i}, this.value)'>` : p.kills}
+            </td>
+            <td>₹${reward}</td>
+            <td class="admin-only">
+                <button class="btn btn-danger" onclick="delLB(${i})">Del</button>
+            </td>
+        </tr>`;
+    });
 
-  document.getElementById("board").innerHTML=html;
+    document.getElementById("lb_table").innerHTML=html;
+}
+renderLB();
+
+/* ADD */
+function addLB(){
+    let n=document.getElementById("aName").value.trim();
+    let k=parseInt(document.getElementById("aKills").value);
+
+    if(!n || isNaN(k)) return alert("Enter valid name & kills!");
+
+    lb.push({name:n,kills:k});
+    localStorage.setItem(LKEY,JSON.stringify(lb));
+
+    renderLB();
+    document.getElementById("aName").value="";
+    document.getElementById("aKills").value="";
+}
+
+/* UPDATE KILLS */
+function updateKills(i,val){
+    lb[i].kills=parseInt(val);
+    localStorage.setItem(LKEY,JSON.stringify(lb));
+    renderLB();
+}
+
+/* DELETE */
+function delLB(i){
+    if(!confirm("Delete this entry?")) return;
+    lb.splice(i,1);
+    localStorage.setItem(LKEY,JSON.stringify(lb));
+    renderLB();
+}
+
+/* CLEAR ALL */
+function clearLB(){
+    if(!confirm("Clear entire leaderboard?")) return;
+    lb=[];
+    localStorage.setItem(LKEY,JSON.stringify(lb));
+    renderLB();
 }
 </script>
 
