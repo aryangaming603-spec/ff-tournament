@@ -1,122 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Room Verification - EXIST GAMER</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Verify — EXIST GAMER</title>
 <style>
-  body{margin:0;background:#020d18;color:#dff6ff;font-family:Arial;padding:16px}
-  .card{background:#071826;padding:16px;border-radius:10px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.06)}
-  input{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#041826;color:#eaffff}
-  button{padding:10px 14px;border:none;border-radius:6px;font-weight:700;margin-top:10px;cursor:pointer}
-  .btn-verify{background:#16a34a;color:#02120a;width:100%}
-  .btn-copy{background:#2563eb;color:#fff;width:100%}
-  .msg{margin-top:12px;font-weight:700}
-  .small{font-size:13px;color:#9fbfcc}
+  :root{--bg:#041426;--card:#082034;--muted:#9fbfcc;--accent:#06b6d4;--radius:12px}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,Arial;background:linear-gradient(180deg,var(--bg),#031827);color:#eafcff;padding:18px}
+  .card{background:var(--card);padding:14px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.03);max-width:720px;margin:0 auto}
+  input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(2,12,20,0.6);color:#eaffff;margin-top:8px}
+  .btn{padding:10px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-top:10px}
+  .btn-primary{background:linear-gradient(90deg,var(--accent),#16a34a);color:#02120a}
+  .muted{color:var(--muted)}
+  .info{margin-top:12px;font-weight:700}
 </style>
 </head>
 <body>
+  <div class="card" id="box">
+    <h2 style="margin:0">Room Verification</h2>
+    <div class="muted" style="margin-top:8px">Enter your registered UID to verify. Only registered (and paid if required) users pass.</div>
 
-<h2 style="text-align:center;margin-bottom:20px">Room Verification</h2>
+    <div style="margin-top:12px">
+      <label class="muted">Room ID</label>
+      <div id="roomId" style="font-weight:700"></div>
 
-<div id="verifyRoom" class="card">Loading room details...</div>
+      <label class="muted" style="margin-top:10px">Enter UID</label>
+      <input id="userUid" placeholder="Enter your Free Fire UID">
+      <button class="btn btn-primary" id="verifyBtn">Verify</button>
+
+      <div id="msg" class="info"></div>
+      <div id="playerInfo" style="margin-top:10px;color:var(--muted)"></div>
+    </div>
+  </div>
 
 <script>
-/*
-  Verify by UID version.
-  Uses:
-    - SETTINGS_KEY = "existG_settings_v2" (roomId, roomPass, isFree)
-    - PLAYERS_KEY  = "existG_players_v2" (array of registered players with uid, name, status)
-*/
-const SETTINGS_KEY = "existG_settings_v2";
-const PLAYERS_KEY = "existG_players_v2";
-
+const SKEY="existG_settings_v2", PKEY="existG_players_v2";
 (function(){
-  const box = document.getElementById("verifyRoom");
-  if(!box) return;
-
-  // load settings and players from localStorage
-  let settings = {};
-  try{ settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); }catch(e){ settings = {}; }
-  let players = [];
-  try{ players = JSON.parse(localStorage.getItem(PLAYERS_KEY) || "[]"); }catch(e){ players = []; }
-
-  const rid = settings.roomId || "";
-  const rpassExists = !!(settings.roomPass);
-  const isFree = !!settings.isFree;
-
-  if(!rid){
-    box.innerHTML = '<div style="color:#ffd166">Room details not set by admin.</div>';
-    return;
-  }
-
-  box.innerHTML = `
-    <div style="font-size:18px;font-weight:700;margin-bottom:10px">Room ID: <span style="color:#34d399">${rid}</span></div>
-    <div style="margin-bottom:10px" class="small">Password: <strong style="color:#ffd166">${rpassExists ? "••••••" : "(no password set)"}</strong></div>
-
-    <label class="small">Enter your UID to verify</label>
-    <input id="userUid" placeholder="Enter your Free Fire UID (numbers only)">
-
-    <button id="verifyBtn" class="btn-verify">Verify</button>
-    <button id="copyRoomBtn" class="btn-copy">Copy Room Details</button>
-
-    <div id="verifyMsg" class="msg"></div>
-    <div id="playerInfo" style="margin-top:8px;color:#9fbfcc"></div>
-  `;
-
-  const verifyBtn = document.getElementById('verifyBtn');
-  const copyBtn = document.getElementById('copyRoomBtn');
-  const msg = document.getElementById('verifyMsg');
-  const pinfo = document.getElementById('playerInfo');
-
-  verifyBtn.addEventListener('click', ()=> {
-    const input = (document.getElementById('userUid')||{}).value.trim();
-    msg.textContent = '';
-    pinfo.textContent = '';
-
-    if(!input){
-      msg.style.color = '#ff6b6b'; msg.textContent = 'Enter your UID.';
-      return;
-    }
-
-    // normalize: remove non-digits just in case
-    const norm = input.replace(/\D/g,'');
-
-    // find player by uid (exact match)
-    const found = players.find(p => (''+p.uid).replace(/\D/g,'') === norm);
-
-    if(!found){
-      msg.style.color = '#ff6b6b';
-      msg.textContent = 'Not registered for this tournament.';
-      return;
-    }
-
-    // if tournament is paid and player status not Paid -> reject
-    if(!isFree && (found.status||'').toLowerCase() !== 'paid'){
-      msg.style.color = '#ff6b6b';
-      msg.textContent = 'Payment not verified. Contact admin.';
-      pinfo.textContent = `Registered name: ${found.name || '(no name)'} • UID: ${found.uid} • Status: ${found.status || 'N/A'}`;
-      return;
-    }
-
+  const s = JSON.parse(localStorage.getItem(SKEY) || "{}");
+  const p = JSON.parse(localStorage.getItem(PKEY) || "[]");
+  document.getElementById("roomId").textContent = s.roomId || "Not set by admin";
+  const btn = document.getElementById("verifyBtn");
+  btn.addEventListener("click", ()=>{
+    const uid = (document.getElementById("userUid").value||"").trim().replace(/\D/g,'');
+    const msg = document.getElementById("msg"), pinfo = document.getElementById("playerInfo");
+    msg.textContent=""; pinfo.textContent="";
+    if(!uid){ msg.style.color="#ff6b6b"; msg.textContent="Enter UID."; return; }
+    const found = p.find(x=>(''+x.uid).replace(/\D/g,'') === uid);
+    if(!found){ msg.style.color="#ff6b6b"; msg.textContent="Not registered."; return; }
+    if((s.regOpen===0) && (!found.paid)){ msg.style.color="#ff6b6b"; msg.textContent="Registration closed / Payment pending."; pinfo.textContent=`Name: ${found.name} • UID: ${found.uid}`; return; }
     // success
-    msg.style.color = '#34d399';
-    msg.textContent = 'Verified ✅ You can join the room.';
-    pinfo.textContent = `Name: ${found.name || '(no name)'} • UID: ${found.uid}`;
+    msg.style.color="#34d399"; msg.textContent="Verified ✅ You may join the room.";
+    pinfo.textContent = `Name: ${found.name || '(no name)'} • UID: ${found.uid} • Status: ${found.paid? 'Paid':'Pending'}`;
   });
-
-  copyBtn.addEventListener('click', ()=>{
-    const text = `Room ID: ${rid}${settings.roomPass ? " | Password: " + settings.roomPass : ""}`;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(()=> {
-        const m = document.getElementById('verifyMsg');
-        m.style.color = '#34d399'; m.textContent = 'Copied room details to clipboard.';
-      }).catch(()=> alert(text));
-    } else alert(text);
-  });
-
 })();
 </script>
-
 </body>
 </html>
