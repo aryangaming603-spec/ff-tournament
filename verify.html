@@ -1,189 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Free Fire UID Verify | Aryan Tournament</title>
+<title>Room Verification - EXIST GAMER</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body{
-  background:#020617;
-  color:#e5e7eb;
-  font-family:Arial, sans-serif;
-  text-align:center;
-  padding:30px 12px;
-}
-h1{font-size:22px;margin-bottom:10px;}
-p{font-size:14px;margin:4px 0;}
-
-input{
-  width:90%;
-  max-width:330px;
-  padding:11px;
-  margin-top:15px;
-  background:#0f172a;
-  color:white;
-  border:none;
-  font-size:15px;
-  border-radius:6px;
-}
-button{
-  width:92%;
-  max-width:330px;
-  padding:11px;
-  margin-top:14px;
-  border:none;
-  border-radius:8px;
-  background:#22c55e;
-  color:#022c22;
-  font-weight:bold;
-  font-size:16px;
-}
-
-.box{
-  width:92%;
-  max-width:360px;
-  margin:22px auto 0;
-  padding:16px;
-  border-radius:10px;
-  display:none;
-}
-.ok{background:#064e3b;border:1px solid #10b981;}
-.no{background:#7f1d1d;border:1px solid #ef4444;}
-
-.val{font-size:19px;margin-top:6px;font-weight:bold;}
-.small{font-size:11px;color:#9ca3af;margin-top:6px;}
-
-<script>
-/* verify.html — read tournament settings from localStorage and show Room ID / verify password */
-(function(){
-  const SETTINGS_KEY = "existG_settings_v2"; // must match main page key
-  const container = document.getElementById("verifyRoom");
-  if(!container) return;
-
-  // read settings
-  let s = {};
-  try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); } catch(e) { s = {}; }
-
-  const rid = s.roomId || "";
-  const rpass = s.roomPass || "";
-
-  if(!rid){
-    container.innerHTML = '<div style="color:#ffd166">Room details not set by admin.</div>';
-    return;
-  }
-
-  // UI: show room id (masked pass) and verify input
-  container.innerHTML = `
-    <div style="font-weight:700;margin-bottom:6px">Room ID: <span style="color:#34d399">${rid}</span></div>
-    <div style="margin-bottom:8px">Room Password: <strong style="color:#ffd166">${rpass ? "••••••" : "(no password set)"}</strong></div>
-
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input id="userRoomPass" placeholder="Enter room password to verify" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#041826;color:#eafcff">
-      <button id="verifyBtn" style="padding:8px 10px;border-radius:6px;background:#16a34a;color:#02120a;border:none;font-weight:700">Verify</button>
-      <button id="copyRoomBtn" style="padding:8px 10px;border-radius:6px;background:#2563eb;color:#fff;border:none;font-weight:700">Copy Room</button>
-    </div>
-
-    <div id="verifyMsg" style="margin-top:8px;color:#ffd166;font-weight:600"></div>
-  `;
-
-  // handlers
-  document.getElementById("verifyBtn").addEventListener("click", function(){
-    const input = (document.getElementById("userRoomPass")||{}).value || "";
-    const msg = document.getElementById("verifyMsg");
-    if(!rpass){
-      msg.style.color = "#34d399"; msg.textContent = "No password set — room open.";
-      return;
+    body{
+        margin:0;
+        background:#020d18;
+        color:#dff6ff;
+        font-family:Arial;
+        padding:16px;
     }
-    if(input === rpass){
-      msg.style.color = "#34d399"; msg.textContent = "Verified ✅ You can join the room.";
-    } else {
-      msg.style.color = "#ff6b6b"; msg.textContent = "Wrong password ❌";
+    .card{
+        background:#071826;
+        padding:16px;
+        border-radius:10px;
+        margin-bottom:20px;
+        border:1px solid rgba(255,255,255,0.08);
     }
-  });
-
-  document.getElementById("copyRoomBtn").addEventListener("click", function(){
-    const text = `Room ID: ${rid}${rpass ? " | Password: " + rpass : ""}`;
-    navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(()=> {
-      const msg = document.getElementById("verifyMsg");
-      msg.style.color = "#34d399"; msg.textContent = "Copied room details to clipboard.";
-    }).catch(()=> alert(text)) : alert(text);
-  });
-})();
-</script>  
+    input{
+        width:100%;
+        padding:10px;
+        margin-top:6px;
+        border-radius:6px;
+        border:1px solid rgba(255,255,255,0.1);
+        background:#04131f;
+        color:#eaffff;
+    }
+    button{
+        padding:10px 14px;
+        border:none;
+        border-radius:6px;
+        font-weight:700;
+        margin-top:10px;
+    }
 </style>
 </head>
+
 <body>
 
-<h1>Free Fire UID Verification 🔐</h1>
-<p>Sirf registered UID ko room details milenge.</p>
+<h2 style="text-align:center;margin-bottom:20px">Room Verification</h2>
 
-<input id="uidInput" placeholder="Enter your UID">
-<button onclick="verifyID()">Verify Now</button>
-
-<!-- ALLOW RESULT -->
-<div id="allowBox" class="box ok">
-  <h2>Access Granted ✔</h2>
-  <p id="showName"></p>
-  <p class="val">Room ID: <span id="roomID"></span></p>
-  <p class="val">Password: <span id="roomPASS"></span></p>
-  <p class="small">⚠ Password kisi ke sath share mat karo.</p>
-</div>
-
-<!-- DENY RESULT -->
-<div id="denyBox" class="box no">
-  <h2>Access Denied ❌</h2>
-  <p>Ye UID registered list me nahi hai.</p>
-  <p class="small">Registration + payment zaroori hai.</p>
-</div>
-
-<script>
-// =============== ALLOWED PLAYER LIST ===============
-// Yahi par sirf 3 UID: Inferno, Action Bolt, V1BRANT
-
-const PLAYERS = [
-  ["3889662216", "Inferno"],
-  ["5642116186", "Action Bolt"],
-  ["2807715845", "V1BRANT"]
-];
-
-// =============== ROOM DETAILS ===============
-// Match banate time yahan asli ID/PASS daal dena
-
-const ROOM_ID   = "XXXXX";  // real room id
-const ROOM_PASS = "YYYYY";  // real password
-<div id="verifyRoom" class="card" style="padding:12px;margin:12px 0;background:#071826;border-radius:8px;color:#dff6ff">
+<!-- ROOM INFO CARD -->
+<div id="verifyRoom" class="card">
   Loading room details...
 </div>
 
-// =============== VERIFY FUNCTION ===============
+<script>
+// ================ VERIFY PAGE SCRIPT ======================
+const SETTINGS_KEY = "existG_settings_v2";
 
-function verifyID(){
-  const entered = document.getElementById("uidInput").value.trim();
+(function(){
+  const box = document.getElementById("verifyRoom");
+  if(!box) return;
 
-  // pehle dono hide
-  document.getElementById("allowBox").style.display="none";
-  document.getElementById("denyBox").style.display="none";
+  // Load settings saved by admin
+  let s = {};
+  try{
+    s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+  }catch(e){
+    s = {};
+  }
 
-  if(!entered){
-    alert("UID likho bhai 😅");
+  const rid  = s.roomId   || "";
+  const rpass = s.roomPass || "";
+
+  // If admin didn't set room yet
+  if(!rid){
+    box.innerHTML = `<div style="color:#ffd166">Room details not set by admin.</div>`;
     return;
   }
 
-  // safe match (string + trim)
-  const found = PLAYERS.find(p => String(p[0]).trim() === entered);
+  // Show verification UI
+  box.innerHTML = `
+    <div style="font-size:18px;font-weight:700;margin-bottom:10px">
+        Room ID: <span style="color:#34d399">${rid}</span>
+    </div>
 
-  if(found){
-    document.getElementById("showName").innerText =
-      "Welcome " + (found[1] || "Player");
+    <div style="margin-bottom:14px">
+        Password: <strong style="color:#ffd166">${rpass ? "••••••" : "(no password set)"}</strong>
+    </div>
 
-    document.getElementById("roomID").innerText   = ROOM_ID;
-    document.getElementById("roomPASS").innerText = ROOM_PASS;
-    document.getElementById("allowBox").style.display="block";
-  } else {
-    document.getElementById("denyBox").style.display="block";
-  }
-}
+    <label>Enter Room Password</label>
+    <input id="userRoomPass" placeholder="Enter password">
+
+    <button id="verifyBtn" style="background:#16a34a;color:#020d0c;width:100%;margin-top:14px">
+        Verify
+    </button>
+
+    <button id="copyRoomBtn" style="background:#2563eb;color:white;width:100%;margin-top:8px">
+        Copy Room Details
+    </button>
+
+    <div id="verifyMsg" style="margin-top:12px;font-weight:700;"></div>
+  `;
+
+  // VERIFY BUTTON LOGIC
+  document.getElementById("verifyBtn").addEventListener("click", ()=>{
+    const input = document.getElementById("userRoomPass").value.trim();
+    const msg = document.getElementById("verifyMsg");
+
+    if(!rpass){
+      msg.style.color="#34d399";
+      msg.textContent="No password required — Verified!";
+      return;
+    }
+
+    if(input === rpass){
+      msg.style.color="#34d399";
+      msg.textContent="Verified ✔ You can join the room!";
+    } else {
+      msg.style.color="#ff6b6b";
+      msg.textContent="Wrong Password ❌";
+    }
+  });
+
+  // COPY BUTTON LOGIC
+  document.getElementById("copyRoomBtn").addEventListener("click", ()=>{
+    const text = `Room ID: ${rid}${rpass ? " | Password: " + rpass : ""}`;
+
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(text).then(()=>{
+        const msg = document.getElementById("verifyMsg");
+        msg.style.color="#34d399";
+        msg.textContent="Copied to clipboard!";
+      });
+    } else {
+      alert(text);
+    }
+  });
+
+})();
 </script>
 
 </body>
