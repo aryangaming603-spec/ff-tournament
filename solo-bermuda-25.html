@@ -1,509 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Solo – Bermuda Tournament</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    /* Safe defaults + prevent overflow */
-    * { box-sizing: border-box; }
-    html,body{height:100%;margin:0;padding:0;background:#020617;color:#e5e7eb;font-family:Arial, sans-serif;}
-    header{background:#0f172a;padding:14px 12px;text-align:center;border-bottom:1px solid #111827;}
-    header h1{margin:0;font-size:20px;color:#7dd3fc;}
-    header p{margin:6px 0 0;font-size:12px;color:#9ca3af;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXIST GAMER — Solo Tournament</title>
 
-    .container{max-width:980px;margin:18px auto;padding:12px;}
-
+<style>
+    :root{
+        --bg:#071423; --card:#0b2430; --text:#e6fbff;
+        --muted:#9fbfcc; --accent:#16a34a; --danger:#d64040;
+        --pad:14px; --radius:12px; --glass:rgba(255,255,255,0.05);
+    }
+    body{
+        margin:0;padding:0;background:var(--bg);color:var(--text);
+        font-family:Inter,Arial,Helvetica,sans-serif;
+    }
+    .wrap{max-width:1150px;margin:0 auto;padding:14px;}
+    h2{margin:0 0 12px;}
     .card{
-      background:linear-gradient(180deg, rgba(16,24,40,0.85), rgba(2,6,23,0.9));
-      border:1px solid #111827;
-      padding:14px;
-      border-radius:12px;
-      margin-bottom:14px;
-      box-shadow:0 6px 18px rgba(0,0,0,0.45);
-      overflow:hidden;
+        background:var(--card);
+        padding:var(--pad);margin-top:16px;border-radius:var(--radius);
+        border:1px solid var(--glass);
+        box-shadow:0 4px 16px rgba(0,0,0,0.4);
     }
-
-    h2{margin:0 0 10px;color:#7dd3fc;font-size:17px;}
-    p{margin:4px 0;color:#cbd5e1;font-size:13px;}
-    .badges{margin:6px 0;}
-    .badge{display:inline-block;background:#0b1220;padding:6px 10px;border-radius:999px;font-size:12px;margin-right:8px;color:#94a3b8;}
-
-    label{display:block;margin-top:8px;font-size:13px;color:#9ca3af;}
-    input[type="text"], input[type="number"]{
-      width:100%;
-      padding:9px;
-      margin-top:6px;
-      border-radius:8px;
-      border:1px solid #273449;
-      background:#061026;
-      color:#e5e7eb;
-      font-size:14px;
+    label{font-size:13px;margin-bottom:4px;display:block;color:var(--muted);}
+    input{
+        width:100%;padding:10px;border-radius:8px;
+        border:1px solid rgba(255,255,255,0.1);
+        background:#051823;color:white;font-size:15px;margin-bottom:10px;
     }
-    input::placeholder{color:#6b7280;}
-
-    .btn{display:inline-block;width:100%;text-align:center;padding:11px;margin-top:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;font-size:15px;}
-    .btn-green{background:#16a34a;color:#04200e;}
-    .btn-blue{background:#2563eb;color:#eaf2ff;}
-    .btn-grey{background:#475569;color:#eaf2ff;}
-    .btn-red{background:#dc2626;color:#fff;}
-
-    /* Tables responsive: scroll inside card if needed */
-    .table-wrap{display:block;overflow-x:auto;width:100%;margin-top:8px;}
-    table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px;}
-    th, td{padding:8px;border:1px solid #111827;text-align:left;color:#e5e7eb;background:transparent;}
-    th{background:#071028;color:#9dd3f0;font-weight:700;position:sticky;top:0;}
-
-    .status-btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer;font-weight:700;}
-    .status-paid{background:#16a34a;color:#04200e;}
-    .status-pending{background:#f97316;color:#2b0500;}
-    .status-edit{background:#2563eb;color:#eaf2ff;margin-top:6px;}
-    .status-remove{background:#dc2626;color:#fff;margin-top:6px;}
-
-    .rank1{background:#fde047;color:#111827;font-weight:700;}
-    .rank2{background:#cbd5e1;color:#111827;font-weight:700;}
-    .rank3{background:#fca5a5;color:#111827;font-weight:700;}
-
-    @media (max-width:520px){
-      header h1{font-size:18px;}
-      .card{padding:12px;}
-      th,td{padding:8px 6px;font-size:12px;}
-      .btn{font-size:14px;padding:10px;}
-      input{padding:8px;font-size:14px;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px;}
+    th,td{
+        padding:10px;border-bottom:1px solid rgba(255,255,255,0.08);
+        text-align:center;
     }
-  </style>
+    .btn{
+        padding:11px 14px;border:none;font-weight:700;
+        border-radius:8px;cursor:pointer;
+    }
+    .btn-primary{background:var(--accent);color:#02210b;}
+    .btn-danger{background:var(--danger);color:white;}
+    .btn-ghost{
+        background:transparent;color:#aee0ff;
+        border:1px solid rgba(255,255,255,0.08);
+    }
+    .admin-only{display:none;}
+</style>
 </head>
+
 <body>
-  <header>
-    <h1>Solo – Bermuda (₹25 Entry)</h1>
-    <p>Entry ₹25 • Winners: 1→₹150, 2→₹100, 3→₹50 • Kill: ₹6 • Admin: ?admin=1</p>
-  </header>
+<div class="wrap">
 
-  <div class="container">
+<!-- Tournament Header -->
+<div class="card">
+    <h2 id="titleHeader">EXIST GAMER — Solo Tournament</h2>
 
-    <!-- INFO -->
-    <div class="card">
-      <h2>Tournament Info</h2>
-      <div class="badges">
-        <span class="badge">Mode: Solo</span>
-        <span class="badge">Map: Bermuda</span>
-        <span class="badge" id="slotBadge">Slots: 48</span>
-      </div>
-      <p><strong>Entry Fee:</strong> ₹25 &nbsp;&nbsp; <strong>Winner Prize:</strong> ₹150 (top) &nbsp;&nbsp; <strong>Kill:</strong> ₹6</p>
-      <p><strong>UPI:</strong> <span style="color:#34d399;font-weight:800">aryangaming603-2@okicici</span></p>
-      <p id="slotsInfoText" style="color:#9ca3af;font-size:13px">Filled: 0 / 48 | Left: 48</p>
-    </div>
-
-    <div id="upiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-  <div style="width:94%;max-width:440px;background:#071026;padding:16px;border-radius:12px;color:#e6eef6;">
-    <h3 style="margin:0 0 8px;">Payment options</h3>
-
-    <p style="margin:0 0 10px;color:#9ca3af;font-size:13px">Scan the QR or copy UPI details & code.</p>
-
-    <div style="text-align:center;margin-bottom:10px;">
-      <img src="upi-qr.png" alt="UPI QR" style="max-width:200px;border-radius:8px;border:1px solid #123;">
-      <div style="margin-top:8px;font-size:13px;color:#cbd5e1;">Scan to pay</div>
-    </div>
-
-    <div style="background:#061026;padding:10px;border-radius:8px;margin-bottom:10px;">
-      <div style="font-size:13px;color:#9ca3af;">UPI ID</div>
-      <div id="upiIdDisplay" style="font-weight:700;margin-top:6px;">9170856377-3@ybl</div>
-
-      <div style="margin-top:8px;font-size:13px;color:#9ca3af;">Payment Code</div>
-      <div id="upiCodeDisplay" style="font-weight:700;margin-top:6px;">XXXXX</div>
-
-      <button onclick="copyUPIInfo()" style="margin-top:10px;padding:10px;border-radius:8px;border:none;background:#22c55e;color:#04200e;font-weight:700;width:100%;">Copy UPI & Code</button>
-    </div>
-
-    <div style="display:flex;gap:8px;">
-      <button onclick="openUpiApp()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#2563eb;color:#eaf2ff;font-weight:700;">Open UPI app</button>
-      <button onclick="closeUpiModal()" style="padding:10px;border-radius:8px;border:none;background:#64748b;color:#fff;">Close</button>
-    </div>
-  </div>
-    </div>
-     
-    <!-- REGISTER -->
-    <div class="card">
-      <h2>Register & Pay</h2>
-      <label>Free Fire Name</label>
-      <input id="ffName" type="text" placeholder="Your Free Fire name">
-      <label>Free Fire UID</label>
-      <input id="ffUid" type="text" placeholder="Example: 1234567890">
-      <label>WhatsApp Number</label>
-      <input id="ffWa" type="text" placeholder="10-digit number">
-      <button class="btn btn-green" onclick="payAndRegister()">Pay ₹25 & Register</button>
-      <p style="color:#9ca3af;font-size:13px;margin-top:10px;">After clicking, a payment code will be generated and UPI will open. Put that code in the payment note.</p>
-    </div>
-
-    <!-- UPI Payment Modal -->
-<div id="upiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-  <div style="width:92%;max-width:420px;background:#071026;padding:14px;border-radius:12px;color:#e6eef6;">
-    <h3 style="margin:0 0 6px;">Payment Options</h3>
-    <p style="margin:0 0 8px;color:#9ca3af;font-size:13px">Scan QR or copy UPI ID & payment code.</p>
-
-    <div style="text-align:center;margin-bottom:8px;">
-      <img src="upi-qr.png" alt="UPI QR" style="max-width:180px;border-radius:8px;border:1px solid #123;">
-      <div style="margin-top:8px;font-size:13px;color:#cbd5e1;">Scan to pay</div>
-    </div>
-
-    <div style="background:#061026;padding:8px;border-radius:8px;margin-bottom:8px;">
-      <div style="font-size:13px;color:#9ca3af;">UPI ID</div>
-      <div id="upiIdDisplay" style="font-weight:700;margin-top:4px;">aryangaming603-2@okicici</div>
-
-      <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Payment Code</div>
-      <div id="upiCodeDisplay" style="font-weight:700;margin-top:4px;">XXXXXX</div>
-
-      <button onclick="copyUPIInfo()" style="margin-top:8px;padding:8px;border-radius:8px;border:none;background:#22c55e;color:#04200e;font-weight:700;width:100%;">Copy Details</button>
-    </div>
-
-    <div style="display:flex;gap:8px;">
-      <button onclick="closeUpiModal()" style="padding:9px;border-radius:8px;border:none;background:#64748b;color:#fff;">Close</button>
-    </div>
-  </div>
+    <p id="infoText" style="color:var(--muted);font-size:14px;"></p>
+    <p class="small">UPI: <span id="infoUpi"></span></p>
+    <p class="small">Room: <span id="infoRoom" style="font-weight:700;color:#ffd166">Not set</span></p>
+    <p class="small" id="slotsInfo"></p>
+    <p class="small" id="regNotice"></p>
 </div>
-    
-    <!-- REGISTERED PLAYERS -->
-    <div class="card">
-      <h2>Registered Players</h2>
-      <p style="color:#9ca3af;font-size:13px;margin:6px 0;">Normal users: UID / WhatsApp / Pay Code are hidden. Organiser can manage via <code>?admin=1</code>.</p>
 
-      <div class="table-wrap" aria-live="polite">
-        <table>
-          <thead>
+<!-- Register -->
+<div class="card">
+    <h2>Register & Pay</h2>
+    <label>Free Fire Name</label>
+    <input id="rName" placeholder="Your in-game name">
+
+    <label>UID</label>
+    <input id="rUid" placeholder="1234567890">
+
+    <label>WhatsApp</label>
+    <input id="rWp" placeholder="10-digit number">
+
+    <button class="btn btn-primary" onclick="regNow()">Pay & Register</button>
+
+    <div id="qrBlock" style="text-align:center;margin-top:14px;display:none;">
+        <img src="aryan-upi-qr.png" width="200" style="border-radius:12px;border:1px solid #0f2233;">
+        <p style="margin-top:10px;color:#aee0ff;font-size:14px;">Scan & Pay</p>
+
+        <button class="btn btn-primary" onclick="openUPI()">Open UPI App</button>
+    </div>
+</div>
+
+<!-- Registered Players -->
+<div class="card">
+    <h2>Registered Players</h2>
+
+    <table>
+        <thead>
             <tr>
-              <th style="width:48px">#</th>
-              <th style="min-width:140px">Name</th>
-              <th style="min-width:120px">UID</th>
-              <th style="min-width:130px">WhatsApp</th>
-              <th style="min-width:110px">Pay Code</th>
-              <th style="min-width:160px">Status / Actions</th>
+                <th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Status</th>
             </tr>
-          </thead>
-          <tbody id="playerList"></tbody>
-        </table>
-      </div>
-      <!-- clean caption under the table -->
-      <p style="color:#9ca3af;font-size:12px;margin-top:8px;">Note: Registered list updates in your browser storage. Use admin view to manage players.</p>
-    </div>
+        </thead>
+        <tbody id="playersTable"></tbody>
+    </table>
+</div>
 
-    <!-- LEADERBOARD -->
-    <div class="card">
-      <h2>Solo Match Leaderboard</h2>
-      <p id="lb_info" style="color:#9ca3af;font-size:13px;margin:6px 0;">Loading leaderboard...</p>
 
-      <div id="lb-admin" style="display:none;margin-bottom:10px;">
-        <label>Player Name</label>
-        <input id="lb_name" type="text" placeholder="Player name">
-        <label>Kills</label>
-        <input id="lb_kill" type="number" placeholder="Kills">
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn btn-blue" style="flex:1" onclick="lbAdd()">Add Result</button>
-          <button class="btn btn-grey" style="flex:1" onclick="lbClear()">Reset</button>
-        </div>
-      </div>
+<!-- Admin Settings -->
+<div class="card admin-only" id="adminSettingsCard">
+    <h2>Admin Settings</h2>
 
-      <div class="table-wrap" style="margin-top:10px;">
-        <table>
-          <thead>
-            <tr><th style="width:64px">Rank</th><th>Name</th><th style="width:90px">Kills</th><th style="width:140px">Reward</th></tr>
-          </thead>
-          <tbody id="lb_table"></tbody>
-        </table>
-      </div>
-      <p style="color:#9ca3af;font-size:12px;margin-top:8px;">Prizes: 1st ₹150, 2nd ₹100, 3rd ₹50 — plus ₹6 per kill for everyone.</p>
-    </div>
+    <label>Tournament Name</label>
+    <input id="setName">
 
-  </div>
+    <label>Map</label>
+    <input id="setMap">
 
-  <script>
-    /* CONFIG & STATE */
-    const CONFIG = { TOTAL_SLOTS: 48, ENTRY_FEE: 25, UPI_ID: "aryangaming603-2@okicici" };
-    const IS_ADMIN = window.location.search.includes("admin=1");
+    <label>Entry Fee (₹)</label>
+    <input id="setFee">
 
-    // load from localStorage or empty arrays
-    let players = JSON.parse(localStorage.getItem("ffSoloPlayers") || "[]");
-    let leaderboard = JSON.parse(localStorage.getItem("soloLB") || "[]");
+    <label>Total Slots</label>
+    <input id="setSlots">
 
-    const WIN1 = 150, WIN2 = 100, WIN3 = 50, PER_KILL = 6;
+    <label>Winner 1 (₹)</label>
+    <input id="setP1">
 
-    /* UTIL */
-    function savePlayers(){ localStorage.setItem("ffSoloPlayers", JSON.stringify(players)); }
-    function saveLB(){ localStorage.setItem("soloLB", JSON.stringify(leaderboard)); }
-    function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
-    function maskUID(u){ return IS_ADMIN ? escapeHtml(u) : "XXXXXXX"; }
-    function maskWA(w){ return IS_ADMIN ? escapeHtml(w) : "XXXXXXXXXX"; }
-    function maskCode(c){ return IS_ADMIN ? escapeHtml(c) : "XXXXXX"; }
+    <label>Winner 2 (₹)</label>
+    <input id="setP2">
 
-    function updateSlotsInfo(){
-      const filled = players.length;
-      const left = Math.max(CONFIG.TOTAL_SLOTS - filled, 0);
-      const s = document.getElementById("slotsInfoText");
-      const b = document.getElementById("slotBadge");
-      if(s) s.textContent = `Filled: ${filled} / ${CONFIG.TOTAL_SLOTS} | Left: ${left}`;
-      if(b) b.textContent = `Slots: ${CONFIG.TOTAL_SLOTS}`;
+    <label>Winner 3 (₹)</label>
+    <input id="setP3">
+
+    <label>Per Kill (₹)</label>
+    <input id="setKill">
+
+    <label>UPI ID</label>
+    <input id="setUpi">
+
+    <label>Registration</label>
+    <select id="setReg">
+        <option value="1">Open</option>
+        <option value="0">Closed</option>
+    </select>
+
+    <label>Room ID</label>
+    <input id="setRoomId">
+
+    <label>Room Password</label>
+    <input id="setRoomPass">
+
+    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    <button class="btn btn-danger" onclick="clearAll()">Clear Players</button>
+</div>
+
+</div>
+
+
+<script>
+const SKEY = "existG_settings_v2";
+const PKEY = "existG_players_v2";
+
+/* DEFAULTS */
+let settings = {
+    name:"EXIST GAMER",
+    map:"Bermuda",
+    fee:25,
+    slots:48,
+    p1:150, p2:100, p3:50,
+    perKill:6,
+    upi:"9170856377-3@ybl",
+    regOpen:1,
+    roomId:"",
+    roomPass:""
+};
+
+let players = [];
+
+/* LOAD */
+(function(){
+    const s = JSON.parse(localStorage.getItem(SKEY)||"null");
+    const p = JSON.parse(localStorage.getItem(PKEY)||"null");
+    if(s) settings={...settings,...s};
+    if(p) players=p;
+
+    applyUI();
+
+    const isAdmin = location.search.includes("admin=1");
+    if(isAdmin){
+        document.getElementById("adminSettingsCard").style.display="block";
+        loadAdminForm();
     }
+})();
 
-    /* REGISTER & PAYMENT */
-    function createCode(){ return "FF" + Math.floor(100000 + Math.random()*900000); }
-    // after code = "FFxxxxx"
-showUpiModal(code);
-    function payAndRegister(){
-      const name = document.getElementById("ffName").value.trim();
-      const uid  = document.getElementById("ffUid").value.trim();
-      const wa   = document.getElementById("ffWa").value.trim();
+/* APPLY UI */
+function applyUI(){
+    document.getElementById("titleHeader").textContent=settings.name + " — Solo Tournament";
+    document.getElementById("infoText").textContent=
+      `Mode: Solo • Map: ${settings.map} • Entry: ₹${settings.fee} • Kill: ₹${settings.perKill} • Prizes: ${settings.p1}/${settings.p2}/${settings.p3}`;
+    document.getElementById("infoUpi").textContent=settings.upi;
+    document.getElementById("slotsInfo").textContent=`Slots: ${settings.slots} • Filled: ${players.length}`;
+    document.getElementById("regNotice").textContent=settings.regOpen?"Registration OPEN":"Registration CLOSED";
 
-      if(!name || !uid || !wa){
-        alert("Please fill name, UID & WhatsApp.");
-        return;
-      }
-      if(players.length >= CONFIG.TOTAL_SLOTS){
-        alert("Slots full.");
-        return;
-      }
-
-      const code = createCode();
-      showUpiModal(code);
-      players.push({ name, uid, wa, code, status: "Pending" });
-      savePlayers();
-      renderPlayers();
-      updateSlotsInfo();
-
-      document.getElementById("ffName").value = "";
-      document.getElementById("ffUid").value = "";
-      document.getElementById("ffWa").value = "";
-
-      alert("Payment code created: " + code + "\nUPI will open now. Put this code in UPI remark.");
-      const upiURL = "upi://pay?pa=" + encodeURIComponent(CONFIG.UPI_ID)
-                   + "&pn=" + encodeURIComponent("Aryan Gaming")
-                   + "&am=" + encodeURIComponent(CONFIG.ENTRY_FEE)
-                   + "&cu=INR&tn=" + encodeURIComponent(code);
+    let rtxt="Not set";
+    if(settings.roomId){
+        rtxt = `${settings.roomId} (${settings.roomPass||"-----"})`;
     }
+    document.getElementById("infoRoom").textContent=rtxt;
 
-    /* PLAYERS TABLE & ADMIN ACTIONS */
-    function renderPlayers(){
-      const tbody = document.getElementById("playerList");
-      tbody.innerHTML = "";
-      players.forEach((p, i) => {
-        const statusHtml = IS_ADMIN
-          ? `<button class="status-btn ${p.status === 'Paid' ? 'status-paid' : 'status-pending'}" onclick="toggleStatus(${i})">${p.status}</button>`
-          : `<span style="font-weight:700;color:${p.status==='Paid'?'#34d399':'#f97316'}">${escapeHtml(p.status)}</span>`;
+    renderPlayers();
+}
 
-        const adminActions = IS_ADMIN
-          ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-               <button class="status-btn status-edit" onclick="editPlayer(${i})">Edit</button>
-               <button class="status-btn status-remove" onclick="removePlayer(${i})">Remove</button>
-             </div>`
-          : "";
+/* REGISTER */
+function regNow(){
+    if(!settings.regOpen) return alert("Registration closed!");
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="text-align:center">${i+1}</td>
-          <td>${escapeHtml(p.name)}</td>
-          <td>${maskUID(p.uid)}</td>
-          <td>${maskWA(p.wa)}</td>
-          <td>${maskCode(p.code)}</td>
-          <td>${statusHtml}${adminActions}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+    const n=document.getElementById("rName").value.trim();
+    const u=document.getElementById("rUid").value.trim();
+    const w=document.getElementById("rWp").value.trim();
 
-    function toggleStatus(index){
-      if(!IS_ADMIN){ alert("Only admin can change status."); return; }
-      players[index].status = players[index].status === "Paid" ? "Pending" : "Paid";
-      savePlayers();
-      renderPlayers();
-    }
+    if(!n||!u||!w) return alert("Fill all fields!");
 
-    function removePlayer(index){
-      if(!IS_ADMIN){ alert("Only admin can remove."); return; }
-      const p = players[index];
-      if(!p) return;
-      if(!confirm(`Delete player ${p.name}?`)) return;
-      players.splice(index,1);
-      savePlayers();
-      renderPlayers();
-      updateSlotsInfo();
-    }
+    const code = Math.random().toString(36).substring(2,7).toUpperCase();
 
-    function editPlayer(index){
-      if(!IS_ADMIN){ alert("Only admin can edit."); return; }
-      const p = players[index];
-      if(!p) return;
-      const newName = prompt("Edit name:", p.name);
-      if(newName === null) return;
-      const newUid = prompt("Edit UID:", p.uid);
-      if(newUid === null) return;
-      const newWa = prompt("Edit WhatsApp:", p.wa);
-      if(newWa === null) return;
+    players.push({name:n,uid:u,wp:w,code,paid:0});
+    localStorage.setItem(PKEY,JSON.stringify(players));
 
-      players[index].name = (newName.trim() || p.name);
-      players[index].uid = (newUid.trim() || p.uid);
-      players[index].wa = (newWa.trim() || p.wa);
-      savePlayers();
-      renderPlayers();
-    }
+    applyUI();
 
-    /* LEADERBOARD: top3 prizes + per-kill */
-    function lbRender(){
-      const tbody = document.getElementById("lb_table");
-      leaderboard = Array.isArray(leaderboard) ? leaderboard : [];
-      const sorted = [...leaderboard].sort((a,b)=>Number(b.kills) - Number(a.kills));
+    document.getElementById("qrBlock").style.display="block";
+    alert("Registered! Now Pay using QR below.");
+}
 
-      let html = "";
-      sorted.forEach((p, i) => {
-        let base = 0;
-        if(i === 0) base = WIN1;
-        else if(i === 1) base = WIN2;
-        else if(i === 2) base = WIN3;
+/* UPI LINK */
+function openUPI(){
+    const amt = settings.fee;
+    const upi = settings.upi;
+    const txt = "Tournament Fee";
+    const link =
+      `upi://pay?pa=${encodeURIComponent(upi)}&pn=EXIST%20GAMER&am=${amt}&cu=INR&tn=${encodeURIComponent(txt)}`;
+    location.href=link;
+}
 
-        const kills = Number(p.kills) || 0;
-        const reward = base + (kills * PER_KILL);
-
-        const rowClass = i===0 ? "rank1" : i===1 ? "rank2" : i===2 ? "rank3" : "";
-
-        const actions = IS_ADMIN
-          ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-               <button class="status-btn status-edit" onclick="lbEdit(${i})">Edit</button>
-               <button class="status-btn status-remove" onclick="lbRemove(${i})">Remove</button>
-             </div>`
-          : "";
-
-        html += `<tr class="${rowClass}">
-                   <td style="text-align:center">${i+1}</td>
-                   <td>${escapeHtml(p.name)}${actions}</td>
-                   <td style="text-align:center">${kills}</td>
-                   <td style="text-align:center">₹${reward}</td>
-                 </tr>`;
-      });
-
-      tbody.innerHTML = html;
-    }
-
-    function lbAdd(){
-      if(!IS_ADMIN){ alert("Only admin can add results."); return; }
-      const n = document.getElementById("lb_name").value.trim();
-      const k = parseInt(document.getElementById("lb_kill").value);
-      if(!n || isNaN(k)){ alert("Provide name and kills."); return; }
-      leaderboard.push({ name: n, kills: k });
-      saveLB();
-      document.getElementById("lb_name").value = "";
-      document.getElementById("lb_kill").value = "";
-      lbRender();
-    }
-
-    function lbClear(){
-      if(!IS_ADMIN){ alert("Only admin can reset."); return; }
-      if(!confirm("Clear full leaderboard?")) return;
-      leaderboard = [];
-      saveLB();
-      lbRender();
-    }
-
-    function lbEdit(index){
-      if(!IS_ADMIN) return;
-      const p = leaderboard[index];
-      if(!p) return;
-      const newName = prompt("Edit name:", p.name);
-      if(newName === null) return;
-      const newKills = prompt("Edit kills:", p.kills);
-      if(newKills === null) return;
-      const knum = parseInt(newKills);
-      leaderboard[index].name = newName.trim() || p.name;
-      leaderboard[index].kills = isNaN(knum) ? p.kills : knum;
-      saveLB();
-      lbRender();
-    }
-
-    function lbRemove(index){
-      if(!IS_ADMIN) return;
-      const p = leaderboard[index];
-      if(!p) return;
-      if(!confirm(`Remove ${p.name} from leaderboard?`)) return;
-      leaderboard.splice(index, 1);
-      saveLB();
-      lbRender();
-    }
-
-    /* INIT */
-    document.addEventListener("DOMContentLoaded", function(){
-      // Setup admin UI text
-      if(IS_ADMIN){
-        const adminBox = document.getElementById("lb-admin");
-        if(adminBox) adminBox.style.display = "block";
-        const info = document.getElementById("lb_info");
-        if(info) info.textContent = "ADMIN MODE ON — Add / Edit / Remove results and players.";
-      } else {
-        const info = document.getElementById("lb_info");
-        if(info) info.textContent = "Public view — results visible; admin updates only via ?admin=1";
-      }
-
-      renderPlayers();
-      lbRender();
-      updateSlotsInfo();
+/* PLAYERS */
+function renderPlayers(){
+    let html="";
+    players.forEach((p,i)=>{
+        html+=`
+        <tr>
+          <td>${i+1}</td>
+          <td>${p.name}</td>
+          <td>${hide(p.uid)}</td>
+          <td>${hide(p.wp)}</td>
+          <td>${p.code}</td>
+          <td>${p.paid?"Paid":"Pending"}</td>
+        </tr>`;
     });
+    document.getElementById("playersTable").innerHTML=html;
+}
+function hide(s){return "X".repeat(s.length);}
 
-    // expose minimal functions for inline onclicks
-    window.payAndRegister = payAndRegister;
-    window.renderPlayers = renderPlayers;
-    window.toggleStatus = toggleStatus;
-    window.removePlayer = removePlayer;
-    window.editPlayer = editPlayer;
-    window.lbAdd = lbAdd;
-    window.lbClear = lbClear;
-    window.lbEdit = lbEdit;
-    window.lbRemove = lbRemove;
-
-  function showUpiModal(code){
-  document.getElementById("upiCodeDisplay").textContent = code;
-  document.getElementById("upiModal").style.display = "flex";
+/* ADMIN */
+function loadAdminForm(){
+    const ids=["setName","setMap","setFee","setSlots","setP1","setP2","setP3","setKill","setUpi","setReg","setRoomId","setRoomPass"];
+    ids.forEach(id=>{
+        document.getElementById(id).value = settings[id.replace("set","").toLowerCase()] || "";
+    });
 }
 
-function closeUpiModal(){
-  document.getElementById("upiModal").style.display = "none";
+function saveSettings(){
+    settings.name=document.getElementById("setName").value;
+    settings.map=document.getElementById("setMap").value;
+    settings.fee=Number(document.getElementById("setFee").value);
+    settings.slots=Number(document.getElementById("setSlots").value);
+    settings.p1=Number(document.getElementById("setP1").value);
+    settings.p2=Number(document.getElementById("setP2").value);
+    settings.p3=Number(document.getElementById("setP3").value);
+    settings.perKill=Number(document.getElementById("setKill").value);
+    settings.upi=document.getElementById("setUpi").value;
+    settings.regOpen=Number(document.getElementById("setReg").value);
+    settings.roomId=document.getElementById("setRoomId").value;
+    settings.roomPass=document.getElementById("setRoomPass").value;
+
+    localStorage.setItem(SKEY,JSON.stringify(settings));
+    alert("Saved!");
+    applyUI();
 }
 
-function copyUPIInfo(){
-  const upi = "aryangaming603-2@okicici";
-  const code = document.getElementById("upiCodeDisplay").textContent;
-  navigator.clipboard.writeText(upi + " | Code: " + code).then(()=>{
-      alert("Copied! Now open any UPI App and pay.");
-  });
+function clearAll(){
+    if(!confirm("Clear ALL players?")) return;
+    players=[];
+    localStorage.removeItem(PKEY);
+    applyUI();
 }
+</script>
 
-    let __LAST_UPI_URL = "";
-let __LAST_PAY_CODE = "";
-
-function showUpiModal(code){
-  __LAST_PAY_CODE = code;
-  const upiId = settings.upi || "aryangaming603-2@okicici";
-
-  document.getElementById('upiCodeDisplay').textContent = code;
-  document.getElementById('upiIdDisplay').textContent = upiId;
-
-  __LAST_UPI_URL =
-    "upi://pay?pa=" + encodeURIComponent(upiId) +
-    "&pn=" + encodeURIComponent(settings.name || "Tournament") +
-    "&am=" + encodeURIComponent(settings.fee || 25) +
-    "&cu=INR&tn=" + encodeURIComponent(code);
-
-  document.getElementById('upiModal').style.display = "flex";
-}
-
-function closeUpiModal(){
-  document.getElementById("upiModal").style.display = "none";
-}
-
-function openUpiApp(){
-  if(__LAST_UPI_URL){
-    window.location.href = __LAST_UPI_URL;
-  }
-}
-
-function copyUPIInfo(){
-  const text = document.getElementById("upiIdDisplay").textContent + " | Code: " + __LAST_PAY_CODE;
-  navigator.clipboard.writeText(text).then(()=> alert("Copied! Open UPI App & Paste"));
-}
-  </script>
 </body>
 </html>
