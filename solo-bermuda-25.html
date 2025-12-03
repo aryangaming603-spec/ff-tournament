@@ -307,45 +307,54 @@
     /* ================== Leaderboard system ================== */
     const WIN1 = 150, WIN2 = 100, WIN3 = 50, PER_KILL = 6;
 
-  function lbRender(){
+    function lbRender(){
   const tbody = document.getElementById("lb_table");
-  // safety: ensure leaderboard is an array
+
+  // Make sure leaderboard is an array
   leaderboard = Array.isArray(leaderboard) ? leaderboard : [];
-  // sort by kills desc (numeric)
-  const sorted = [...leaderboard].sort((a,b) => Number(b.kills) - Number(a.kills));
+
+  // Sort by kills (descending)
+  const sorted = [...leaderboard].sort((a,b)=>Number(b.kills) - Number(a.kills));
 
   let html = "";
+
   sorted.forEach((p, i) => {
-    // prize for top 3
+    // Base prize for top 3
     let base = 0;
-    if (i === 0) base = 150;   // 1st
-    else if (i === 1) base = 100; // 2nd
-    else if (i === 2) base = 50;  // 3rd
+    if(i === 0) base = 150;   // 1st
+    else if(i === 1) base = 100; // 2nd
+    else if(i === 2) base = 50;  // 3rd
 
-    // ensure kills is number
-    const killsNum = Number(p.kills) || 0;
-    const reward = base + (killsNum * PER_KILL);
+    // Kill reward
+    const kills = Number(p.kills) || 0;
+    const reward = base + (kills * PER_KILL);
 
-    // row highlight for top3
-    const rowClass = i===0 ? "rank1" : i===1 ? "rank2" : i===2 ? "rank3" : "";
+    // Highlight rows
+    const rowClass =
+      i === 0 ? "rank1"
+    : i === 1 ? "rank2"
+    : i === 2 ? "rank3"
+    : "";
 
-    // admin actions (edit/remove) appended under name if admin
+    // Admin only: edit + delete buttons
     const actions = IS_ADMIN
-      ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-           <button class="status-btn status-edit" onclick="lbEdit(${i})">Edit</button>
-           <button class="status-btn status-remove" onclick="lbRemove(${i})">Remove</button>
-         </div>`
+      ? `<br>
+         <button class="status-btn status-edit" onclick="lbEdit(${i})">Edit</button>
+         <button class="status-btn status-remove" onclick="lbRemove(${i})">Remove</button>`
       : "";
 
     html += `
       <tr class="${rowClass}">
         <td style="text-align:center">${i+1}</td>
-        <td>${escapeHtml(p.name)}${actions}</td>
-        <td style="text-align:center">${killsNum}</td>
+        <td>${escapeHtml(p.name)} ${actions}</td>
+        <td style="text-align:center">${kills}</td>
         <td style="text-align:center">₹${reward}</td>
       </tr>
     `;
   });
+
+  tbody.innerHTML = html;
+    }
 
   tbody.innerHTML = html;
   }
