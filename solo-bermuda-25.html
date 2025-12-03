@@ -1,146 +1,397 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<title>Room Verification - EXIST GAMER</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EXIST GAMER — Solo Tournament</title>
 <style>
-  body{margin:0;background:#020d18;color:#dff6ff;font-family:Arial;padding:16px}
-  .card{background:#071826;padding:16px;border-radius:10px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.06)}
-  input{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#041826;color:#eaffff}
-  button{padding:10px 14px;border:none;border-radius:6px;font-weight:700;margin-top:10px;cursor:pointer}
-  .btn-verify{background:#16a34a;color:#02120a;width:100%}
-  .btn-copy{background:#2563eb;color:#fff;width:100%}
-  .msg{margin-top:12px;font-weight:700}
-  .small{font-size:13px;color:#9fbfcc}
-  .k{color:#ffd166}
-  .good{color:#34d399}
-  .bad{color:#ff6b6b}
+/* Base reset & typography */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:auto;width:100%;background:#051527;color:#d9eef8;font-family:Inter,Arial,Helvetica,sans-serif;overflow-x:hidden}
+header{background:linear-gradient(180deg,#062430,#041621);padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+header h1{margin:0;font-size:20px;color:#9be7ff}
+header p{margin:6px 0 0;color:#9fbfcc;font-size:13px}
+
+/* Layout */
+.wrap{max-width:1100px;margin:14px auto;padding:12px}
+.row{display:flex;gap:14px;align-items:flex-start}
+.col{flex:1;min-width:300px}
+.card{background:linear-gradient(180deg,rgba(6,18,30,0.6),rgba(3,8,15,0.7));padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 8px 24px rgba(0,0,0,0.45)}
+h2{margin:0 0 8px;color:#8fe0ff}
+.small{font-size:13px;color:#9fbfcc}
+label{display:block;margin-top:8px;color:#9fbfcc;font-size:13px}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#041826;color:#e6f8ff;margin-top:6px;font-size:14px}
+.btn{display:inline-block;padding:10px 14px;border-radius:9px;border:none;cursor:pointer;font-weight:700}
+.btn-primary{background:#16a34a;color:#04200e}
+.btn-accent{background:#2563eb;color:#fff}
+.btn-grey{background:#475569;color:#fff}
+.btn-danger{background:#dc2626;color:#fff}
+
+/* Table */
+.table-wrap{overflow-x:auto;margin-top:10px;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{padding:8px;border:1px solid rgba(255,255,255,0.02);text-align:left;font-size:13px}
+th{background:rgba(6,18,30,0.5);color:#bfefff;font-weight:700;position:sticky;top:0}
+.status-paid{background:#16a34a;color:#04200e;padding:6px;border-radius:6px;font-weight:700}
+.status-pending{background:#f97316;color:#2b0500;padding:6px;border-radius:6px;font-weight:700}
+.rank1{background:#fde047;color:#111;font-weight:700}
+.rank2{background:#cbd5e1;color:#111;font-weight:700}
+.rank3{background:#fca5a5;color:#111;font-weight:700}
+
+/* Modal */
+#upiModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:18px}
+#upiModal > .box{width:100%;max-width:460px;background:#071826;padding:16px;border-radius:12px}
+#upiModal img{max-width:200px;display:block;margin:8px auto;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+
+/* Responsive / mobile friendly */
+@media (max-width:900px){
+  .row{flex-direction:column}
+  .col{min-width:100%!important;width:100%}
+  table{min-width:520px}
+  th{position:static}
+  #adminSettingsCard{display:none} /* hide admin for normal mobile users */
+}
+
+/* Very small screens */
+@media (max-width:420px){
+  header h1{font-size:18px}
+  .card{padding:10px}
+  input,select{padding:8px}
+  .btn{padding:9px 10px}
+}
+
+/* safety: ensure no site-level horizontal overflow */
+html,body{max-width:100%;overflow-x:hidden}
+
+  <p style="color:#ff4d4d;font-weight:800;font-size:16px;margin-top:6px;">
+  🚫 EMULATOR PLAYERS NOT ALLOWED (MOBILE ONLY)
+</p>
 </style>
 </head>
 <body>
+<header>
+  <h1 id="titleHeader">EXIST GAMER — Solo Tournament</h1>
+  <p id="subtitle">Organized by EXIST GAMER • Admin: add <code>?admin=1</code></p>
+</header>
 
-<h2 style="text-align:center;margin-bottom:20px">Room Verification</h2>
-
-<div id="verifyRoom" class="card">Loading room details...</div>
-
-<script>
-/*
-  Verify by UID version (updated):
-  - shows room password unmasked
-  - shows player name, uid, status
-  - shows prize settings (p1,p2,p3, perKill)
-*/
-const SETTINGS_KEY = "existG_settings_v2";
-const PLAYERS_KEY = "existG_players_v2";
-
-(function(){
-  const box = document.getElementById("verifyRoom");
-  if(!box) return;
-
-  // load settings and players from localStorage
-  let settings = {};
-  try{ settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); }catch(e){ settings = {}; }
-  let players = [];
-  try{ players = JSON.parse(localStorage.getItem(PLAYERS_KEY) || "[]"); }catch(e){ players = []; }
-
-  const rid = settings.roomId || "";
-  const rpass = settings.roomPass || "";
-  const isFree = !!settings.isFree;
-
-  if(!rid){
-    box.innerHTML = '<div style="color:#ffd166">Room details not set by admin.</div>';
-    return;
-  }
-
-  // show UI: room, prizes, input for UID
-  box.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div>
-        <div style="font-size:18px;font-weight:700">Room ID: <span style="color:#34d399">${rid}</span></div>
-        <div class="small" style="margin-top:6px">Password: <strong style="color:#ffd166">${rpass || "(no password set)"}</strong></div>
+<div class="wrap">
+  <div class="row">
+    <div class="col">
+      <!-- Info card -->
+      <div class="card" id="infoCard">
+        <h2>Tournament Info</h2>
+        <p id="infoText" class="small">Loading…</p>
+        <p class="small">UPI: <span id="infoUpi" style="color:#34d399;font-weight:700">9170856377-3@ybl</span></p>
+        <p class="small" id="slotsInfo">Slots: 48 • Filled: 0</p>
       </div>
-      <div style="text-align:right" class="small">
-        <div>Prizes:</div>
-        <div>1st: ₹${settings.p1 || 0}</div>
-        <div>2nd: ₹${settings.p2 || 0}</div>
-        <div>3rd: ₹${settings.p3 || 0}</div>
-        <div style="margin-top:6px">Per Kill: ₹${settings.perKill || 0}</div>
+
+      <!-- Register card -->
+      <div class="card" id="registerCard">
+        <h2>Register & Pay</h2>
+        <p id="regNotice" class="small">Registration status unknown</p>
+
+        <label>Free Fire Name</label>
+        <input id="ffName" placeholder="Your in-game name">
+
+        <label>UID</label>
+        <input id="ffUid" placeholder="1234567890">
+
+        <label>WhatsApp</label>
+        <input id="ffWa" placeholder="10-digit number">
+
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="payAndRegister()">Pay & Register</button>
+          <button class="btn btn-grey" onclick="openAdminQuick()" style="display:none" id="adminQuickBtn">Admin</button>
+        </div>
+
+        <p class="small" style="margin-top:8px">After registering you will see QR & UPI code — scan or copy and then press "Open UPI app" to pay.</p>
+      </div>
+
+      <!-- Players -->
+      <div class="card">
+        <h2>Registered Players</h2>
+        <div class="table-wrap">
+          <table aria-live="polite">
+            <thead>
+              <tr><th style="width:42px">#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Status / Actions</th></tr>
+            </thead>
+            <tbody id="playerList"></tbody>
+          </table>
+        </div>
+        <p class="small" id="playersNote">Players stored in browser. Admin can manage them.</p>
       </div>
     </div>
 
-    <div class="small" style="margin-top:8px;margin-bottom:6px">Enter your UID to verify (the UID you used during registration)</div>
-    <input id="userUid" placeholder="Enter your Free Fire UID (numbers only)">
+    <div class="col">
+      <!-- Admin settings -->
+      <div class="card" id="adminSettingsCard" style="display:none">
+        <h2>Admin Settings (Live)</h2>
+        <p class="small">Change tournament details. Saves in this browser.</p>
 
-    <button id="verifyBtn" class="btn-verify">Verify</button>
-    <button id="copyRoomBtn" class="btn-copy">Copy Room Details</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label>Tournament Name</label><input id="setName" type="text"></div>
+          <div><label>Mode</label><input id="setMode" type="text"></div>
+          <div><label>Map</label><input id="setMap" type="text"></div>
+          <div><label>Total Slots</label><input id="setSlots" type="number" min="1"></div>
+          <div><label>Entry Fee (₹)</label><input id="setFee" type="number" min="0"></div>
+          <div><label>Is Free?</label><select id="setFree"><option value="0">No</option><option value="1">Yes</option></select></div>
+          <div><label>Winner 1 (₹)</label><input id="setP1" type="number"></div>
+          <div><label>Winner 2 (₹)</label><input id="setP2" type="number"></div>
+          <div><label>Winner 3 (₹)</label><input id="setP3" type="number"></div>
+          <div><label>Per Kill (₹)</label><input id="setKill" type="number"></div>
+          <div style="grid-column:1/3"><label>UPI ID</label><input id="setUpi" type="text"></div>
+          <div><label>Registration</label><select id="setReg"><option value="1">Open</option><option value="0">Closed</option></select></div>
+          <div><label>Primary Color</label><input id="setColor" type="color" value="#16a34a"></div>
+        </div>
 
-    <div id="verifyMsg" class="msg"></div>
-    <div id="playerInfo" style="margin-top:10px;color:#9fbfcc"></div>
-  `;
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-accent" onclick="saveSettings()">Save Settings</button>
+          <button class="btn btn-grey" onclick="resetSettings()">Reset Defaults</button>
+          <button class="btn btn-danger" onclick="clearAllData()">Clear Players & LB</button>
+        </div>
+        <p id="saveNote" class="small"></p>
+      </div>
 
-  const verifyBtn = document.getElementById('verifyBtn');
-  const copyBtn = document.getElementById('copyRoomBtn');
-  const msg = document.getElementById('verifyMsg');
-  const pinfo = document.getElementById('playerInfo');
+      <!-- Leaderboard -->
+      <div class="card">
+        <h2>Leaderboard</h2>
+        <p class="small">Top 3 prizes calculated automatically. Admin can add results.</p>
 
-  verifyBtn.addEventListener('click', ()=> {
-    const input = (document.getElementById('userUid')||{}).value.trim();
-    msg.textContent = '';
-    pinfo.textContent = '';
+        <div id="lbAdmin" style="display:none;margin-top:8px">
+          <label>Player</label><input id="lb_name" type="text">
+          <label>Kills</label><input id="lb_kills" type="number">
+          <div style="margin-top:8px;display:flex;gap:8px"><button class="btn btn-accent" onclick="lbAdd()">Add</button><button class="btn btn-grey" onclick="lbClear()">Reset LB</button></div>
+        </div>
 
-    if(!input){
-      msg.style.color = '#ff6b6b'; msg.textContent = 'Enter your UID.'; return;
-    }
+        <div class="table-wrap" style="margin-top:10px">
+          <table><thead><tr><th style="width:64px">Rank</th><th>Name</th><th style="width:90px">Kills</th><th style="width:140px">Reward</th></tr></thead><tbody id="lb_table"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    // normalize UID to digits-only
-    const norm = input.replace(/\D/g,'');
+<!-- UPI Modal -->
+<div id="upiModal" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true">
+    <h3 style="margin:0 0 8px;color:#bfefff">Payment options</h3>
+    <p class="small" style="margin:0 0 10px">Scan QR or copy UPI details & code. Then press "Open UPI app" to pay.</p>
+    <div style="text-align:center">
+      <img id="upiQrImg" src="aryan-upi-qr.png" alt="UPI QR">
+    </div>
+    <div style="background:#02171b;padding:10px;border-radius:8px;margin-top:10px">
+      <div class="small">UPI ID</div>
+      <div id="upiIdDisplay" style="font-weight:700;margin-top:6px">9170856377-3@ybl</div>
+      <div class="small" style="margin-top:8px">Payment Code</div>
+      <div id="upiCodeDisplay" style="font-weight:700;margin-top:6px">XXXXX</div>
+      <button class="btn" onclick="copyUPIInfo()" style="width:100%;margin-top:8px;background:#22c55e;color:#04200e">Copy UPI & Code</button>
+    </div>
 
-    // find player by uid (exact match)
-    const found = players.find(p => (''+p.uid).replace(/\D/g,'') === norm);
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="openUpiBtn" class="btn btn-accent" onclick="openUpiApp()">Open UPI app</button>
+      <a id="waLink" href="#" target="_blank" style="text-decoration:none"><button class="btn" style="background:#25D366;color:#04200e">Send via WhatsApp</button></a>
+      <button class="btn btn-grey" onclick="closeUpiModal()">Close</button>
+    </div>
+  </div>
+</div>
 
-    if(!found){
-      msg.style.color = '#ff6b6b';
-      msg.textContent = 'Not registered for this tournament.';
-      return;
-    }
+<script>
+/* Storage keys & defaults */
+const SETTINGS_KEY = "existG_settings_v2";
+const PLAYERS_KEY = "existG_players_v2";
+const LB_KEY = "existG_lb_v2";
 
-    // show player summary (name, uid, status)
-    pinfo.innerHTML = `
-      <div><strong>Name:</strong> ${escapeHtml(found.name || '(no name)')}</div>
-      <div><strong>UID:</strong> ${escapeHtml(found.uid)}</div>
-      <div><strong>Status:</strong> ${escapeHtml(found.status || 'N/A')}</div>
-    `;
+const DEFAULTS = {
+  name:"EXIST GAMER", mode:"Solo", map:"Bermuda", slots:48, fee:25, isFree:false, regOpen:true,
+  p1:150,p2:100,p3:50, perKill:6, upi:"9170856377-3@ybl", primary:"#16a34a"
+};
 
-    // if tournament is paid and player status not Paid -> reject
-    if(!isFree && (''+(found.status||'')).toLowerCase() !== 'paid'){
-      msg.style.color = '#ff6b6b';
-      msg.textContent = 'Payment not verified. Contact admin.';
-      return;
-    }
+/* state */
+let settings = {};
+let players = JSON.parse(localStorage.getItem(PLAYERS_KEY) || "[]");
+let leaderboard = JSON.parse(localStorage.getItem(LB_KEY) || "[]");
+const IS_ADMIN = window.location.search.includes("admin=1");
 
-    // success - show password (unmasked) and allow copy join info
-    msg.style.color = '#34d399';
-    msg.textContent = 'Verified ✅ You can join the room. Password is shown above.';
-  });
+/* util */
+function savePlayers(){ localStorage.setItem(PLAYERS_KEY, JSON.stringify(players)); }
+function saveLB(){ localStorage.setItem(LB_KEY, JSON.stringify(leaderboard)); }
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+function escapeHtml(s){ return (''+s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-  copyBtn.addEventListener('click', ()=>{
-    const text = `Room ID: ${rid}${rpass ? " | Password: " + rpass : ""}`;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(()=> {
-        const m = document.getElementById('verifyMsg');
-        m.style.color = '#34d399'; m.textContent = 'Copied room details to clipboard.';
-      }).catch(()=> alert(text));
-    } else alert(text);
-  });
+/* load settings */
+function loadSettings(){
+  try{
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    settings = s && typeof s === "object" ? {...DEFAULTS, ...s} : {...DEFAULTS};
+  }catch(e){ settings = {...DEFAULTS}; }
+  applySettings();
+}
 
-  // small helper to escape HTML before inserting
-  function escapeHtml(s){
-    return (''+s).replace(/[&<>"']/g,m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+/* apply to UI */
+function applySettings(){
+  document.getElementById("titleHeader").textContent = (settings.name || DEFAULTS.name) + " — Tournament";
+  document.getElementById("subtitle").textContent = `${settings.mode} • ${settings.map} • Entry ₹${settings.fee}`;
+  document.getElementById("infoText").textContent = `${settings.mode} • Map: ${settings.map} • Entry: ₹${settings.fee} • Kill: ₹${settings.perKill} • Prizes: ${settings.p1}/${settings.p2}/${settings.p3}`;
+  document.getElementById("infoUpi").textContent = settings.upi;
+  document.getElementById("slotsInfo").textContent = `Slots: ${settings.slots} • Filled: ${players.length}`;
+  document.getElementById("regNotice").textContent = settings.regOpen ? "Registration OPEN" : "Registration CLOSED";
+
+  if(IS_ADMIN){
+    document.getElementById("adminSettingsCard").style.display = "block";
+    document.getElementById("lbAdmin").style.display = "block";
+    document.getElementById("setName").value = settings.name;
+    document.getElementById("setMode").value = settings.mode;
+    document.getElementById("setMap").value = settings.map;
+    document.getElementById("setSlots").value = settings.slots;
+    document.getElementById("setFee").value = settings.fee;
+    document.getElementById("setFree").value = settings.isFree ? "1":"0";
+    document.getElementById("setP1").value = settings.p1;
+    document.getElementById("setP2").value = settings.p2;
+    document.getElementById("setP3").value = settings.p3;
+    document.getElementById("setKill").value = settings.perKill;
+    document.getElementById("setUpi").value = settings.upi;
+    document.getElementById("setReg").value = settings.regOpen ? "1":"0";
+    document.getElementById("setColor").value = settings.primary || DEFAULTS.primary;
+  }else{
+    document.getElementById("adminSettingsCard").style.display = "none";
+    document.getElementById("lbAdmin").style.display = "none";
   }
+}
 
-})();
+/* admin functions */
+function saveSettings(){
+  settings.name = document.getElementById("setName").value || DEFAULTS.name;
+  settings.mode = document.getElementById("setMode").value || DEFAULTS.mode;
+  settings.map = document.getElementById("setMap").value || DEFAULTS.map;
+  settings.slots = parseInt(document.getElementById("setSlots").value) || DEFAULTS.slots;
+  settings.fee = Number(document.getElementById("setFee").value) || DEFAULTS.fee;
+  settings.isFree = document.getElementById("setFree").value === "1";
+  settings.p1 = Number(document.getElementById("setP1").value) || DEFAULTS.p1;
+  settings.p2 = Number(document.getElementById("setP2").value) || DEFAULTS.p2;
+  settings.p3 = Number(document.getElementById("setP3").value) || DEFAULTS.p3;
+  settings.perKill = Number(document.getElementById("setKill").value) || DEFAULTS.perKill;
+  settings.upi = document.getElementById("setUpi").value || DEFAULTS.upi;
+  settings.regOpen = document.getElementById("setReg").value === "1";
+  settings.primary = document.getElementById("setColor").value || DEFAULTS.primary;
+  saveSettings();
+  applySettings();
+  alert("Settings saved.");
+}
+function resetSettings(){ if(!confirm("Reset to defaults?")) return; settings = {...DEFAULTS}; saveSettings(); applySettings(); alert("Defaults restored"); }
+function clearAllData(){ if(!IS_ADMIN){ alert("Admin only"); return;} if(!confirm("Clear players and leaderboard?")) return; players=[]; leaderboard=[]; localStorage.removeItem(PLAYERS_KEY); localStorage.removeItem(LB_KEY); renderPlayers(); lbRender(); applySettings(); alert("Cleared"); }
+
+/* registration & payment */
+function createCode(){ return "FF"+Math.floor(100000 + Math.random()*900000); }
+
+function payAndRegister(){
+  try{
+    if(!settings.regOpen){ alert("Registration is closed"); return; }
+    const name = (document.getElementById("ffName")||{}).value.trim();
+    const uid = (document.getElementById("ffUid")||{}).value.trim();
+    const wa = (document.getElementById("ffWa")||{}).value.trim();
+    if(!name || !uid || !wa){ alert("Fill Name, UID & WhatsApp"); return; }
+    if(players.length >= settings.slots){ alert("Slots full"); return; }
+
+    const code = createCode();
+    const status = settings.isFree ? "Paid":"Pending";
+    players.push({name, uid, wa, code, status, ts:Date.now()});
+    savePlayers();
+    renderPlayers();
+    applySettings();
+
+    // clear inputs
+    document.getElementById("ffName").value="";
+    document.getElementById("ffUid").value="";
+    document.getElementById("ffWa").value="";
+
+    // show modal (no auto redirect)
+    showUpiModal(code);
+    // prepare whatsapp fallback to admin
+    document.getElementById("waLink").href = `https://wa.me/919919285782?text=${encodeURIComponent("Hi, I want to pay for EXIST GAMER. Code: " + code)}`;
+  }catch(e){ console.error(e); alert("Error registering."); }
+}
+
+/* render players */
+function renderPlayers(){
+  const tbody = document.getElementById("playerList");
+  tbody.innerHTML = "";
+  players.forEach((p,i)=>{
+   const statusHtml = IS_ADMIN ? `<button class="${p.status==='Paid'?'status-paid':'status-pending'}" onclick="togglePaid(${i})">${escapeHtml(p.status)}</button>` : `<span class="small">${escapeHtml(p.status)}</span>`;
+   const adminActions = IS_ADMIN ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-accent" onclick="editPlayer(${i})">Edit</button><button class="btn btn-danger" onclick="removePlayer(${i})">Remove</button></div>` : "";
+   const tr = document.createElement("tr");
+    tr.innerHTML = `<td style="text-align:center">${i+1}</td>
+      <td>${escapeHtml(p.name)}</td>
+      <td>${IS_ADMIN?escapeHtml(p.uid):'XXXXXXX'}</td>
+      <td>${IS_ADMIN?escapeHtml(p.wa):'XXXXXXXXXX'}</td>
+      <td>${IS_ADMIN?escapeHtml(p.code):'XXXXXX'}</td>
+      <td>${statusHtml}${adminActions}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* admin player actions */
+function togglePaid(i){ if(!IS_ADMIN){ alert("Admin only"); return } players[i].status = players[i].status==='Paid'?'Pending':'Paid'; savePlayers(); renderPlayers(); }
+function removePlayer(i){ if(!IS_ADMIN){ alert("Admin only"); return } if(!confirm("Remove player?")) return; players.splice(i,1); savePlayers(); renderPlayers(); applySettings(); }
+function editPlayer(i){ if(!IS_ADMIN){ alert("Admin only"); return } const p=players[i]; const nn=prompt("Edit name:",p.name); if(nn===null) return; const u=prompt("Edit UID:",p.uid); if(u===null) return; const w=prompt("Edit WhatsApp:",p.wa); if(w===null) return; p.name=nn.trim()||p.name; p.uid=u.trim()||p.uid; p.wa=w.trim()||p.wa; savePlayers(); renderPlayers(); }
+
+/* leaderboard */
+function lbRender(){
+  const tbody = document.getElementById("lb_table");
+  const sorted = [...leaderboard].sort((a,b)=>Number(b.kills)-Number(a.kills));
+  let html="";
+  sorted.forEach((p,i)=>{
+    let base=0;
+    if(i===0) base=settings.p1;
+    else if(i===1) base=settings.p2;
+    else if(i===2) base=settings.p3;
+    const kills = Number(p.kills)||0;
+    const reward = base + kills * settings.perKill;
+    const cls = i===0?"rank1":i===1?"rank2":i===2?"rank3":"";
+    html += `<tr class="${cls}"><td style="text-align:center">${i+1}</td><td>${escapeHtml(p.name)}${IS_ADMIN?` <button class="btn btn-accent" onclick="lbEdit(${i})">Edit</button> <button class="btn btn-danger" onclick="lbRemove(${i})">Remove</button>`:""}</td><td style="text-align:center">${kills}</td><td style="text-align:center">₹${reward}</td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+function lbAdd(){ if(!IS_ADMIN){alert("Admin only");return} const n=document.getElementById("lb_name").value.trim(); const k=parseInt(document.getElementById("lb_kills").value); if(!n||isNaN(k)){alert("Enter name & kills");return} leaderboard.push({name:n,kills:k}); saveLB(); document.getElementById("lb_name").value=""; document.getElementById("lb_kills").value=""; lbRender(); }
+function lbClear(){ if(!IS_ADMIN){alert("Admin only");return} if(!confirm("Reset leaderboard?")) return; leaderboard=[]; saveLB(); lbRender(); }
+function lbEdit(i){ if(!IS_ADMIN) return; const p = leaderboard[i]; if(!p) return; const nn = prompt("Edit name:", p.name); if (nn === null) return; const nk = prompt("Edit kills:", p.kills); if (nk === null) return; leaderboard[i].name = nn.trim() || p.name; leaderboard[i].kills = isNaN(parseInt(nk)) ? p.kills : parseInt(nk); saveLB(); lbRender(); }
+function lbRemove(i){ if(!IS_ADMIN) return; if(!confirm("Remove?")) return; leaderboard.splice(i,1); saveLB(); lbRender(); }
+
+/* UPI modal control */
+let __LAST_UPI_URL="", __LAST_PAY_CODE="";
+function showUpiModal(code){
+  __LAST_PAY_CODE = code || "";
+  const upiId = settings.upi || DEFAULTS.upi;
+  document.getElementById('upiCodeDisplay').textContent = __LAST_PAY_CODE || "XXXXX";
+  document.getElementById('upiIdDisplay').textContent = upiId;
+  document.getElementById('waLink').href = `https://wa.me/919170856377?text=${encodeURIComponent("Hi, I want to pay for EXIST GAMER. Code: " + __LAST_PAY_CODE)}`;
+  __LAST_UPI_URL = "upi://pay?pa=" + encodeURIComponent(upiId) + "&pn=" + encodeURIComponent(settings.name||DEFAULTS.name) + "&am=" + encodeURIComponent(settings.fee||DEFAULTS.fee) + "&cu=INR&tn=" + encodeURIComponent(__LAST_PAY_CODE);
+  const m=document.getElementById('upiModal'); if(m) m.style.display='flex';
+}
+function closeUpiModal(){ const m=document.getElementById('upiModal'); if(m) m.style.display='none'; }
+function openUpiApp(){ if(!_LAST_UPI_URL){ alert("No payment prepared."); return } window.location.href = __LAST_UPI_URL; setTimeout(()=>alert("If UPI didn't open, copy UPI & code and pay manually."),900); }
+function copyUPIInfo(){ const upi=document.getElementById('upiIdDisplay').textContent||DEFAULTS.upi; const code=document.getElementById('upiCodeDisplay').textContent||''; const txt = upi + " | Code: " + code; navigator.clipboard.writeText(txt).then(()=>alert("Copied UPI & Code. Paste in your UPI app to pay.")).catch(()=>prompt("Copy manually:", txt)); }
+
+/* init */
+document.addEventListener("DOMContentLoaded", ()=>{
+  loadSettings();
+  if(IS_ADMIN){
+    document.getElementById("adminSettingsCard").style.display='block';
+    document.getElementById("lbAdmin").style.display='block';
+    // small admin quick button for mobile
+    if(window.innerWidth < 900){
+      const b = document.getElementById("adminQuickBtn");
+      if(b){ b.style.display = 'inline-block'; b.onclick = ()=>{ window.scrollTo({top:0,behavior:'smooth'}); document.getElementById("adminSettingsCard").style.display='block'; } }
+    }
+  }
+  renderPlayers();
+  lbRender();
+
+  // safety: ensure page scrollable
+  document.documentElement.style.overflowX='hidden';
+  document.body.style.overflowX='hidden';
+  document.documentElement.style.overflowY='auto';
+  document.body.style.overflowY='auto';
+});
 </script>
-
 </body>
-</html>
+</html> 
