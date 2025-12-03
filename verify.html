@@ -5,130 +5,114 @@
 <title>Room Verification - EXIST GAMER</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-    body{
-        margin:0;
-        background:#020d18;
-        color:#dff6ff;
-        font-family:Arial;
-        padding:16px;
-    }
-    .card{
-        background:#071826;
-        padding:16px;
-        border-radius:10px;
-        margin-bottom:20px;
-        border:1px solid rgba(255,255,255,0.08);
-    }
-    input{
-        width:100%;
-        padding:10px;
-        margin-top:6px;
-        border-radius:6px;
-        border:1px solid rgba(255,255,255,0.1);
-        background:#04131f;
-        color:#eaffff;
-    }
-    button{
-        padding:10px 14px;
-        border:none;
-        border-radius:6px;
-        font-weight:700;
-        margin-top:10px;
-    }
+  body{margin:0;background:#020d18;color:#dff6ff;font-family:Arial;padding:16px}
+  .card{background:#071826;padding:16px;border-radius:10px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.06)}
+  input{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#041826;color:#eaffff}
+  button{padding:10px 14px;border:none;border-radius:6px;font-weight:700;margin-top:10px;cursor:pointer}
+  .btn-verify{background:#16a34a;color:#02120a;width:100%}
+  .btn-copy{background:#2563eb;color:#fff;width:100%}
+  .msg{margin-top:12px;font-weight:700}
+  .small{font-size:13px;color:#9fbfcc}
 </style>
 </head>
-
 <body>
 
 <h2 style="text-align:center;margin-bottom:20px">Room Verification</h2>
 
-<!-- ROOM INFO CARD -->
-<div id="verifyRoom" class="card">
-  Loading room details...
-</div>
+<div id="verifyRoom" class="card">Loading room details...</div>
 
 <script>
-// ================ VERIFY PAGE SCRIPT ======================
+/*
+  Verify by UID version.
+  Uses:
+    - SETTINGS_KEY = "existG_settings_v2" (roomId, roomPass, isFree)
+    - PLAYERS_KEY  = "existG_players_v2" (array of registered players with uid, name, status)
+*/
 const SETTINGS_KEY = "existG_settings_v2";
+const PLAYERS_KEY = "existG_players_v2";
 
 (function(){
   const box = document.getElementById("verifyRoom");
   if(!box) return;
 
-  // Load settings saved by admin
-  let s = {};
-  try{
-    s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
-  }catch(e){
-    s = {};
-  }
+  // load settings and players from localStorage
+  let settings = {};
+  try{ settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); }catch(e){ settings = {}; }
+  let players = [];
+  try{ players = JSON.parse(localStorage.getItem(PLAYERS_KEY) || "[]"); }catch(e){ players = []; }
 
-  const rid  = s.roomId   || "";
-  const rpass = s.roomPass || "";
+  const rid = settings.roomId || "";
+  const rpassExists = !!(settings.roomPass);
+  const isFree = !!settings.isFree;
 
-  // If admin didn't set room yet
   if(!rid){
-    box.innerHTML = `<div style="color:#ffd166">Room details not set by admin.</div>`;
+    box.innerHTML = '<div style="color:#ffd166">Room details not set by admin.</div>';
     return;
   }
 
-  // Show verification UI
   box.innerHTML = `
-    <div style="font-size:18px;font-weight:700;margin-bottom:10px">
-        Room ID: <span style="color:#34d399">${rid}</span>
-    </div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:10px">Room ID: <span style="color:#34d399">${rid}</span></div>
+    <div style="margin-bottom:10px" class="small">Password: <strong style="color:#ffd166">${rpassExists ? "••••••" : "(no password set)"}</strong></div>
 
-    <div style="margin-bottom:14px">
-        Password: <strong style="color:#ffd166">${rpass ? "••••••" : "(no password set)"}</strong>
-    </div>
+    <label class="small">Enter your UID to verify</label>
+    <input id="userUid" placeholder="Enter your Free Fire UID (numbers only)">
 
-    <label>Enter Room Password</label>
-    <input id="userRoomPass" placeholder="Enter password">
+    <button id="verifyBtn" class="btn-verify">Verify</button>
+    <button id="copyRoomBtn" class="btn-copy">Copy Room Details</button>
 
-    <button id="verifyBtn" style="background:#16a34a;color:#020d0c;width:100%;margin-top:14px">
-        Verify
-    </button>
-
-    <button id="copyRoomBtn" style="background:#2563eb;color:white;width:100%;margin-top:8px">
-        Copy Room Details
-    </button>
-
-    <div id="verifyMsg" style="margin-top:12px;font-weight:700;"></div>
+    <div id="verifyMsg" class="msg"></div>
+    <div id="playerInfo" style="margin-top:8px;color:#9fbfcc"></div>
   `;
 
-  // VERIFY BUTTON LOGIC
-  document.getElementById("verifyBtn").addEventListener("click", ()=>{
-    const input = document.getElementById("userRoomPass").value.trim();
-    const msg = document.getElementById("verifyMsg");
+  const verifyBtn = document.getElementById('verifyBtn');
+  const copyBtn = document.getElementById('copyRoomBtn');
+  const msg = document.getElementById('verifyMsg');
+  const pinfo = document.getElementById('playerInfo');
 
-    if(!rpass){
-      msg.style.color="#34d399";
-      msg.textContent="No password required — Verified!";
+  verifyBtn.addEventListener('click', ()=> {
+    const input = (document.getElementById('userUid')||{}).value.trim();
+    msg.textContent = '';
+    pinfo.textContent = '';
+
+    if(!input){
+      msg.style.color = '#ff6b6b'; msg.textContent = 'Enter your UID.';
       return;
     }
 
-    if(input === rpass){
-      msg.style.color="#34d399";
-      msg.textContent="Verified ✔ You can join the room!";
-    } else {
-      msg.style.color="#ff6b6b";
-      msg.textContent="Wrong Password ❌";
+    // normalize: remove non-digits just in case
+    const norm = input.replace(/\D/g,'');
+
+    // find player by uid (exact match)
+    const found = players.find(p => (''+p.uid).replace(/\D/g,'') === norm);
+
+    if(!found){
+      msg.style.color = '#ff6b6b';
+      msg.textContent = 'Not registered for this tournament.';
+      return;
     }
+
+    // if tournament is paid and player status not Paid -> reject
+    if(!isFree && (found.status||'').toLowerCase() !== 'paid'){
+      msg.style.color = '#ff6b6b';
+      msg.textContent = 'Payment not verified. Contact admin.';
+      pinfo.textContent = `Registered name: ${found.name || '(no name)'} • UID: ${found.uid} • Status: ${found.status || 'N/A'}`;
+      return;
+    }
+
+    // success
+    msg.style.color = '#34d399';
+    msg.textContent = 'Verified ✅ You can join the room.';
+    pinfo.textContent = `Name: ${found.name || '(no name)'} • UID: ${found.uid}`;
   });
 
-  // COPY BUTTON LOGIC
-  document.getElementById("copyRoomBtn").addEventListener("click", ()=>{
-    const text = `Room ID: ${rid}${rpass ? " | Password: " + rpass : ""}`;
-
-    if(navigator.clipboard){
-      navigator.clipboard.writeText(text).then(()=>{
-        const msg = document.getElementById("verifyMsg");
-        msg.style.color="#34d399";
-        msg.textContent="Copied to clipboard!";
-      });
-    } else {
-      alert(text);
-    }
+  copyBtn.addEventListener('click', ()=>{
+    const text = `Room ID: ${rid}${settings.roomPass ? " | Password: " + settings.roomPass : ""}`;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=> {
+        const m = document.getElementById('verifyMsg');
+        m.style.color = '#34d399'; m.textContent = 'Copied room details to clipboard.';
+      }).catch(()=> alert(text));
+    } else alert(text);
   });
 
 })();
