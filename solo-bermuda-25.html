@@ -345,6 +345,9 @@ let players = [];
     if(p) players = p;
   } catch(e){
     console.warn("load error", e);
+    // after loading settings and players in init()
+setAdminVisible(IS_ADMIN);
+if(IS_ADMIN) loadAdminForm();
   }
 
   // hide floating button if admin already
