@@ -448,7 +448,33 @@ function openUPI(){
 }
 function openUPIBlock(){ document.getElementById("qrArea").style.display = "block"; document.getElementById("qrArea").scrollIntoView({behavior:"smooth"}); }
 
-/* ADMIN: unlock via PIN prompt */
+/* ===== admin show/hide helper ===== */
+function setAdminVisible(on){
+  // add/remove a style tag that forces .admin-only to show
+  let el = document.getElementById('admin-override');
+  if(on){
+    if(!el){
+      el = document.createElement('style');
+      el.id = 'admin-override';
+      el.innerText = '.admin-only{display:block !important;}';
+      document.head.appendChild(el);
+    }
+    // reveal admin-only nodes (in case some need extra show)
+    document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'block');
+    // hide floating admin button
+    const af = document.getElementById('adminFloating');
+    if(af) af.style.display = 'none';
+  } else {
+    if(el) el.remove();
+    // hide admin nodes
+    document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'none');
+    // show floating admin button
+    const af = document.getElementById('adminFloating');
+    if(af) af.style.display = 'block';
+  }
+}
+
+/* ADMIN: unlock via PIN prompt (REPLACE your old tryAdmin) */
 function tryAdmin(){
   try{
     const pin = prompt("Enter Admin PIN:");
@@ -456,9 +482,8 @@ function tryAdmin(){
     if(pin === ADMIN_PIN){
       localStorage.setItem("exist_isAdmin","1");
       IS_ADMIN = true;
-      // reveal admin UI
-      document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'block');
-      document.getElementById('adminFloating').style.display = 'none';
+      // force admin UI visible (overrides previous CSS)
+      setAdminVisible(true);
       loadAdminForm();
       alert("Admin mode activated.");
     } else {
@@ -469,11 +494,14 @@ function tryAdmin(){
     alert("Error: " + e.message);
   }
 }
+
+/* ADMIN logout (REPLACE your old adminLogout) */
 function adminLogout(){
-  localStorage.removeItem('exist_isAdmin');
+  try {
+    localStorage.removeItem('exist_isAdmin');
+  } catch(e){ console.warn(e) }
   IS_ADMIN = false;
-  document.querySelectorAll('.admin-only').forEach(x => x.style.display = 'none');
-  document.getElementById('adminFloating').style.display = 'block';
+  setAdminVisible(false);
   alert("Admin logged out.");
 }
 
