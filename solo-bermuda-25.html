@@ -41,9 +41,33 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 .hint{font-size:12px;color:var(--muted);margin-top:6px}
 
 /* Table responsive wrapper + prevent overflow */
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
-.table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
-.table-wrap th,.table-wrap td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;word-break:break-word;white-space:normal;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  width:100%;
+}
+.table-wrap table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto; /* let columns size naturally */
+}
+.table-wrap th, .table-wrap td{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;       /* prevent breaking single letters into new lines */
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:260px;          /* allow more width so words don't wrap letter-by-letter */
+}
+/* allow specific columns to wrap if absolutely needed (like long notes) */
+.table-wrap td.wrap-allow{
+  white-space:normal;
+  word-break:break-word;
+  max-width:300px;
+  text-align:left;
+}
 .table-wrap th{color:var(--muted);font-weight:700;font-size:13px}
 
 /* Admin only style toggling */
@@ -318,10 +342,10 @@ function renderPlayersTable(){
   players.forEach((p,i)=>{
     html += `<tr>
       <td>${i+1}</td>
-      <td style="text-align:left">${escapeHtml(p.name)}</td>
+      <td class="wrap-allow" style="text-align:left">${escapeHtml(p.name)}</td>
       <td>${hideValue(p.uid)}</td>
       <td>${hideValue(p.wp)}</td>
-      <td>${p.code}</td>
+      <td>${escapeHtml(p.code)}</td>
       <td>${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</td>
       <td class="admin-only"> 
          <button class="btn btn-primary" onclick="markPaid(${i})">Paid</button>
@@ -361,8 +385,8 @@ function regNow(){
 
   // small validation
   if(wp.length < 8) return alert("Enter a valid WhatsApp number.");
-
-  const code = Math.random().toString(36).slice(2,8).toUpperCase();
+  
+const code = (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,4)).toUpperCase();
   players.push({name, uid, wp, code, paid: 0});
   localStorage.setItem(PKEY, JSON.stringify(players));
   applySettingsToUI();
