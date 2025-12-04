@@ -1,6 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+  import { getDatabase, ref, push, set, get, child, update } 
+    from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
+    authDomain: "exist-gamer.firebaseapp.com",
+    databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "exist-gamer",
+    storageBucket: "exist-gamer.firebasestorage.app",
+    messagingSenderId: "868288388784",
+    appId: "1:868288388784:web:b4a8b933ccbeb95b392575",
+    measurementId: "G-BNFXCZQTJW"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Global access
+  window.db = db;
+  window.dbRef = ref;
+  window.dbPush = push;
+  window.dbSet = set;
+  window.dbGet = get;
+  window.dbUpdate = update;
+</script>  
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>EXIST GAMER — Solo Tournament</title>
