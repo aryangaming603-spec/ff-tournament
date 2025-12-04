@@ -109,6 +109,8 @@ let isAdmin = localStorage.getItem('exist_isAdmin') === '1';
 function loadPlayers(){
   try{
     players = JSON.parse(localStorage.getItem(PKEY) || "[]") || [];
+    // load settings too (so room id/pass are available)
+settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {};
   } catch(e){
     console.error("load error", e);
     players = [];
@@ -149,6 +151,7 @@ function render(filtered){
       <td>${escapeHtml(p.wp||'')}</td>
       <td><b>${escapeHtml(p.code||'')}</b></td>
       <td>${proofText ? escapeHtml(proofText) + (p.proof && p.proof.img ? ` <button class="btn btn-ghost" onclick="viewProof(${idx})">View Proof</button>` : '') : ''}</td>
+      <td>${( (p.paid || p.verified) && settings.roomId ) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-'}</td>
 
 <!-- ROOM cell: show only when paid or verified and settings have roomId -->
 <td>${( (p.paid || p.verified) && settings.roomId ) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-'}</td>
@@ -225,10 +228,7 @@ function doSearch(){
   });
   render(res);
 }
-function resetSearch(){ document.getElementById('q').value=''; loadPlayers(); }
-
-/* initial load */
-loadPlayers();
+function resetSearch(){ document.getElementById('q')
 
 /* listen storage change (in case admin changed players in another tab) */
 window.addEventListener('storage', function(e){
