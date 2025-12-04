@@ -199,18 +199,25 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
         <button class="btn btn-ghost" onclick="clearRegForm()">Clear</button>
       </div>
 
-      <div id="qrArea" style="display:none;margin-top:12px;text-align:center">
+     <div id="qrArea" style="display:none;margin-top:12px;text-align:center">
   <img id="qrImg" src="aryan-upi-qr.png" alt="QR" style="width:220px;border-radius:12px;border:1px solid var(--glass)">
 
   <div style="height:8px"></div>
 
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="openUPI()">Open UPI App</button>
-    <button class="btn btn-ghost" onclick="openWhatsApp()">Send on WhatsApp</button>
+    <button class="btn btn-primary" onclick="openUPI('generic')">Open UPI App</button>
+
+    <!-- small provider buttons (same deep-link; UX convenience) -->
+    <button class="btn btn-ghost" onclick="openUPI('gpay')">GPay</button>
+    <button class="btn btn-ghost" onclick="openUPI('phonepe')">PhonePe</button>
+    <button class="btn btn-ghost" onclick="openUPI('paytm')">Paytm</button>
+
+    <!-- WhatsApp payment/request -->
+    <button class="btn btn-ghost" onclick="openWhatsApp()" title="Send payment info / request to admin">Send on WhatsApp</button>
   </div>
 
-  <div class="muted" style="margin-top:8px">After payment, submit proof or admin will verify your payment.</div>
-      </div>
+  <div class="muted" style="margin-top:8px">Tip: Use Open UPI for direct pay. After paying, send proof via WhatsApp or the payment proof form.</div>
+     </div> 
 
     <!-- right: registered players -->
     <div class="card">
@@ -455,34 +462,51 @@ function openUPI(){
   location.href = link;
 }
 
-  // Admin WhatsApp number (India format: 91 + mobile)
-const ADMIN_WA = "919170856377"; // CHANGE ONLY if your WhatsApp number changes
+/* ADMIN WhatsApp number (India format: 91 + mobile) */
+const ADMIN_WA = "919170856377";
 
-function openWhatsApp(){
-  // last registered player
+/* open UPI deep link - works with most UPI apps */
+function openUPI(provider){
   const last = players[players.length - 1];
-  if(!last){
-    return alert("Please register first.");
-  }
+  if(!last) return alert("No recent registration found. Please register first.");
 
-  // WhatsApp message
+  const upi = settings.upi || DEFAULTS.upi;
+  const amt = settings.fee || DEFAULTS.fee;
+  const note = `Code:${last.code}`;
+
+  const base = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amt)}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+  let link = base;
+  // provider param kept for UX; default uses same standard link
+  if(provider === 'gpay'){ link = base; }
+  else if(provider === 'phonepe'){ link = base; }
+  else if(provider === 'paytm'){ link = base; }
+
+  try {
+    location.href = link;
+    setTimeout(()=>window.open(link, "_blank"), 300);
+  } catch(e){
+    window.open(link, "_blank");
+  }
+}
+
+/* WhatsApp - opens chat with admin and prefilled message */
+function openWhatsApp(){
+  const last = players[players.length - 1];
+  if(!last) return alert("Please register first.");
+
   const msg =
 `Hi Admin (EXIST GAMER),
-I have paid ₹${settings.fee}.
+I want to pay ₹${settings.fee}.
 Name: ${last.name}
 UID: ${last.uid}
 Code: ${last.code}
-Please verify.`;
+Please confirm payment method / send instructions.`;
 
-  // WhatsApp deep link
   const waUrl = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`;
-
-  // Open WhatsApp
   window.open(waUrl, "_blank");
 }
   
-function openUPIBlock(){ document.getElementById("qrArea").style.display = "block"; document.getElementById("qrArea").scrollIntoView({behavior:"smooth"}); }
-
 /* ===== admin show/hide helper ===== */
 function setAdminVisible(on){
   // add/remove a style tag that forces .admin-only to show
