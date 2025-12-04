@@ -1,32 +1,41 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EXIST GAMER — Verify</title>
 <style>
 :root{
   --bg:linear-gradient(180deg,#031026,#071423);
   --panel:#082034; --muted:#9fbfcc; --accent:#06b6d4;
-  --radius:10px; --pad:12px;
+  --accent2:#16a34a; --danger:#ef4444; --radius:10px; --pad:12px;
+  --glass:rgba(255,255,255,0.03);
 }
-body{margin:0;font-family:Inter,Arial;background:var(--bg);color:#eafcff;padding:18px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:#eafcff;padding:18px}
 .container{max-width:1100px;margin:0 auto}
-.card{background:var(--panel);padding:var(--pad);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.03);margin-bottom:14px}
-.header{display:flex;justify-content:space-between;align-items:center}
+.card{background:var(--panel);padding:var(--pad);border-radius:var(--radius);border:1px solid var(--glass);margin-bottom:14px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .h1{margin:0}
 .small{color:var(--muted);font-size:13px}
 .input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(2,12,20,0.6);color:#eaffff;width:100%}
 .btn{padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
-.btn-primary{background:var(--accent);color:#02120a}
+.btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#02120a}
 .btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.06)}
+.btn-danger{background:var(--danger);color:#fff}
 .table-wrap{overflow:auto;margin-top:10px}
 table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left;vertical-align:middle}
 th{color:var(--muted);font-weight:700}
 .status-paid{background:#134e4a;padding:6px 8px;border-radius:8px;color:#d1fae5;display:inline-block}
 .status-pend{background:#44337a;padding:6px 8px;border-radius:8px;color:#f3e8ff;display:inline-block}
+.room-badge{background:#0b3140;padding:6px 8px;border-radius:6px;color:#bfffe6}
 .admin-only{display:none}
+.notice{background:rgba(255,210,102,0.06);border-left:4px solid #ffd166;padding:10px;border-radius:6px;color:#ffd166}
+@media (max-width:700px){
+  th,td{padding:8px;font-size:13px}
+  .header{flex-direction:column;align-items:flex-start}
+}
 </style>
 </head>
 <body>
@@ -34,12 +43,16 @@ th{color:var(--muted);font-weight:700}
   <div class="card header">
     <div>
       <h2 class="h1">EXIST GAMER — Verify Payments</h2>
-      <div class="small">Search by name, UID or Code. Mark Paid to reveal Room details.</div>
+      <div class="small">Search by Name, UID or Code. Mark Verified → Room details appear.</div>
     </div>
     <div style="text-align:right">
-      <div id="adminStatus" class="small">Checking admin...</div>
+      <div id="adminStatus" class="small">Admin mode: <strong id="adminFlag">OFF</strong></div>
       <div style="height:8px"></div>
-      <button class="btn btn-ghost" onclick="loadPlayers()">Refresh</button>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="unlockAdmin()">Unlock Admin</button>
+        <button class="btn btn-ghost" onclick="logoutAdmin()">Logout Admin</button>
+        <button class="btn btn-ghost" onclick="loadPlayers()">Refresh</button>
+      </div>
     </div>
   </div>
 
@@ -51,16 +64,15 @@ th{color:var(--muted);font-weight:700}
     </div>
   </div>
 
-  <div id="notAdminNotice" class="card" style="display:none">
-    <strong style="color:#ffd166">Notice: You are not admin.</strong>
-    <div class="small" style="margin-top:8px">To mark paid & see room details, open main page and unlock Admin (PIN).</div>
+  <div id="notice" class="card notice" style="display:none">
+    <div id="noticeText"></div>
   </div>
 
   <div class="card">
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Proof/Txn</th><th>Room</th><th>Status</th><th class="admin-only">Actions</th></tr>
+          <tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Proof/Txn</th><th>Room (shown only when verified)</th><th>Status</th><th class="admin-only">Actions</th></tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -69,28 +81,44 @@ th{color:var(--muted);font-weight:700}
 </div>
 
 <script>
+/*
+  Simple Verify page
+  - Reads players from localStorage key: 'existG_players_v2'
+  - Reads settings from: 'existG_settings_v2'
+  - Admin PIN to unlock: 786786
+  - Only Paid players can be Verified (button enabled only for paid)
+  - When verified -> player.verified = true saved to localStorage -> Room shown
+*/
+
 const PKEY = "existG_players_v2";
 const SKEY = "existG_settings_v2";
-let players = [], settings = {}, isAdmin = localStorage.getItem('exist_isAdmin')==='1';
+const ADMIN_PIN = "786786";
 
-function escapeHtml(s){ return (""+s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+let players = [];
+let settings = {};
+let isAdmin = localStorage.getItem('exist_isAdmin') === '1';
+
+function escapeHtml(s){ return (""+s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function loadPlayers(){
-  try{ players = JSON.parse(localStorage.getItem(PKEY) || "[]") || []; }catch(e){ players = []; }
-  try{ settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; }catch(e){ settings = {}; }
-  isAdmin = localStorage.getItem('exist_isAdmin')==='1';
+  try{ players = JSON.parse(localStorage.getItem(PKEY) || "[]") || []; } catch(e){ players = []; }
+  try{ settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; } catch(e){ settings = {}; }
+  isAdmin = localStorage.getItem('exist_isAdmin') === '1';
+  document.getElementById('adminFlag').textContent = isAdmin ? 'ON' : 'OFF';
   render();
 }
 
+// Render table: show all players but room only if p.verified === true
 function render(filtered){
   const list = Array.isArray(filtered) ? filtered : players;
   const tbody = document.getElementById('tbody');
-  if(!list.length){ tbody.innerHTML = '<tr><td colspan="9" class="small">No players found.</td></tr>'; showAdmin(false); return; }
+  if(!list.length){ tbody.innerHTML = '<tr><td colspan="9" class="small">No players found.</td></tr>'; return; }
+
   let html = '';
-  list.forEach((p, idx)=>{
-    const realIdx = players.findIndex(x=>x.code===p.code && x.uid===p.uid);
-    const proofText = p.proof ? (p.proof.txn || 'Uploaded') : '
-    const roomCell = (p.verified && settings && settings.roomId) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-';
+  list.forEach((p, idx) => {
+    const realIdx = players.findIndex(x => x.code === p.code && x.uid === p.uid);
+    const proofText = p.proof ? (p.proof.txn || 'Uploaded') : '';
+    const roomCell = (p.verified && settings && settings.roomId) ? `<span class="room-badge">${escapeHtml(settings.roomId)}${settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : ''}</span>` : '-';
     html += `<tr>
       <td>${realIdx+1}</td>
       <td>${escapeHtml(p.name||'')}</td>
@@ -101,68 +129,104 @@ function render(filtered){
       <td>${roomCell}</td>
       <td>${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</td>
       <td class="admin-only">
-        <button class="btn btn-primary" onclick="markPaid(${realIdx})">Mark Paid</button>
-        <button class="btn btn-ghost" onclick="verifyUID(${realIdx})">Verify</button>
+        <button class="btn btn-primary" onclick="verifyUID(${realIdx})" ${p.paid ? '' : 'disabled title="Not paid yet"'}>Verify</button>
         <button class="btn btn-ghost" onclick="copyUID(${realIdx})">Copy UID</button>
         <button class="btn btn-danger" onclick="deletePlayer(${realIdx})">Delete</button>
       </td>
     </tr>`;
   });
+
   tbody.innerHTML = html;
-  showAdmin(isAdmin);
+  // admin UI show/hide
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+
+  // small notice if not admin
+  const notice = document.getElementById('notice');
+  const noticeText = document.getElementById('noticeText');
+  if(!isAdmin){
+    notice.style.display = 'block';
+    noticeText.innerHTML = 'You are NOT admin. To mark Verified and reveal room details open the main tournament page and unlock Admin (PIN).';
+  } else {
+    notice.style.display = 'none';
+    noticeText.innerHTML = '';
+  }
 }
 
-function showAdmin(on){
-  document.getElementById('notAdminNotice').style.display = on ? 'none' : 'block';
-  document.querySelectorAll('.admin-only').forEach(el=>el.style.display = on ? '' : 'none');
-  document.getElementById('adminStatus').textContent = on ? 'Admin mode: ON' : 'Admin mode: OFF';
-}
-
+/* SEARCH */
 function doSearch(){
-  try{ players = JSON.parse(localStorage.getItem(PKEY) || "[]") || []; }catch(e){ players = []; }
-  try{ settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; }catch(e){ settings = {}; }
-  const q = (document.getElementById('q').value||'').trim().toLowerCase();
+  const q = (document.getElementById('q').value || '').trim().toLowerCase();
   if(!q){ render(); return; }
-  const filtered = players.filter(p=>{
-    return (p.name||'').toLowerCase().includes(q) || (p.uid||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q);
-  });
+  const filtered = players.filter(p =>
+    (p.name||'').toLowerCase().includes(q) ||
+    (p.uid||'').toLowerCase().includes(q) ||
+    (p.code||'').toLowerCase().includes(q)
+  );
   render(filtered);
 }
-function resetSearch(){ document.getElementById('q').value=''; loadPlayers(); }
+function resetSearch(){ document.getElementById('q').value=''; render(); }
 
-function markPaid(i){
+/* VIEW PROOF */
+function viewProof(i){
+  if(!players[i] || !players[i].proof || !players[i].proof.img) return alert("No proof image");
+  const w = window.open('','_blank'); w.document.write(`<img src="${players[i].proof.img}" style="max-width:100%;height:auto">`);
+}
+
+/* COPY UID */
+function copyUID(i){
+  if(!players[i] || !players[i].uid) return alert("No UID");
+  navigator.clipboard?.writeText(players[i].uid).then(()=>alert("UID copied to clipboard")).catch(()=>alert("Cannot copy"));
+}
+
+/* DELETE ENTRY (admin required) */
+function deletePlayer(i){
   if(!isAdmin) return alert("Admin only");
-  if(typeof i!=='number' || i<0 || i>=players.length) return;
-  players[i].paid = 1; localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); alert("Marked Paid");
+  if(!confirm("Delete this player?")) return;
+  players.splice(i,1);
+  localStorage.setItem(PKEY, JSON.stringify(players));
+  loadPlayers();
 }
+
+/* VERIFY (admin only). Only allowed if player.paid is truthy */
 function verifyUID(i){
-  // check admin flag (optional)
-  if(localStorage.getItem('exist_isAdmin') !== '1'){
-    return alert("Only admin can verify.");
-  }
-  // safety
-  if(typeof i !== 'number' || i < 0) return alert("Invalid index");
-  try{
-    const players = JSON.parse(localStorage.getItem('existG_players_v2')||'[]');
-    if(!players[i]) return alert("Player not found");
-    players[i].verified = true;
-    localStorage.setItem('existG_players_v2', JSON.stringify(players));
-    alert("UID verified. Room details will now be visible for this player.");
-    // refresh view
-    setTimeout(()=>{ loadPlayers(); }, 120);
-  }catch(e){
-    console.error(e);
-    alert("Error verifying: "+e.message);
-  }
+  if(!isAdmin) return alert("Admin only");
+  if(typeof i !== 'number' || i < 0 || i >= players.length) return alert("Invalid");
+  const p = players[i];
+  if(!p.paid) return alert("Player hasn't paid yet.");
+  // set verified flag
+  players[i].verified = true;
+  localStorage.setItem(PKEY, JSON.stringify(players));
+  alert(`Player ${p.name || p.uid} verified — Room details will now show.`);
+  setTimeout(loadPlayers, 120);
 }
 
-function deletePlayer(i){ if(!confirm("Delete entry?")) return; players.splice(i,1); localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); }
-function copyUID(i){ const t = players[i] && players[i].uid; if(!t) return alert("No UID"); navigator.clipboard?.writeText(t).then(()=>alert("UID copied")); }
-function viewProof(i){ const p=players[i]; if(!p||!p.proof||!p.proof.img) return alert("No proof"); const w=window.open(''); w.document.write(`<img src="${p.proof.img}" style="max-width:100%">`); if(p.proof.txn) w.document.write(`<p>Txn: ${escapeHtml(p.proof.txn)}</p>`); }
+/* ADMIN unlock/logout */
+function unlockAdmin(){
+  const pin = prompt("Enter Admin PIN:");
+  if(pin === null) return;
+  if(pin === ADMIN_PIN){
+    localStorage.setItem('exist_isAdmin', '1');
+    isAdmin = true;
+    document.getElementById('adminFlag').textContent = 'ON';
+    render();
+    alert("Admin unlocked.");
+  } else {
+    alert("Wrong PIN.");
+  }
+}
+function logoutAdmin(){
+  localStorage.removeItem('exist_isAdmin');
+  isAdmin = false;
+  document.getElementById('adminFlag').textContent = 'OFF';
+  render();
+  alert("Admin logged out.");
+}
 
-window.addEventListener('storage', function(e){ if(e.key===PKEY||e.key===SKEY) setTimeout(loadPlayers,120); });
+/* sync across tabs */
+window.addEventListener('storage', (e) => {
+  if(e.key === PKEY || e.key === SKEY) setTimeout(loadPlayers, 120);
+});
 
-// initial load
+/* initial load */
 loadPlayers();
 </script>
 </body>
