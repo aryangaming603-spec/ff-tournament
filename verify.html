@@ -1,260 +1,396 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getDatabase, ref, push, set, get, child, update } 
-    from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
-    authDomain: "exist-gamer.firebaseapp.com",
-    databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "exist-gamer",
-    storageBucket: "exist-gamer.firebasestorage.app",
-    messagingSenderId: "868288388784",
-    appId: "1:868288388784:web:b4a8b933ccbeb95b392575",
-    measurementId: "G-BNFXCZQTJW"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Global access
-  window.db = db;
-  window.dbRef = ref;
-  window.dbPush = push;
-  window.dbSet = set;
-  window.dbGet = get;
-  window.dbUpdate = update;
-</script>  
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>EXIST GAMER — Verify</title>
 <style>
 :root{
-  --bg:linear-gradient(180deg,#031026,#071423);
-  --panel:#082034; --muted:#9fbfcc; --accent:#06b6d4;
-  --accent2:#16a34a; --danger:#ef4444; --radius:10px; --pad:12px;
+  --bg:linear-gradient(180deg,#031026 0%, #071423 100%);
+  --panel:#082034;
+  --muted:#9fbfcc;
+  --accent1:#06b6d4;
+  --accent2:#16a34a;
+  --danger:#ef4444;
   --glass:rgba(255,255,255,0.03);
+  --radius:12px;
+  --pad:14px;
+  --card-shadow: 0 10px 30px rgba(0,0,0,0.55);
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:#eafcff;padding:18px}
-.container{max-width:1100px;margin:0 auto}
-.card{background:var(--panel);padding:var(--pad);border-radius:var(--radius);border:1px solid var(--glass);margin-bottom:14px}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#eafcff}
+.container{max-width:1100px;margin:18px auto;padding:18px}
 .header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.h1{margin:0}
-.small{color:var(--muted);font-size:13px}
-.input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(2,12,20,0.6);color:#eaffff;width:100%}
-.btn{padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
-.btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#02120a}
-.btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.06)}
+.brand h1{margin:0;font-size:22px}
+.muted{color:var(--muted);font-size:13px}
+.card{background:var(--panel);border-radius:var(--radius);padding:var(--pad);border:1px solid var(--glass);box-shadow:var(--card-shadow);margin-top:14px}
+.row{display:grid;grid-template-columns:1fr 360px;gap:14px}
+@media(max-width:880px){ .row{grid-template-columns:1fr} }
+.input, input, select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(2,12,20,0.6);color:#eaffff;margin-top:6px}
+.btn{padding:8px 12px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#02120a}
+.btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.04)}
 .btn-danger{background:var(--danger);color:#fff}
-.table-wrap{overflow:auto;margin-top:10px}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left;vertical-align:middle}
-th{color:var(--muted);font-weight:700}
-.status-paid{background:#134e4a;padding:6px 8px;border-radius:8px;color:#d1fae5;display:inline-block}
-.status-pend{background:#44337a;padding:6px 8px;border-radius:8px;color:#f3e8ff;display:inline-block}
-.room-badge{background:#0b3140;padding:6px 8px;border-radius:6px;color:#bfffe6}
-.admin-only{display:none}
-.notice{background:rgba(255,210,102,0.06);border-left:4px solid #ffd166;padding:10px;border-radius:6px;color:#ffd166}
-@media (max-width:700px){
-  th,td{padding:8px;font-size:13px}
-  .header{flex-direction:column;align-items:flex-start}
-}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
+.table-wrap table{width:100%;border-collapse:collapse}
+.table-wrap th,.table-wrap td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left;vertical-align:middle;color:#dff}
+.table-wrap th{color:var(--muted);font-weight:700;font-size:13px}
+.bad{background:#1f2937;color:#fff;padding:6px 8px;border-radius:999px;font-weight:700}
+.status-paid{background:#134e4a;color:#d1fae5;padding:6px 8px;border-radius:8px;font-weight:700}
+.status-pend{background:#44337a;color:#f3e8ff;padding:6px 8px;border-radius:8px;font-weight:700}
+.center{display:flex;align-items:center;gap:8px}
+.small{font-size:13px;color:var(--muted)}
+.notice{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+.copy-btn{background:transparent;border:1px dashed rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;color:var(--muted)}
+.search-row{display:flex;gap:8px;align-items:center}
+@media(max-width:700px){.row{grid-template-columns:1fr}.search-row{flex-direction:column;align-items:stretch}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="card header">
-    <div>
-      <h2 class="h1">EXIST GAMER — Verify Payments</h2>
-      <div class="small">Search by Name, UID or Code. Mark Verified → Room details appear.</div>
+
+  <div class="header">
+    <div class="brand">
+      <h1>EXIST GAMER — Verify Payments</h1>
+      <p class="muted">Search by name / UID / Code. Admin can mark Paid & Verified.</p>
     </div>
+
     <div style="text-align:right">
-      <div id="adminStatus" class="small">Admin mode: <strong id="adminFlag">OFF</strong></div>
-      <div style="height:8px"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="unlockAdmin()">Unlock Admin</button>
-        <button class="btn btn-ghost" onclick="logoutAdmin()">Logout Admin</button>
-        <button class="btn btn-ghost" onclick="loadPlayers()">Refresh</button>
+      <div class="muted">Admin mode: <span id="adminFlag">OFF</span></div>
+      <div style="margin-top:8px">
+        <button id="unlockAdmin" class="btn btn-ghost">Unlock Admin</button>
+        <button id="refreshBtn" class="btn btn-ghost">Refresh</button>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <input id="q" class="input" placeholder="Search by Name / UID / Code" style="flex:1" onkeydown="if(event.key==='Enter') doSearch()">
-      <button class="btn btn-primary" onclick="doSearch()">Search</button>
-      <button class="btn btn-ghost" onclick="resetSearch()">Reset</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1">
+        <div class="search-row">
+          <input id="searchInput" placeholder="Enter UID or Code or Name" class="input" />
+          <button id="searchBtn" class="btn btn-primary">Search</button>
+          <button id="resetBtn" class="btn btn-ghost">Reset</button>
+        </div>
+        <div id="searchNote" class="small muted" style="margin-top:8px">Tip: press Enter or click Search. Admin unlock required to mark Paid/Verified.</div>
+      </div>
+
+      <div style="width:320px">
+        <div class="notice small">Realtime DB: <span id="dbStatus">connecting...</span></div>
+        <div style="height:8px"></div>
+        <div class="small">Loaded players: <strong id="playersCount">0</strong></div>
+      </div>
     </div>
   </div>
 
-  <div id="notice" class="card notice" style="display:none">
-    <div id="noticeText"></div>
+  <div id="resultArea" class="card" style="margin-top:12px">
+    <div id="resultInner">
+      <div class="muted">No search yet — results will appear here.</div>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="card" style="margin-top:12px">
+    <h3 style="margin:0 0 8px 0">All Players (live)</h3>
     <div class="table-wrap">
-      <table>
+      <table id="playersTable">
         <thead>
-          <tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Proof/Txn</th><th>Room (shown only when verified)</th><th>Status</th><th class="admin-only">Actions</th></tr>
+          <tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Proof/Txn</th><th>Room</th><th>Status</th><th>Actions</th></tr>
         </thead>
-        <tbody id="tbody"></tbody>
+        <tbody id="playersBody">
+          <tr><td colspan="9" class="muted">Loading players...</td></tr>
+        </tbody>
       </table>
     </div>
   </div>
+
 </div>
 
-<script>
-/*
-  Simple Verify page
-  - Reads players from localStorage key: 'existG_players_v2'
-  - Reads settings from: 'existG_settings_v2'
-  - Admin PIN to unlock: 786786
-  - Only Paid players can be Verified (button enabled only for paid)
-  - When verified -> player.verified = true saved to localStorage -> Room shown
-*/
+<!-- Firebase + app script: uses modular CDN -->
+<script type="module">
+// ---------- FIREBASE CONFIG & INIT ----------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, ref, onValue, get, child, update, set, push, remove } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-const PKEY = "existG_players_v2";
-const SKEY = "existG_settings_v2";
-const ADMIN_PIN = "786786";
+/* ==== REPLACE WITH YOUR CONFIG (you provided earlier) ==== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
+  authDomain: "exist-gamer.firebaseapp.com",
+  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "exist-gamer",
+  storageBucket: "exist-gamer.firebasestorage.app",
+  messagingSenderId: "868288388784",
+  appId: "1:868288388784:web:b4a8b933ccbeb95b392575",
+  measurementId: "G-BNFXCZQTJW"
+};
 
-let players = [];
-let settings = {};
-let isAdmin = localStorage.getItem('exist_isAdmin') === '1';
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-function escapeHtml(s){ return (""+s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+// ---------- KEYS / STATE ----------
+let players = {};   // object keyed by push id
+let settings = {};  // from /settings
+let isAdmin = false;
 
-function loadPlayers(){
-  try{ players = JSON.parse(localStorage.getItem(PKEY) || "[]") || []; } catch(e){ players = []; }
-  try{ settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; } catch(e){ settings = {}; }
-  isAdmin = localStorage.getItem('exist_isAdmin') === '1';
-  document.getElementById('adminFlag').textContent = isAdmin ? 'ON' : 'OFF';
-  render();
+// UI refs
+const dbStatus = document.getElementById("dbStatus");
+const playersCountEl = document.getElementById("playersCount");
+const playersBody = document.getElementById("playersBody");
+const resultInner = document.getElementById("resultInner");
+const adminFlag = document.getElementById("adminFlag");
+
+// search controls
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const resetBtn = document.getElementById("resetBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+const unlockAdmin = document.getElementById("unlockAdmin");
+
+// ---------- UTIL ----------
+function escapeHtml(s){ return (""+s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function shortMask(s){ s = (s||"")+""; if(!s) return ""; return s.length>4? "•••"+s.slice(-4) : "•••"+s; }
+function showDBStatus(txt){ dbStatus.textContent = txt; }
+function showPlayersCount(){ playersCountEl.textContent = Object.keys(players).length; }
+
+// ---------- LIVE LISTENERS ----------
+const playersRef = ref(db, "players");
+const settingsRef = ref(db, "settings");
+
+// listen settings
+onValue(settingsRef, snapshot => {
+  settings = snapshot.val() || {};
+  // ensure adminPin exists: fallback provided
+  showDBStatus("connected");
+});
+
+// listen players (realtime)
+onValue(playersRef, snapshot => {
+  const v = snapshot.val() || {};
+  players = v;
+  renderPlayersTable();
+  showPlayersCount();
+});
+
+// ---------- RENDER ----------
+function renderPlayersTable(){
+  const rows = [];
+  const ordered = Object.entries(players || {});
+  if(ordered.length === 0){
+    playersBody.innerHTML = `<tr><td colspan="9" class="muted">No players found.</td></tr>`;
+    return;
+  }
+  ordered.forEach(([id,p], idx)=>{
+    const name = escapeHtml(p.name || "");
+    const uid = escapeHtml(p.uid || "");
+    const wp = escapeHtml(p.wp || "");
+    const code = escapeHtml(p.code || "");
+    const proof = p.proof || "";
+    const room = (p.roomId || settings.roomId) || "";
+    const statusHTML = (p.paid ? `<span class="status-paid">Paid</span>` : `<span class="status-pend">Pending</span>`);
+    const roomDisplay = (p.paid ? (room ? escapeHtml(room) : "<span class='small muted'>room not set</span>") : "<span class='small muted'>hidden</span>");
+
+    rows.push(`<tr>
+      <td>${idx+1}</td>
+      <td>${name}</td>
+      <td>${shortMask(uid)}</td>
+      <td>${shortMask(wp)}</td>
+      <td><b>${code}</b></td>
+      <td>${escapeHtml(proof || "")}</td>
+      <td>${roomDisplay}</td>
+      <td>${statusHTML}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="onViewPlayer('${id}')">View</button>
+          <button class="btn btn-primary" onclick="onCopy('${id}')">Copy</button>
+          <button class="btn btn-ghost" onclick="onRevealRoom('${id}')">Room</button>
+          ${isAdmin ? `<button class="btn btn-primary" onclick="onMarkPaid('${id}')">Paid</button>` : ''}
+          ${isAdmin ? `<button class="btn btn-ghost" onclick="onMarkVerified('${id}')">Verified</button>` : ''}
+          ${isAdmin ? `<button class="btn btn-danger" onclick="onDelete('${id}')">Delete</button>` : ''}
+        </div>
+      </td>
+    </tr>`);
+  });
+  playersBody.innerHTML = rows.join("");
 }
 
-// Render table: show all players but room only if p.verified === true
-function render(filtered){
-  const list = Array.isArray(filtered) ? filtered : players;
-  const tbody = document.getElementById('tbody');
-  if(!list.length){ tbody.innerHTML = '<tr><td colspan="9" class="small">No players found.</td></tr>'; return; }
+// ---------- ACTIONS (exposed to DOM via window) ----------
+window.onViewPlayer = function(id){
+  const p = players[id];
+  if(!p) return alert("Player not found");
+  // show full details, reveal room only if paid
+  const paid = !!p.paid;
+  const roomId = p.roomId || settings.roomId || "";
+  const roomPass = p.roomPass || settings.roomPass || "";
+  const html = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div><strong>Name:</strong> ${escapeHtml(p.name||"")}</div>
+        <div><strong>UID:</strong> ${escapeHtml(p.uid||"")}</div>
+        <div><strong>WhatsApp:</strong> ${escapeHtml(p.wp||"")}</div>
+        <div style="margin-top:8px"><strong>Code:</strong> ${escapeHtml(p.code||"")}</div>
+        <div style="margin-top:8px" class="small muted">Registered at: ${p.createdAt ? new Date(p.createdAt).toLocaleString() : "—"}</div>
+      </div>
+      <div style="text-align:right">
+        <div>${ paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</div>
+        <div style="margin-top:8px">${ paid ? '<button id="revealBtn" class="btn btn-ghost">Show Room</button>' : ''}</div>
+      </div>
+    </div>
+    <div style="margin-top:12px" id="viewExtra"></div>
+  `;
+  resultInner.innerHTML = html;
+  if(paid){
+    const btn = document.getElementById("revealBtn");
+    btn && btn.addEventListener("click", ()=>{
+      const extra = document.getElementById("viewExtra");
+      extra.innerHTML = `
+        <div style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)">
+          <div><strong>Room ID:</strong> ${escapeHtml(roomId)}</div>
+          <div style="margin-top:6px"><strong>Password:</strong> <span id="maskPw">••••••</span> <button id="showPw" class="btn btn-ghost">Show</button></div>
+        </div>
+      `;
+      const showPw = document.getElementById("showPw");
+      showPw && showPw.addEventListener("click", ()=>{
+        document.getElementById("maskPw").textContent = roomPass || "—";
+        showPw.style.display = "none";
+      });
+    });
+  }
+};
 
-  let html = '';
-  list.forEach((p, idx) => {
-    const realIdx = players.findIndex(x => x.code === p.code && x.uid === p.uid);
-    const proofText = p.proof ? (p.proof.txn || 'Uploaded') : '';
-    const roomCell = (p.verified && settings && settings.roomId) ? `<span class="room-badge">${escapeHtml(settings.roomId)}${settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : ''}</span>` : '-';
-    html += `<tr>
-      <td>${realIdx+1}</td>
-      <td>${escapeHtml(p.name||'')}</td>
-      <td>${escapeHtml(p.uid||'')}</td>
-      <td>${escapeHtml(p.wp||'')}</td>
-      <td><b>${escapeHtml(p.code||'')}</b></td>
-      <td>${proofText ? escapeHtml(proofText) + (p.proof && p.proof.img ? ` <button class="btn btn-ghost" onclick="viewProof(${realIdx})">View</button>` : '') : ''}</td>
-      <td>${roomCell}</td>
-      <td>${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</td>
-      <td class="admin-only">
-        <button class="btn btn-primary" onclick="verifyUID(${realIdx})" ${p.paid ? '' : 'disabled title="Not paid yet"'}>Verify</button>
-        <button class="btn btn-ghost" onclick="copyUID(${realIdx})">Copy UID</button>
-        <button class="btn btn-danger" onclick="deletePlayer(${realIdx})">Delete</button>
-      </td>
-    </tr>`;
+window.onCopy = async function(id){
+  const p = players[id];
+  if(!p) return;
+  const txt = `Name: ${p.name}\nUID: ${p.uid}\nCode: ${p.code}\nRoom: ${p.roomId || settings.roomId || ''}\nPass: ${p.roomPass || settings.roomPass || ''}`;
+  try{
+    await navigator.clipboard.writeText(txt);
+    alert("Copied details to clipboard.");
+  }catch(e){
+    prompt("Copy this text:", txt);
+  }
+};
+
+window.onRevealRoom = function(id){
+  const p = players[id];
+  if(!p) return alert("Not found");
+  if(!p.paid) return alert("Payment not received yet.");
+  const roomId = p.roomId || settings.roomId || "";
+  const roomPass = p.roomPass || settings.roomPass || "";
+  resultInner.innerHTML = `<div><strong>Room:</strong> ${escapeHtml(roomId)}<br><strong>Pass:</strong> ${escapeHtml(roomPass || "—")}</div>`;
+};
+
+window.onMarkPaid = async function(id){
+  if(!isAdmin) return alert("Admin only");
+  if(!confirm("Mark this player as Paid?")) return;
+  await update(ref(db, `players/${id}`), { paid: 1 });
+  alert("Marked Paid.");
+};
+
+window.onMarkVerified = async function(id){
+  if(!isAdmin) return alert("Admin only");
+  if(!confirm("Mark this player as Verified (will not change paid status)?")) return;
+  await update(ref(db, `players/${id}`), { verified: 1 });
+  alert("Marked Verified.");
+};
+
+window.onDelete = async function(id){
+  if(!isAdmin) return alert("Admin only");
+  if(!confirm("Delete this player permanently?")) return;
+  await remove(ref(db, `players/${id}`));
+  alert("Deleted.");
+};
+
+// ---------- SEARCH & UI logic ----------
+searchBtn.addEventListener("click", doSearch);
+resetBtn.addEventListener("click", ()=>{
+  searchInput.value = "";
+  resultInner.innerHTML = `<div class="muted">No search yet — results will appear here.</div>`;
+});
+refreshBtn.addEventListener("click", ()=>{
+  // re-read once (onValue is live so this is mostly UX)
+  showDBStatus("refreshing...");
+  get(child(ref(db), '/players')).then(()=> showDBStatus("connected")).catch(()=> showDBStatus("error"));
+});
+
+searchInput.addEventListener("keydown", e=>{ if(e.key === "Enter") doSearch(); });
+
+async function doSearch(){
+  const q = (searchInput.value || "").trim();
+  if(!q) return alert("Enter UID or Code or name to search.");
+  // search players object
+  const list = Object.entries(players || {});
+  let foundEntry = list.find(([id,p])=>{
+    if(!p) return false;
+    const code = (p.code||"")+"";
+    const uid = (p.uid||"")+"";
+    const name = (p.name||"")+"";
+    return uid === q || code.toUpperCase() === q.toUpperCase() || (name.toLowerCase().includes(q.toLowerCase()));
   });
+  if(!foundEntry){
+    resultInner.innerHTML = `<div class="muted">No registration found for "${escapeHtml(q)}".</div>`;
+    return;
+  }
+  const [id, player] = foundEntry;
+  // Show result
+  const paid = !!player.paid;
+  const roomId = player.roomId || settings.roomId || "";
+  const roomPass = player.roomPass || settings.roomPass || "";
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div><strong>${escapeHtml(player.name||"")}</strong></div>
+      <div class="small muted">UID: ${escapeHtml(player.uid||"")}</div>
+      <div class="small muted">Code: ${escapeHtml(player.code||"")}</div>
+      <div style="margin-top:8px">${escapeHtml(player.proof||"") ? '<div><strong>Proof:</strong> '+escapeHtml(player.proof)+'</div>' : ''}</div>
+    </div>
+    <div style="text-align:right">
+      <div>${ paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>' }</div>
+      <div style="margin-top:8px">
+        <button class="btn btn-ghost" onclick="onCopy('${id}')">Copy</button>
+        ${isAdmin ? `<button class="btn btn-primary" onclick="onMarkPaid('${id}')">Mark Paid</button>` : ''}
+      </div>
+    </div>
+  </div>`;
 
-  tbody.innerHTML = html;
-  // admin UI show/hide
-  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
-
-  // small notice if not admin
-  const notice = document.getElementById('notice');
-  const noticeText = document.getElementById('noticeText');
-  if(!isAdmin){
-    notice.style.display = 'block';
-    noticeText.innerHTML = 'You are NOT admin. To mark Verified and reveal room details open the main tournament page and unlock Admin (PIN).';
+  // show room if paid
+  if(paid){
+    html += `<div style="margin-top:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)">
+      <div><strong>Room ID:</strong> ${escapeHtml(roomId)}</div>
+      <div style="margin-top:6px"><strong>Room Pass:</strong> <span id="maskpw">••••••</span> <button id="showRoomBtn" class="btn btn-ghost">Show</button></div>
+    </div>`;
   } else {
-    notice.style.display = 'none';
-    noticeText.innerHTML = '';
+    html += `<div style="margin-top:12px" class="muted">Payment not received yet. Room details will be visible after payment.</div>`;
+  }
+
+  resultInner.innerHTML = html;
+
+  const showBtn = document.getElementById("showRoomBtn");
+  if(showBtn){
+    showBtn.addEventListener("click", ()=>{
+      document.getElementById("maskpw").textContent = roomPass || "—";
+      showBtn.style.display = "none";
+    });
   }
 }
 
-/* SEARCH */
-function doSearch(){
-  const q = (document.getElementById('q').value || '').trim().toLowerCase();
-  if(!q){ render(); return; }
-  const filtered = players.filter(p =>
-    (p.name||'').toLowerCase().includes(q) ||
-    (p.uid||'').toLowerCase().includes(q) ||
-    (p.code||'').toLowerCase().includes(q)
-  );
-  render(filtered);
-}
-function resetSearch(){ document.getElementById('q').value=''; render(); }
-
-/* VIEW PROOF */
-function viewProof(i){
-  if(!players[i] || !players[i].proof || !players[i].proof.img) return alert("No proof image");
-  const w = window.open('','_blank'); w.document.write(`<img src="${players[i].proof.img}" style="max-width:100%;height:auto">`);
-}
-
-/* COPY UID */
-function copyUID(i){
-  if(!players[i] || !players[i].uid) return alert("No UID");
-  navigator.clipboard?.writeText(players[i].uid).then(()=>alert("UID copied to clipboard")).catch(()=>alert("Cannot copy"));
-}
-
-/* DELETE ENTRY (admin required) */
-function deletePlayer(i){
-  if(!isAdmin) return alert("Admin only");
-  if(!confirm("Delete this player?")) return;
-  players.splice(i,1);
-  localStorage.setItem(PKEY, JSON.stringify(players));
-  loadPlayers();
-}
-
-/* VERIFY (admin only). Only allowed if player.paid is truthy */
-function verifyUID(i){
-  if(!isAdmin) return alert("Admin only");
-  if(typeof i !== 'number' || i < 0 || i >= players.length) return alert("Invalid");
-  const p = players[i];
-  if(!p.paid) return alert("Player hasn't paid yet.");
-  // set verified flag
-  players[i].verified = true;
-  localStorage.setItem(PKEY, JSON.stringify(players));
-  alert(`Player ${p.name || p.uid} verified — Room details will now show.`);
-  setTimeout(loadPlayers, 120);
-}
-
-/* ADMIN unlock/logout */
-function unlockAdmin(){
+// ---------- ADMIN UNLOCK ----------
+unlockAdmin.addEventListener("click", async ()=>{
+  // first try to read adminPin from settings
+  const pinFromDb = settings.adminPin || settings.adminPIN || settings.pin || null;
+  const expected = pinFromDb || "786786";
   const pin = prompt("Enter Admin PIN:");
   if(pin === null) return;
-  if(pin === ADMIN_PIN){
-    localStorage.setItem('exist_isAdmin', '1');
+  if(pin === expected.toString()){
     isAdmin = true;
-    document.getElementById('adminFlag').textContent = 'ON';
-    render();
+    adminFlag.textContent = "ON";
     alert("Admin unlocked.");
+    renderPlayersTable();
   } else {
     alert("Wrong PIN.");
   }
-}
-function logoutAdmin(){
-  localStorage.removeItem('exist_isAdmin');
-  isAdmin = false;
-  document.getElementById('adminFlag').textContent = 'OFF';
-  render();
-  alert("Admin logged out.");
-}
-
-/* sync across tabs */
-window.addEventListener('storage', (e) => {
-  if(e.key === PKEY || e.key === SKEY) setTimeout(loadPlayers, 120);
 });
 
-/* initial load */
-loadPlayers();
+// ---------- initial UI ----------
+adminFlag.textContent = isAdmin ? "ON" : "OFF";
+resultInner.innerHTML = `<div class="muted">No search yet — results will appear here.</div>`;
+
 </script>
 </body>
 </html>
