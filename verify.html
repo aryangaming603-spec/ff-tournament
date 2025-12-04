@@ -3,91 +3,64 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>EXIST GAMER — Verify Payments</title>
+<title>EXIST GAMER — Verify</title>
 <style>
 :root{
-  --bg:#071423; --panel:#082034; --muted:#9fbfcc;
-  --accent:#06b6d4; --radius:10px; --pad:12px;
+  --bg:linear-gradient(180deg,#031026,#071423);
+  --panel:#082034; --muted:#9fbfcc; --accent:#06b6d4;
+  --radius:10px; --pad:12px;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter, Arial, sans-serif;background:linear-gradient(180deg,#031026,#071423);color:#eafcff;padding:18px}
+body{margin:0;font-family:Inter,Arial;background:var(--bg);color:#eafcff;padding:18px}
 .container{max-width:1100px;margin:0 auto}
 .card{background:var(--panel);padding:var(--pad);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.03);margin-bottom:14px}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.h1{font-size:20px;margin:0}
+.header{display:flex;justify-content:space-between;align-items:center}
+.h1{margin:0}
 .small{color:var(--muted);font-size:13px}
 .input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(2,12,20,0.6);color:#eaffff;width:100%}
 .btn{padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
 .btn-primary{background:var(--accent);color:#02120a}
 .btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.06)}
 .table-wrap{overflow:auto;margin-top:10px}
-table{width:100%;border-collapse:collapse;font-size:14px}
+table{width:100%;border-collapse:collapse}
 th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
 th{color:var(--muted);font-weight:700}
-.bad-paid{background:#134e4a;padding:6px 8px;border-radius:8px;color:#d1fae5;display:inline-block}
-.bad-pend{background:#44337a;padding:6px 8px;border-radius:8px;color:#f3e8ff;display:inline-block}
-.note{color:var(--muted);font-size:13px}
+.status-paid{background:#134e4a;padding:6px 8px;border-radius:8px;color:#d1fae5;display:inline-block}
+.status-pend{background:#44337a;padding:6px 8px;border-radius:8px;color:#f3e8ff;display:inline-block}
 .admin-only{display:none}
-.search-row{display:flex;gap:8px;align-items:center}
-@media(max-width:820px){ .search-row{flex-direction:column;align-items:stretch} }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="card header">
     <div>
-      <div class="h1">EXIST GAMER — Verify Payments</div>
-      <div class="small">Players registered on solo page will appear here. Verify by Code / UID.</div>
+      <h2 class="h1">EXIST GAMER — Verify Payments</h2>
+      <div class="small">Search by name, UID or Code. Mark Paid to reveal Room details.</div>
     </div>
     <div style="text-align:right">
       <div id="adminStatus" class="small">Checking admin...</div>
       <div style="height:8px"></div>
-      <button id="refreshBtn" class="btn btn-ghost" onclick="loadPlayers()">Refresh</button>
+      <button class="btn btn-ghost" onclick="loadPlayers()">Refresh</button>
     </div>
   </div>
 
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <div style="flex:1">
-        <div class="search-row">
-          <input id="q" class="input" placeholder="Search by Name / UID / Code (type and press Enter)" onkeydown="if(event.key==='Enter') doSearch()">
-          <button class="btn btn-primary" onclick="doSearch()">Search</button>
-          <button class="btn btn-ghost" onclick="resetSearch()">Reset</button>
-        </div>
-        <div class="note" style="margin-top:8px">Tip: Click "View Proof" to open screenshot (if player submitted). Mark Paid when you confirmed UPI transaction with the code.</div>
-      </div>
-
-      <div style="width:260px">
-        <div class="small">Quick stats</div>
-        <div style="margin-top:8px">
-          <div class="small">Total Registered: <span id="totalCnt">0</span></div>
-          <div class="small">Paid: <span id="paidCnt">0</span></div>
-          <div class="small">Pending: <span id="pendCnt">0</span></div>
-        </div>
-      </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="q" class="input" placeholder="Search by Name / UID / Code" style="flex:1" onkeydown="if(event.key==='Enter') doSearch()">
+      <button class="btn btn-primary" onclick="doSearch()">Search</button>
+      <button class="btn btn-ghost" onclick="resetSearch()">Reset</button>
     </div>
   </div>
 
   <div id="notAdminNotice" class="card" style="display:none">
-    <div style="color:#ffd166;font-weight:700">Notice: You are not admin.</div>
-    <div class="small" style="margin-top:8px">To verify payments and mark Paid, open the main Solo page and press <strong>Admin</strong> then enter PIN. This page will then show admin actions.</div>
+    <strong style="color:#ffd166">Notice: You are not admin.</strong>
+    <div class="small" style="margin-top:8px">To mark paid & see room details, open main page and unlock Admin (PIN).</div>
   </div>
 
   <div class="card">
     <div class="table-wrap">
-      <table id="playersTable">
+      <table>
         <thead>
-          <tr>
-  <th>#</th>
-  <th>Name</th>
-  <th>UID</th>
-  <th>WhatsApp</th>
-  <th>Code</th>
-  <th>Proof / Txn</th>
-  <th>Room</th>  <!-- new -->
-  <th>Status</th>
-  <th class="admin-only">Actions</th>
-</tr>
+          <tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Proof/Txn</th><th>Room</th><th>Status</th><th class="admin-only">Actions</th></tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -96,144 +69,84 @@ th{color:var(--muted);font-weight:700}
 </div>
 
 <script>
-/* keys must match solo page */
 const PKEY = "existG_players_v2";
-const SKEY = "existG_settings_v2";   // <-- add this line
+const SKEY = "existG_settings_v2";
+let players = [], settings = {}, isAdmin = localStorage.getItem('exist_isAdmin')==='1';
 
-/* state */
-let players = [];
-let settings = {};                    // <-- add this line
-let isAdmin = localStorage.getItem('exist_isAdmin') === '1';
+function escapeHtml(s){ return (""+s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-/* load players from localStorage */
 function loadPlayers(){
-  try{
-    players = JSON.parse(localStorage.getItem(PKEY) || "[]") || [];
-    // load settings too (so room id/pass are available)
-settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {};
-  } catch(e){
-    console.error("load error", e);
-    players = [];
-  }
-
-  // load settings (room id / password) to display when verified/paid
-  try {
-    settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {};
-  } catch(e) {
-    console.warn("settings load error", e);
-    settings = {};
-  }
-  }
+  try{ players = JSON.parse(localStorage.getItem(PKEY) || "[]") || []; }catch(e){ players = []; }
+  try{ settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; }catch(e){ settings = {}; }
+  isAdmin = localStorage.getItem('exist_isAdmin')==='1';
   render();
 }
 
-/* render table */
 function render(filtered){
-  const list = filtered || players;
-  document.getElementById('totalCnt').textContent = players.length;
-  const paid = players.filter(p=>p.paid).length;
-  document.getElementById('paidCnt').textContent = paid;
-  document.getElementById('pendCnt').textContent = players.length - paid;
-
+  const list = Array.isArray(filtered) ? filtered : players;
   const tbody = document.getElementById('tbody');
-  if(!list.length){
-    tbody.innerHTML = '<tr><td colspan="8" class="small">No players found.</td></tr>';
-    return;
-  }
+  if(!list.length){ tbody.innerHTML = '<tr><td colspan="9" class="small">No players found.</td></tr>'; showAdmin(false); return; }
   let html = '';
-  list.forEach((p,i)=>{
-    const idx = players.indexOf(p);
-    const proofText = p.proof ? (p.proof.txn || 'Screenshot') : '';
+  list.forEach((p, idx)=>{
+    const realIdx = players.findIndex(x=>x.code===p.code && x.uid===p.uid);
+    const proofText = p.proof ? (p.proof.txn || 'Uploaded') : '';
+    const roomCell = ((p.paid || p.verified) && settings && settings.roomId) ? escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '') : '-';
     html += `<tr>
-      <td>${idx+1}</td>
+      <td>${realIdx+1}</td>
       <td>${escapeHtml(p.name||'')}</td>
       <td>${escapeHtml(p.uid||'')}</td>
       <td>${escapeHtml(p.wp||'')}</td>
       <td><b>${escapeHtml(p.code||'')}</b></td>
-      <td>${proofText ? escapeHtml(proofText) + (p.proof && p.proof.img ? ` <button class="btn btn-ghost" onclick="viewProof(${idx})">View Proof</button>` : '') : ''}</td>
-      <td>${( (p.paid || p.verified) && settings.roomId ) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-'}</td>
-
-<!-- ROOM cell: show only when paid or verified and settings have roomId -->
-<td>${( (p.paid || p.verified) && settings.roomId ) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-'}</td>
-
-<td>${p.paid ? '<span class="bad-paid">Paid</span>' : '<span class="bad-pend">Pending</span>'}</td>
-<td class="admin-only"> ... </td>
-         <button class="btn btn-primary" onclick="markPaid(${idx})">Mark Paid</button>
-         <button class="btn btn-ghost" onclick="verifyUID(${idx})">Verify UID</button>
-         <button class="btn btn-ghost" onclick="copyUID(${idx})">Copy UID</button>
-         <button class="btn btn-danger" onclick="deletePlayer(${idx})">Delete</button>
+      <td>${proofText ? escapeHtml(proofText) + (p.proof && p.proof.img ? ` <button class="btn btn-ghost" onclick="viewProof(${realIdx})">View</button>` : '') : ''}</td>
+      <td>${roomCell}</td>
+      <td>${p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>'}</td>
+      <td class="admin-only">
+        <button class="btn btn-primary" onclick="markPaid(${realIdx})">Mark Paid</button>
+        <button class="btn btn-ghost" onclick="verifyUID(${realIdx})">Verify</button>
+        <button class="btn btn-ghost" onclick="copyUID(${realIdx})">Copy UID</button>
+        <button class="btn btn-danger" onclick="deletePlayer(${realIdx})">Delete</button>
       </td>
     </tr>`;
   });
   tbody.innerHTML = html;
-
-  // show/hide admin UI:
-  document.getElementById('notAdminNotice').style.display = isAdmin ? 'none' : 'block';
-  document.querySelectorAll('.admin-only').forEach(el=>{
-    el.style.display = isAdmin ? 'table-cell' : 'none';
-  });
-  document.getElementById('adminStatus').textContent = isAdmin ? "Admin mode: ON" : "Admin mode: OFF";
+  showAdmin(isAdmin);
 }
 
-/* helpers */
-function escapeHtml(s){ return (""+s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-/* actions */
-function markPaid(i){
-  if(!isAdmin) return alert("Only admin can mark paid.");
-  players[i].paid = 1;
-  localStorage.setItem(PKEY, JSON.stringify(players));
-  loadPlayers();
-  alert("Marked Paid.");
-}
-function verifyUID(i){
-  if(!isAdmin) return alert("Only admin can verify.");
-  // simple verify: we can set a flag or just mark paid as verified (example sets verified flag)
-  players[i].verified = true;
-  localStorage.setItem(PKEY, JSON.stringify(players));
-  loadPlayers();
-  alert("UID Verified for " + players[i].name);
-}
-function deletePlayer(i){
-  if(!isAdmin) return alert("Only admin can delete.");
-  if(!confirm("Delete player?")) return;
-  players.splice(i,1);
-  localStorage.setItem(PKEY, JSON.stringify(players));
-  loadPlayers();
+function showAdmin(on){
+  document.getElementById('notAdminNotice').style.display = on ? 'none' : 'block';
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display = on ? '' : 'none');
+  document.getElementById('adminStatus').textContent = on ? 'Admin mode: ON' : 'Admin mode: OFF';
 }
 
-/* view proof image in new window */
-function viewProof(i){
-  const p = players[i];
-  if(!p.proof || !p.proof.img) return alert("No proof image.");
-  const w = window.open("");
-  w.document.write(`<h3>Payment Proof — ${escapeHtml(p.name)} (Code: ${escapeHtml(p.code)})</h3>`);
-  w.document.write(`<img src="${p.proof.img}" style="max-width:100%;height:auto;border:1px solid #ccc">`);
-  if(p.proof.txn) w.document.write(`<p>Txn: ${escapeHtml(p.proof.txn)}</p>`);
-}
-
-/* copy UID to clipboard */
-function copyUID(i){
-  const txt = players[i].uid || '';
-  if(!txt) return alert("No UID");
-  navigator.clipboard?.writeText(txt).then(()=>alert("UID copied")).catch(()=>alert("Copy failed"));
-}
-
-/* search */
 function doSearch(){
+  try{ players = JSON.parse(localStorage.getItem(PKEY) || "[]") || []; }catch(e){ players = []; }
+  try{ settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; }catch(e){ settings = {}; }
   const q = (document.getElementById('q').value||'').trim().toLowerCase();
-  if(!q){ loadPlayers(); return; }
-  const res = players.filter(p=>{
+  if(!q){ render(); return; }
+  const filtered = players.filter(p=>{
     return (p.name||'').toLowerCase().includes(q) || (p.uid||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q);
   });
-  render(res);
+  render(filtered);
 }
-function resetSearch(){ document.getElementById('q')
+function resetSearch(){ document.getElementById('q').value=''; loadPlayers(); }
 
-/* listen storage change (in case admin changed players in another tab) */
-window.addEventListener('storage', function(e){
-  if(e.key === PKEY) loadPlayers();
-});
+function markPaid(i){
+  if(!isAdmin) return alert("Admin only");
+  if(typeof i!=='number' || i<0 || i>=players.length) return;
+  players[i].paid = 1; localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); alert("Marked Paid");
+}
+function verifyUID(i){
+  if(!isAdmin) return alert("Admin only");
+  if(typeof i!=='number') return; players[i].verified = true; localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); alert("Verified");
+}
+function deletePlayer(i){ if(!confirm("Delete entry?")) return; players.splice(i,1); localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); }
+function copyUID(i){ const t = players[i] && players[i].uid; if(!t) return alert("No UID"); navigator.clipboard?.writeText(t).then(()=>alert("UID copied")); }
+function viewProof(i){ const p=players[i]; if(!p||!p.proof||!p.proof.img) return alert("No proof"); const w=window.open(''); w.document.write(`<img src="${p.proof.img}" style="max-width:100%">`); if(p.proof.txn) w.document.write(`<p>Txn: ${escapeHtml(p.proof.txn)}</p>`); }
+
+window.addEventListener('storage', function(e){ if(e.key===PKEY||e.key===SKEY) setTimeout(loadPlayers,120); });
+
+// initial load
+loadPlayers();
 </script>
 </body>
 </html>
