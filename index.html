@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EXIST GAMER — Tournament</title>
+<style>
+:root{
+  --bg:linear-gradient(180deg,#031026,#071423);
+  --panel:#072033; --muted:#9fbfcc; --accent:#06b6d4; --danger:#ef4444;
+  --glass:rgba(255,255,255,0.03); --radius:10px; --pad:12px; --maxw:980px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#eafcff}
+.container{max-width:var(--maxw);margin:18px auto;padding:16px}
+.card{background:var(--panel);border-radius:var(--radius);padding:var(--pad);border:1px solid var(--glass)}
+.row{display:grid;grid-template-columns:1fr 320px;gap:12px}
+@media(max-width:820px){ .row{grid-template-columns:1fr} }
+.input{width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#eaffff}
+.btn{padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,var(--accent),#16a34a);color:#02120a}
+.btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.04)}
+.small{font-size:13px;color:var(--muted)}
+.table-wrap{overflow-x:auto;margin-top:10px}
+.table-wrap table{width:100%;border-collapse:collapse}
+.table-wrap th, .table-wrap td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;font-size:14px}
+.table-wrap td.left{ text-align:left }
+.status-paid{background:#134e4a;color:#d1fae5;padding:6px;border-radius:8px}
+.status-pend{background:#44337a;color:#f3e8ff;padding:6px;border-radius:8px}
+.admin-only{display:none}
+.hidden{display:none}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div>
+      <h2 style="margin:0">EXIST GAMER</h2>
+      <div class="small muted">Free Fire — Simple Tournament</div>
+    </div>
+    <div style="text-align:right">
+      <button id="unlockBtn" class="btn btn-ghost">Unlock Admin</button>
+      <a id="linkVerify" class="btn btn-ghost" href="verify.html">Verify</a>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <!-- left -->
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Register</h3>
+      <div class="small muted">Fill details → Pay (UPI) → Admin will mark Paid.</div>
+
+      <label class="small" style="margin-top:8px">In-game name</label>
+      <input id="name" class="input" placeholder="Your name">
+
+      <label class="small">UID</label>
+      <input id="uid" class="input" placeholder="123456789">
+
+      <label class="small">WhatsApp</label>
+      <input id="wp" class="input" placeholder="10-digit number">
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="regBtn" class="btn btn-primary">Pay & Register</button>
+        <button id="clearBtn" class="btn btn-ghost">Clear</button>
+      </div>
+
+      <div id="qrBox" class="card hidden" style="margin-top:12px;text-align:center">
+        <div class="small muted">Scan QR or open UPI app</div>
+        <img id="qrImg" src="" alt="QR" style="width:200px;border-radius:8px;margin-top:8px">
+        <div style="height:8px"></div>
+        <button id="openUpi" class="btn btn-primary">Open UPI</button>
+      </div>
+    </div>
+
+    <!-- right -->
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Registered Players</h3>
+      <div class="small muted" id="infoTop">Players saved on server</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Status</th><th class="admin-only">Actions</th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="7" class="small muted">No players yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+// --------- CONFIG: replace these with your Firebase project config if different ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
+  authDomain: "exist-gamer.firebaseapp.com",
+  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "exist-gamer",
+  storageBucket: "exist-gamer.firebasestorage.app",
+  messagingSenderId: "868288388784",
+  appId: "1:868288388784:web:b4a8b933ccbeb95b392575",
+  measurementId: "G-BNFXCZQTJW"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// --------- defaults ----------
+const DEFAULT_UPI = "9170856377-3@ybl";  // change if needed
+const DEFAULT_FEE = 25;
+const DEFAULT_ADMIN_PIN = "786786";
+
+// state
+let players = {};
+
+// utils
+function genCode(){ return (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,5)).toUpperCase(); }
+function escapeHtml(s){ return (""+s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function mask(v){ v=(v||"")+''; if(!v) return ''; return v.length<=4 ? "•••"+v : "•••"+v.slice(-4); }
+
+// ui refs
+const nameIn = document.getElementById('name');
+const uidIn = document.getElementById('uid');
+const wpIn = document.getElementById('wp');
+const regBtn = document.getElementById('regBtn');
+const clearBtn = document.getElementById('clearBtn');
+const tbody = document.getElementById('tbody');
+const qrBox = document.getElementById('qrBox');
+const qrImg = document.getElementById('qrImg');
+const openUpi = document.getElementById('openUpi');
+const unlockBtn = document.getElementById('unlockBtn');
+
+// realtime listen players
+db.ref('players').on('value', snap => {
+  players = snap.val() || {};
+  renderPlayers();
+});
+
+// render table
+function renderPlayers(){
+  const entries = Object.entries(players);
+  if(entries.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" class="small muted">No players yet</td></tr>';
+    return;
+  }
+  // get keys to map to buttons reliably
+  const keys = Object.keys(players);
+  tbody.innerHTML = keys.map((k, i) => {
+    const p = players[k] || {};
+    const status = p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>';
+    const actions = window.IS_ADMIN ? `<button class="btn btn-primary" onclick="markPaid('${k}')">Paid</button>
+      <button class="btn btn-ghost" onclick="deletePlayer('${k}')">Delete</button>` : '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td class="left">${escapeHtml(p.name)}</td>
+      <td>${mask(p.uid)}</td>
+      <td>${mask(p.wp)}</td>
+      <td><b>${escapeHtml(p.code)}</b></td>
+      <td>${status}</td>
+      <td class="admin-only">${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+// registration
+async function register(){
+  const name = nameIn.value.trim(), uid = uidIn.value.trim(), wp = wpIn.value.trim();
+  if(!name || !uid || !wp) return alert('Fill all fields');
+  if(wp.length < 8) return alert('Enter valid WhatsApp number');
+  // fetch settings fee/up i from server if set; fallback to defaults
+  let fee = DEFAULT_FEE;
+  try{ const s = (await db.ref('settings').once('value')).val(); if(s && s.fee) fee = s.fee; }catch(e){}
+  const code = genCode();
+  const payload = { name, uid, wp, code, paid:0, createdAt:Date.now() };
+  try{
+    const ref = db.ref('players');
+    const pushRef = await ref.push(payload);
+    alert('Registered! Your code: ' + code + '. Save it.');
+    // show QR for quick payment (Google Chart API)
+    const upi = (await db.ref('settings/upi').once('value')).val() || DEFAULT_UPI;
+    const upiStr = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('EXIST GAMER')}&am=${encodeURIComponent(fee)}&cu=INR&tn=${encodeURIComponent('Entry:'+code)}`;
+    qrImg.src = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiStr)}`;
+    qrBox.classList.remove('hidden');
+    clearForm();
+  }catch(e){ console.error(e); alert('Register failed'); }
+}
+
+regBtn.addEventListener('click', register);
+clearBtn.addEventListener('click', ()=>{ clearForm(); qrBox.classList.add('hidden'); });
+
+function clearForm(){ nameIn.value=''; uidIn.value=''; wpIn.value=''; }
+
+// open UPI link
+openUpi.addEventListener('click', async ()=>{
+  const upi = (await db.ref('settings/upi').once('value')).val() || DEFAULT_UPI;
+  const fee = (await db.ref('settings/fee').once('value')).val() || DEFAULT_FEE;
+  const link = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('EXIST GAMER')}&am=${encodeURIComponent(fee)}&cu=INR&tn=${encodeURIComponent('Tournament')}`;
+  // try android intent then fallback
+  const intent = `intent://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('EXIST GAMER')}&am=${encodeURIComponent(fee)}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+  window.location.href = intent;
+  setTimeout(()=>window.location.href = link, 1200);
+});
+
+// admin unlock
+window.IS_ADMIN = false;
+unlockBtn.addEventListener('click', async ()=>{
+  const pin = prompt('Enter admin PIN:');
+  if(!pin) return;
+  try{
+    const snap = await db.ref('settings/adminPin').once('value');
+    const real = snap.exists() ? snap.val() : DEFAULT_ADMIN_PIN;
+    if(String(pin) === String(real)){
+      window.IS_ADMIN = true;
+      document.querySelectorAll('.admin-only').forEach(x=> x.style.display = '');
+      alert('Admin unlocked');
+    } else alert('Wrong PIN');
+  }catch(e){
+    if(pin === DEFAULT_ADMIN_PIN){ window.IS_ADMIN = true; document.querySelectorAll('.admin-only').forEach(x=> x.style.display=''); alert('Admin unlocked (fallback)'); }
+    else alert('Wrong PIN');
+  }
+});
+
+// admin actions
+window.markPaid = async function(key){
+  if(!window.IS_ADMIN) return alert('Admin only');
+  if(!confirm('Mark as paid?')) return;
+  try{ await db.ref('players/'+key).update({ paid:1 }); alert('Marked paid'); }catch(e){ console.error(e); alert('Fail'); }
+};
+window.deletePlayer = async function(key){
+  if(!window.IS_ADMIN) return alert('Admin only');
+  if(!confirm('Delete player?')) return;
+  try{ await db.ref('players/'+key).remove(); alert('Deleted'); }catch(e){ console.error(e); alert('Fail'); }
+};
+</script>
+</body>
+</html>
