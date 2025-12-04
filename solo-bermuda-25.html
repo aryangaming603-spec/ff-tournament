@@ -459,10 +459,49 @@ function clearRegForm(){
   document.getElementById("rWp").value = "";
 }
 
-function regNow(){
-  if(!settings.regOpen){
-    return alert("Registration is closed by admin.");
+// STEP-2: Register and push to RTDB, returns server key and code
+async function regNow(){
+  const nameEl = document.getElementById("rName");
+  const uidEl   = document.getElementById("rUid");
+  const wpEl    = document.getElementById("rWp");
+
+  if(!nameEl||!uidEl||!wpEl){ alert("Inputs missing: rName, rUid, rWp"); return; }
+
+  const name = nameEl.value.trim();
+  const uid  = uidEl.value.trim();
+  const wp   = wpEl.value.trim();
+
+  if(!name || !uid || !wp){ alert("Please fill all fields."); return; }
+  if(wp.length < 8){ alert("Enter a valid WhatsApp number."); return; }
+
+  const code = (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,4)).toUpperCase();
+  const player = {
+    name, uid, wp, code,
+    paid: 0,
+    verified: false,
+    createdAt: Date.now()
+  };
+
+  try{
+    const playersRef = dbRef(db, "players");
+    const pushRef = await dbPush(playersRef, player);
+    const playerKey = pushRef.key || null;
+
+    alert("Registered! Your code: " + code + "\nSave this code.");
+
+    nameEl.value = "";
+    uidEl.value = "";
+    wpEl.value = "";
+
+    document.getElementById("qrArea").style.display = "block";
+
+    return { ok:true, playerKey, code };
+  }catch(err){
+    console.error("regNow error:", err);
+    alert("Registration failed.");
+    return { ok:false };
   }
+}
   const name = document.getElementById("rName").value.trim();
   const uid = document.getElementById("rUid").value.trim();
   const wp = document.getElementById("rWp").value.trim();
