@@ -420,6 +420,17 @@ async function regNow(){
   if(!name || !uid || !wp) return alert('Please fill all fields.');
   if(wp.length < 8) return alert('Enter a valid WhatsApp number.');
 
+  const upi = "9170856377-3@ybl";
+const fee = 25;
+const tn = "Entry:" + code;
+
+const upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent("EXIST GAMER")}&am=${encodeURIComponent(fee)}&cu=INR&tn=${encodeURIComponent(tn)}`;
+
+const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiLink)}`;
+
+document.getElementById("qrImg").src = qrUrl;
+document.getElementById("qrBox").style.display = "block";
+
   const code = genCode();
   const payload = { name, uid, wp, code, paid:0, verified:0, createdAt: Date.now() };
   try{
