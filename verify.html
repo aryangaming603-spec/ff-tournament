@@ -136,9 +136,26 @@ function markPaid(i){
   players[i].paid = 1; localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); alert("Marked Paid");
 }
 function verifyUID(i){
-  if(!isAdmin) return alert("Admin only");
-  if(typeof i!=='number') return; players[i].verified = true; localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); alert("Verified");
+  // check admin flag (optional)
+  if(localStorage.getItem('exist_isAdmin') !== '1'){
+    return alert("Only admin can verify.");
+  }
+  // safety
+  if(typeof i !== 'number' || i < 0) return alert("Invalid index");
+  try{
+    const players = JSON.parse(localStorage.getItem('existG_players_v2')||'[]');
+    if(!players[i]) return alert("Player not found");
+    players[i].verified = true;
+    localStorage.setItem('existG_players_v2', JSON.stringify(players));
+    alert("UID verified. Room details will now be visible for this player.");
+    // refresh view
+    setTimeout(()=>{ loadPlayers(); }, 120);
+  }catch(e){
+    console.error(e);
+    alert("Error verifying: "+e.message);
+  }
 }
+
 function deletePlayer(i){ if(!confirm("Delete entry?")) return; players.splice(i,1); localStorage.setItem(PKEY, JSON.stringify(players)); loadPlayers(); }
 function copyUID(i){ const t = players[i] && players[i].uid; if(!t) return alert("No UID"); navigator.clipboard?.writeText(t).then(()=>alert("UID copied")); }
 function viewProof(i){ const p=players[i]; if(!p||!p.proof||!p.proof.img) return alert("No proof"); const w=window.open(''); w.document.write(`<img src="${p.proof.img}" style="max-width:100%">`); if(p.proof.txn) w.document.write(`<p>Txn: ${escapeHtml(p.proof.txn)}</p>`); }
