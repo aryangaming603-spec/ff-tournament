@@ -200,12 +200,17 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
       </div>
 
       <div id="qrArea" style="display:none;margin-top:12px;text-align:center">
-        <img id="qrImg" src="aryan-upi-qr.png" alt="QR" style="width:220px;border-radius:12px;border:1px solid var(--glass)">
-        <div style="height:8px"></div>
-        <button class="btn btn-primary" onclick="openUPI()">Open UPI App</button>
-        <div class="muted" style="margin-top:8px">After payment, admin will verify and mark Paid.</div>
+  <img id="qrImg" src="aryan-upi-qr.png" alt="QR" style="width:220px;border-radius:12px;border:1px solid var(--glass)">
+
+  <div style="height:8px"></div>
+
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="openUPI()">Open UPI App</button>
+    <button class="btn btn-ghost" onclick="openWhatsApp()">Send on WhatsApp</button>
+  </div>
+
+  <div class="muted" style="margin-top:8px">After payment, submit proof or admin will verify your payment.</div>
       </div>
-    </div>
 
     <!-- right: registered players -->
     <div class="card">
@@ -449,6 +454,33 @@ function openUPI(){
   const link = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amt)}&cu=INR&tn=${encodeURIComponent(tn)}`;
   location.href = link;
 }
+
+  // Admin WhatsApp number (India format: 91 + mobile)
+const ADMIN_WA = "919170856377"; // CHANGE ONLY if your WhatsApp number changes
+
+function openWhatsApp(){
+  // last registered player
+  const last = players[players.length - 1];
+  if(!last){
+    return alert("Please register first.");
+  }
+
+  // WhatsApp message
+  const msg =
+`Hi Admin (EXIST GAMER),
+I have paid ₹${settings.fee}.
+Name: ${last.name}
+UID: ${last.uid}
+Code: ${last.code}
+Please verify.`;
+
+  // WhatsApp deep link
+  const waUrl = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`;
+
+  // Open WhatsApp
+  window.open(waUrl, "_blank");
+}
+  
 function openUPIBlock(){ document.getElementById("qrArea").style.display = "block"; document.getElementById("qrArea").scrollIntoView({behavior:"smooth"}); }
 
 /* ===== admin show/hide helper ===== */
