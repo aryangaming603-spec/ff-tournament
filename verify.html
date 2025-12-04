@@ -89,8 +89,8 @@ function render(filtered){
   let html = '';
   list.forEach((p, idx)=>{
     const realIdx = players.findIndex(x=>x.code===p.code && x.uid===p.uid);
-    const proofText = p.proof ? (p.proof.txn || 'Uploaded') : '';
-    const roomCell = ((p.paid || p.verified) && settings && settings.roomId) ? escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '') : '-';
+    const proofText = p.proof ? (p.proof.txn || 'Uploaded') : '
+    const roomCell = (p.verified && settings && settings.roomId) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-';
     html += `<tr>
       <td>${realIdx+1}</td>
       <td>${escapeHtml(p.name||'')}</td>
