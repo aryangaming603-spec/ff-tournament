@@ -78,8 +78,16 @@ th{color:var(--muted);font-weight:700}
       <table id="playersTable">
         <thead>
           <tr>
-            <th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Proof / Txn</th><th>Status</th><th class="admin-only">Actions</th>
-          </tr>
+  <th>#</th>
+  <th>Name</th>
+  <th>UID</th>
+  <th>WhatsApp</th>
+  <th>Code</th>
+  <th>Proof / Txn</th>
+  <th>Room</th>  <!-- new -->
+  <th>Status</th>
+  <th class="admin-only">Actions</th>
+</tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -101,9 +109,18 @@ let isAdmin = localStorage.getItem('exist_isAdmin') === '1';
 function loadPlayers(){
   try{
     players = JSON.parse(localStorage.getItem(PKEY) || "[]") || [];
-  }catch(e){
+  } catch(e){
     console.error("load error", e);
     players = [];
+  }
+
+  // load settings (room id / password) to display when verified/paid
+  try {
+    settings = JSON.parse(localStorage.getItem(SKEY) || "{}") || {};
+  } catch(e) {
+    console.warn("settings load error", e);
+    settings = {};
+  }
   }
   render();
 }
@@ -132,8 +149,12 @@ function render(filtered){
       <td>${escapeHtml(p.wp||'')}</td>
       <td><b>${escapeHtml(p.code||'')}</b></td>
       <td>${proofText ? escapeHtml(proofText) + (p.proof && p.proof.img ? ` <button class="btn btn-ghost" onclick="viewProof(${idx})">View Proof</button>` : '') : ''}</td>
-      <td>${p.paid ? '<span class="bad-paid">Paid</span>' : '<span class="bad-pend">Pending</span>'}</td>
-      <td class="admin-only">
+
+<!-- ROOM cell: show only when paid or verified and settings have roomId -->
+<td>${( (p.paid || p.verified) && settings.roomId ) ? (escapeHtml(settings.roomId) + (settings.roomPass ? ' / ' + escapeHtml(settings.roomPass) : '')) : '-'}</td>
+
+<td>${p.paid ? '<span class="bad-paid">Paid</span>' : '<span class="bad-pend">Pending</span>'}</td>
+<td class="admin-only"> ... </td>
          <button class="btn btn-primary" onclick="markPaid(${idx})">Mark Paid</button>
          <button class="btn btn-ghost" onclick="verifyUID(${idx})">Verify UID</button>
          <button class="btn btn-ghost" onclick="copyUID(${idx})">Copy UID</button>
