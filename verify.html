@@ -90,9 +90,11 @@ th{color:var(--muted);font-weight:700}
 <script>
 /* keys must match solo page */
 const PKEY = "existG_players_v2";
+const SKEY = "existG_settings_v2";   // <-- add this line
 
 /* state */
 let players = [];
+let settings = {};                    // <-- add this line
 let isAdmin = localStorage.getItem('exist_isAdmin') === '1';
 
 /* load players from localStorage */
