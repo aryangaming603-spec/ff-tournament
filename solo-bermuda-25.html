@@ -589,7 +589,87 @@ async function clearAllPlayers(){
   if(!confirm('Clear all players? This cannot be undone.')) return;
   try{ await db.ref('players').set(null); alert('All players cleared'); }catch(e){ console.error(e); alert('Failed'); }
 }
+<script>
+// ===== Admin-lock patch: show admin UI ONLY after correct PIN =====
 
+// Ensure admin UI hidden by default
+document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+try{ document.getElementById('adminSettingsCard').style.display = 'none'; }catch(e){}
+
+let IS_ADMIN = false; // strict: default false
+
+// read saved hint from settings in DB (if available) - uses firebase `db` which must already exist
+async function checkStoredAdminPin(pin){
+  try{
+    const snap = await db.ref('settings/adminPin').once('value');
+    const real = snap.exists() ? String(snap.val()) : null;
+    return real && String(pin) === real;
+  }catch(e){
+    console.warn('checkStoredAdminPin error', e);
+    return false;
+  }
+}
+
+// call this to attempt unlock
+async function tryUnlockAdmin(){
+  // prompt for pin
+  const pin = prompt('Enter admin PIN to unlock admin controls:');
+  if(pin === null) return; // user cancelled
+  // first check DB stored pin (preferred)
+  const okDb = await checkStoredAdminPin(pin);
+  if(okDb){
+    IS_ADMIN = true;
+    enableAdminUI();
+    alert('Admin unlocked (DB pin).');
+    return;
+  }
+  // fallback to default pin 786786
+  if(String(pin) === '786786'){
+    IS_ADMIN = true;
+    enableAdminUI();
+    alert('Admin unlocked (fallback pin).');
+    return;
+  }
+  alert('Wrong PIN. Admin not unlocked.');
+}
+
+// show admin UI elements and set flag
+function enableAdminUI(){
+  IS_ADMIN = true;
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+  try{ document.getElementById('adminSettingsCard').style.display = ''; }catch(e){}
+  // expose functions if needed
+  window.markPaid = window.markPaid || window.onMarkPaid || window.markPaid;
+  // optionally re-render UI if needed
+}
+
+// If URL contains admin=1, prompt for PIN (but do NOT auto-unlock)
+if(location.search.includes('admin=1')){
+  // small delay so page loads
+  setTimeout(()=> tryUnlockAdmin(), 300);
+}
+
+// Also add a convenient unlock button if not present (adds to header)
+(function addUnlockButton(){
+  try{
+    const headerRight = document.querySelector('.header [style*="text-align:right"]') || document.querySelector('.header');
+    if(!headerRight) return;
+    // only add once
+    if(document.getElementById('adminUnlockBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'adminUnlockBtn';
+    btn.className = 'btn btn-ghost';
+    btn.textContent = 'Unlock Admin';
+    btn.style.marginLeft = '8px';
+    btn.onclick = tryUnlockAdmin;
+    headerRight.appendChild(btn);
+  }catch(e){ console.warn(e); }
+})();
+
+// prevent accidental global admin true state from earlier code
+// if some older script set window.isAdmin, override it
+try{ window.isAdmin = IS_ADMIN; }catch(e){}
+</script>
 /* make admin functions global */
 window.markPaid = markPaid;
 window.markVerified = markVerified;
@@ -597,33 +677,7 @@ window.deletePlayer = deletePlayer;
 window.viewPlayer = viewPlayer;
 window.saveSettingsToServer = saveSettingsToServer;
 
-/* ======================= On-screen admin unlock (PIN) ======================= */
-(function setupAdminUnlock(){
-  // if admin in URL, keep isAdmin true
-  if(isAdmin){
-    document.querySelectorAll('.admin-only').forEach(x => x.style.display = '');
-    adminSettingsCard.style.display = '';
-    return;
-  }
-  // add unlock prompt when clicking header admin link
-  const unlockBtn = document.querySelector('a[href="?admin=1"]') || document.querySelector('#openRegBtn');
-  // also listen for unlockAdmin button (if exists)
-  const pageUnlock = document.getElementById('openRegBtn');
-  document.querySelectorAll('a,button').forEach(el=> el.addEventListener('contextmenu', ()=>{})); // noop
-  // add global unlock via prompt (user flow)
-  window.unlockAdminWithPin = async function(){
-    const pin = prompt('Enter admin PIN:');
-    if(!pin) return;
-    // check /settings/adminPin
-    const snap = await db.ref('settings/adminPin').once('value');
-    const real = snap.exists()? snap.val() : DEFAULTS.adminPin;
-    if(String(pin) === String(real)){
-      isAdmin = true;
-      document.querySelectorAll('.admin-only').forEach(x => x.style.display = '');
-      adminSettingsCard.style.display = '';
-      alert('Admin unlocked');
-      loadAdminFormFromSettings();
-    } else alert('Wrong PIN');
+ alert('Wrong PIN');
   };
   // quick double-tap on title to unlock (convenient)
   titleHeader.addEventListener('dblclick', ()=>{ unlockAdminWithPin(); });
