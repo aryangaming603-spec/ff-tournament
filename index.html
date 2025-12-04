@@ -3,99 +3,255 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EXIST GAMER — Tournament</title>
+<title>EXIST GAMER — Solo Tournament</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <style>
 :root{
-  --bg:linear-gradient(180deg,#031026,#071423);
-  --panel:#072033; --muted:#9fbfcc; --accent:#06b6d4; --danger:#ef4444;
-  --glass:rgba(255,255,255,0.03); --radius:10px; --pad:12px; --maxw:980px;
+  --bg:#060507;
+  --panel:#0b0b0c;
+  --muted:#b6a990;
+  --gold:#EFB810;
+  --accent:#FFD873;
+  --danger:#ff3b30;
+  --glass:rgba(255,255,255,0.03);
+  --radius:12px;
+  --pad:14px;
+  --maxw:1100px;
+  --card-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  --glass-2: rgba(235, 198, 98, 0.06);
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#eafcff}
-.container{max-width:var(--maxw);margin:18px auto;padding:16px}
-.card{background:var(--panel);border-radius:var(--radius);padding:var(--pad);border:1px solid var(--glass)}
-.row{display:grid;grid-template-columns:1fr 320px;gap:12px}
-@media(max-width:820px){ .row{grid-template-columns:1fr} }
-.input{width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#eaffff}
-.btn{padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
-.btn-primary{background:linear-gradient(90deg,var(--accent),#16a34a);color:#02120a}
-.btn-ghost{background:transparent;color:#bfefff;border:1px solid rgba(255,255,255,0.04)}
-.small{font-size:13px;color:var(--muted)}
-.table-wrap{overflow-x:auto;margin-top:10px}
-.table-wrap table{width:100%;border-collapse:collapse}
-.table-wrap th, .table-wrap td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;font-size:14px}
-.table-wrap td.left{ text-align:left }
-.status-paid{background:#134e4a;color:#d1fae5;padding:6px;border-radius:8px}
-.status-pend{background:#44337a;color:#f3e8ff;padding:6px;border-radius:8px}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,#040405 0%, #0b0b0c 100%);color:#fff;-webkit-font-smoothing:antialiased}
+.container{max-width:var(--maxw);margin:20px auto;padding:16px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand h1{margin:0;font-size:22px;letter-spacing:0.6px;color:var(--gold)}
+.brand p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));border-radius:var(--radius);padding:var(--pad);border:1px solid var(--glass);box-shadow:var(--card-shadow);margin-top:14px}
+.row{display:grid;grid-template-columns:1fr 380px;gap:14px}
+@media(max-width:880px){ .row{grid-template-columns:1fr} }
+.muted{color:var(--muted);font-size:13px}
+.kv{font-weight:800;color:#fff}
+.input, input, select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#fff;margin-top:6px}
+.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,var(--gold),var(--accent));color:#101010}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid rgba(255,255,255,0.04)}
+.btn-danger{background:var(--danger);color:#fff}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* Table responsive wrapper + prevent overflow */
+.table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  width:100%;
+}
+.table-wrap table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+}
+.table-wrap th, .table-wrap td{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:260px;
+}
+.table-wrap td.wrap-left{white-space:normal;text-align:left}
+.table-wrap th{color:var(--muted);font-weight:700;font-size:13px}
+
+/* mobile stacked */
+@media (max-width:700px){
+  .table-wrap table, .table-wrap thead, .table-wrap tbody, .table-wrap th, .table-wrap td, .table-wrap tr { display:block; }
+  .table-wrap thead { display:none; }
+  .table-wrap tr { background: transparent;margin: 0 0 12px 0;padding: 8px;border-radius:10px;border:1px solid rgba(255,255,255,0.03); }
+  .table-wrap td { display:flex;justify-content:space-between;align-items:center;padding:8px 10px;white-space:normal;border-bottom:none; }
+  .table-wrap td[data-label]::before{ content: attr(data-label); color: var(--muted); font-weight:700; margin-right:8px; width:45%; text-align:left; flex:0 0 auto; }
+  .table-wrap td .cell-value{flex:1 1 auto; text-align:right; max-width:55%;}
+}
+
+/* tiny badges */
+.status-paid{background:#1f4d1f;color:#d1f7d8;padding:6px 8px;border-radius:8px;font-weight:700}
+.status-pend{background:#3f2b15;color:#f3e8d7;padding:6px 8px;border-radius:8px;font-weight:700}
+
+/* admin only */
 .admin-only{display:none}
+
+/* small */
+.small{font-size:13px;color:var(--muted)}
+.center{display:flex;align-items:center;gap:8px}
+.right{display:flex;justify-content:flex-end}
 .hidden{display:none}
-.muted{color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-    <div>
-      <h2 style="margin:0">EXIST GAMER</h2>
-      <div class="small muted">Free Fire — Simple Tournament</div>
+  <div class="header">
+    <div class="brand">
+      <h1>EXIST GAMER</h1>
+      <p class="muted">Solo • Bermuda — Free Fire Tournament</p>
     </div>
+
     <div style="text-align:right">
-      <button id="unlockBtn" class="btn btn-ghost">Unlock Admin</button>
-      <a id="linkVerify" class="btn btn-ghost" href="verify.html">Verify</a>
+      <div class="muted small">Admin</div>
+      <div style="margin-top:8px">
+        <button id="unlockAdminBtn" class="btn btn-ghost">Unlock Admin</button>
+        <a class="btn btn-ghost" href="verify.html">Verify</a>
+      </div>
     </div>
   </div>
 
-  <div class="row" style="margin-top:12px">
-    <!-- left -->
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">Register</h3>
-      <div class="small muted">Fill details → Pay (UPI) → Admin will mark Paid.</div>
+  <!-- top info -->
+  <div class="card">
+    <div class="row">
+      <div>
+        <h2 id="titleHeader" style="margin:0;color:var(--gold)">EXIST GAMER — Solo Tournament</h2>
+        <p id="desc" class="muted" style="margin-top:8px">Mode: Solo • Map: Bermuda • Prize: ₹150/100/50</p>
 
-      <label class="small" style="margin-top:8px">In-game name</label>
-      <input id="name" class="input" placeholder="Your name">
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+          <div class="small">
+            <div class="small muted">UPI</div>
+            <div class="kv" id="infoUpi">-</div>
+          </div>
 
-      <label class="small">UID</label>
-      <input id="uid" class="input" placeholder="123456789">
+          <div class="small">
+            <div class="small muted">Room</div>
+            <div class="kv" id="infoRoom">Not set</div>
+          </div>
 
-      <label class="small">WhatsApp</label>
-      <input id="wp" class="input" placeholder="10-digit number">
+          <div class="small">
+            <div class="small muted">Slots</div>
+            <div class="kv" id="slotsInfo">0 filled</div>
+          </div>
 
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="regBtn" class="btn btn-primary">Pay & Register</button>
-        <button id="clearBtn" class="btn btn-ghost">Clear</button>
+          <div class="small">
+            <div class="small muted">Registration</div>
+            <div class="kv" id="regInfo">Open</div>
+          </div>
+        </div>
       </div>
 
-      <div id="qrBox" class="card hidden" style="margin-top:12px;text-align:center">
-        <div class="small muted">Scan QR or open UPI app</div>
-        <img id="qrImg" src="" alt="QR" style="width:200px;border-radius:8px;margin-top:8px">
+      <div>
+        <div class="card" style="padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small muted">Entry</div>
+              <div class="kv" id="feeInfo">₹25</div>
+            </div>
+            <div>
+              <div class="small muted">Per Kill</div>
+              <div class="kv" id="pkill">₹6</div>
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+          <div class="controls">
+            <button id="openQrBtn" class="btn btn-primary">Pay & Register</button>
+            <button id="openRegBtn" class="btn btn-ghost">Register</button>
+          </div>
+
+          <div class="hint">Note: Use same device for admin actions or unlock with PIN.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- main -->
+  <div class="row" style="margin-top:12px">
+    <!-- left: register -->
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Register</h3>
+      <div class="muted small">Fill details and click <strong>Pay & Register</strong>. QR will appear for payment.</div>
+
+      <label class="small" style="margin-top:10px">Free Fire Name</label>
+      <input id="rName" placeholder="Your in-game name" class="input">
+
+      <label class="small">UID</label>
+      <input id="rUid" placeholder="e.g. 123456789" class="input">
+
+      <label class="small">WhatsApp</label>
+      <input id="rWp" placeholder="10-digit number" class="input">
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="regNowBtn" class="btn btn-primary">Pay & Register</button>
+        <button id="clearRegBtn" class="btn btn-ghost">Clear</button>
+      </div>
+
+      <div id="qrArea" class="card hidden" style="margin-top:12px;text-align:center;padding:12px">
+        <div class="muted small">Scan the QR or click Open UPI</div>
+        <img id="qrImg" src="" alt="QR" style="width:220px;border-radius:12px;border:1px solid var(--glass);margin-top:8px">
         <div style="height:8px"></div>
-        <button id="openUpi" class="btn btn-primary">Open UPI</button>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <button id="openUpiBtn" class="btn btn-primary">Open UPI</button>
+          <button id="waProofBtn" class="btn btn-ghost">Send Proof (WhatsApp)</button>
+        </div>
+        <div class="muted small" style="margin-top:8px">After payment, admin will verify and mark Paid.</div>
       </div>
     </div>
 
-    <!-- right -->
+    <!-- right: players -->
     <div class="card">
       <h3 style="margin:0 0 8px 0">Registered Players</h3>
-      <div class="small muted" id="infoTop">Players saved on server</div>
-
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>Name</th><th>UID</th><th>WhatsApp</th><th>Code</th><th>Status</th><th class="admin-only">Actions</th></tr></thead>
-          <tbody id="tbody"><tr><td colspan="7" class="small muted">No players yet</td></tr></tbody>
+          <tbody id="playersTable"><tr><td colspan="7" class="muted small">No players registered yet.</td></tr></tbody>
         </table>
       </div>
+      <div style="height:10px"></div>
+      <div class="muted small">Tip: Long values hidden for privacy. Admin can mark Paid or remove entries.</div>
     </div>
+  </div>
+
+  <!-- admin panel -->
+  <div class="card admin-only" id="adminPanel" style="margin-top:16px;display:none">
+    <h3 style="margin:0 0 8px 0">Admin Panel</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div><label class="small">Tournament Name</label><input id="setName" class="input"></div>
+      <div><label class="small">Map</label><input id="setMap" class="input"></div>
+
+      <div><label class="small">Entry Fee (₹)</label><input id="setFee" type="number" class="input"></div>
+      <div><label class="small">Slots</label><input id="setSlots" type="number" class="input"></div>
+
+      <div><label class="small">Winner1 (₹)</label><input id="setP1" type="number" class="input"></div>
+      <div><label class="small">Winner2 (₹)</label><input id="setP2" type="number" class="input"></div>
+
+      <div><label class="small">Winner3 (₹)</label><input id="setP3" type="number" class="input"></div>
+      <div><label class="small">Per Kill (₹)</label><input id="setKill" type="number" class="input"></div>
+
+      <div><label class="small">UPI ID</label><input id="setUpi" class="input" placeholder="9170856377-3@ybl"></div>
+      <div><label class="small">Registration</label><select id="setReg" class="input"><option value="1">Open</option><option value="0">Closed</option></select></div>
+
+      <div><label class="small">Room ID</label><input id="setRoomId" class="input"></div>
+      <div><label class="small">Room Password</label><input id="setRoomPass" class="input"></div>
+
+      <div><label class="small">Admin PIN</label><input id="setAdminPin" class="input" placeholder="786786"></div>
+      <div><label class="small">QR File (optional)</label><input id="setQrFile" class="input" placeholder="aryan-upi-qr.png"></div>
+    </div>
+
+    <div style="height:12px"></div>
+    <div style="display:flex;gap:8px">
+      <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+      <button id="importSampleBtn" class="btn btn-ghost">Import Sample</button>
+      <button id="clearPlayersBtn" class="btn btn-danger">Clear Players</button>
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="small muted">Admin visible only after unlocking with PIN (default 786786).</div>
   </div>
 
 </div>
 
-<!-- Firebase (compat) -->
+<!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-// --------- CONFIG: replace these with your Firebase project config if different ----------
+/* ---------- Firebase config (use your project's config if different) ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
   authDomain: "exist-gamer.firebaseapp.com",
@@ -109,132 +265,338 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --------- defaults ----------
-const DEFAULT_UPI = "9170856377-3@ybl";  // change if needed
-const DEFAULT_FEE = 25;
-const DEFAULT_ADMIN_PIN = "786786";
+/* ---------- defaults & state ---------- */
+const DEFAULTS = {
+  name: "EXIST GAMER",
+  map: "Bermuda",
+  fee: 25,
+  slots: 48,
+  p1: 150, p2: 100, p3: 50,
+  perKill: 6,
+  upi: "9170856377-3@ybl",
+  regOpen: 1,
+  roomId: "",
+  roomPass: "",
+  adminPin: "786786",
+  qrFile: "aryan-upi-qr.png"
+};
 
-// state
-let players = {};
+let settings = {...DEFAULTS};
+let players = {}; // keyed by push key
+let isAdmin = false;
 
-// utils
-function genCode(){ return (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,5)).toUpperCase(); }
-function escapeHtml(s){ return (""+s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function mask(v){ v=(v||"")+''; if(!v) return ''; return v.length<=4 ? "•••"+v : "•••"+v.slice(-4); }
+/* ---------- UI refs ---------- */
+const titleHeader = document.getElementById('titleHeader');
+const descEl = document.getElementById('desc');
+const infoUpi = document.getElementById('infoUpi');
+const infoRoom = document.getElementById('infoRoom');
+const slotsInfo = document.getElementById('slotsInfo');
+const regInfo = document.getElementById('regInfo');
+const feeInfo = document.getElementById('feeInfo');
+const pkill = document.getElementById('pkill');
 
-// ui refs
-const nameIn = document.getElementById('name');
-const uidIn = document.getElementById('uid');
-const wpIn = document.getElementById('wp');
-const regBtn = document.getElementById('regBtn');
-const clearBtn = document.getElementById('clearBtn');
-const tbody = document.getElementById('tbody');
-const qrBox = document.getElementById('qrBox');
+const playersTable = document.getElementById('playersTable');
+const qrArea = document.getElementById('qrArea');
 const qrImg = document.getElementById('qrImg');
-const openUpi = document.getElementById('openUpi');
-const unlockBtn = document.getElementById('unlockBtn');
 
-// realtime listen players
-db.ref('players').on('value', snap => {
-  players = snap.val() || {};
-  renderPlayers();
-});
+/* admin */
+const adminPanel = document.getElementById('adminPanel');
 
-// render table
-function renderPlayers(){
-  const entries = Object.entries(players);
-  if(entries.length === 0){
-    tbody.innerHTML = '<tr><td colspan="7" class="small muted">No players yet</td></tr>';
-    return;
+/* init */
+(function init(){
+  // listen settings
+  db.ref('settings').on('value', snap => {
+    const s = snap.val();
+    if(s) settings = {...DEFAULTS, ...s};
+    applySettings();
+  });
+  // listen players
+  db.ref('players').on('value', snap => {
+    players = snap.val() || {};
+    renderPlayers();
+    slotsInfo.textContent = `Slots: ${settings.slots} • Filled: ${Object.keys(players).length}`;
+  });
+
+  // wire buttons
+  document.getElementById('regNowBtn').addEventListener('click', regNow);
+  document.getElementById('clearRegBtn').addEventListener('click', clearRegForm);
+  document.getElementById('openQrBtn').addEventListener('click', ()=> qrArea.classList.toggle('hidden'));
+  document.getElementById('openRegBtn').addEventListener('click', ()=> window.scrollTo({top: document.getElementById('rName').offsetTop-80, behavior:'smooth'}));
+  document.getElementById('openUpiBtn').addEventListener('click', openUPI);
+  document.getElementById('waProofBtn').addEventListener('click', sendWhatsAppProof);
+
+  document.getElementById('unlockAdminBtn').addEventListener('click', unlockAdmin);
+  document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+  document.getElementById('importSampleBtn').addEventListener('click', importSample);
+  document.getElementById('clearPlayersBtn').addEventListener('click', clearAllPlayers);
+
+  applySettings();
+})();
+
+/* ---------- helpers ---------- */
+function applySettings(){
+  titleHeader.textContent = `${settings.name} — Solo`;
+  descEl.textContent = `Mode: Solo • Map: ${settings.map} • Prizes: ${settings.p1}/${settings.p2}/${settings.p3}`;
+  infoUpi.textContent = settings.upi;
+  feeInfo.textContent = `₹${settings.fee}`;
+  pkill.textContent = `₹${settings.perKill}`;
+  regInfo.textContent = settings.regOpen ? "Open" : "Closed";
+  infoRoom.textContent = settings.roomId ? `${settings.roomId} (${settings.roomPass ? "set" : "no pass"})` : "Not set";
+  qrImg.src = settings.qrFile || DEFAULTS.qrFile;
+  // fill admin inputs if visible
+  if(isAdmin){
+    document.getElementById('setName').value = settings.name || "";
+    document.getElementById('setMap').value = settings.map || "";
+    document.getElementById('setFee').value = settings.fee || "";
+    document.getElementById('setSlots').value = settings.slots || "";
+    document.getElementById('setP1').value = settings.p1 || "";
+    document.getElementById('setP2').value = settings.p2 || "";
+    document.getElementById('setP3').value = settings.p3 || "";
+    document.getElementById('setKill').value = settings.perKill || "";
+    document.getElementById('setUpi').value = settings.upi || "";
+    document.getElementById('setReg').value = settings.regOpen ? "1" : "0";
+    document.getElementById('setRoomId').value = settings.roomId || "";
+    document.getElementById('setRoomPass').value = settings.roomPass || "";
+    document.getElementById('setAdminPin').value = settings.adminPin || DEFAULTS.adminPin;
+    document.getElementById('setQrFile').value = settings.qrFile || DEFAULTS.qrFile;
   }
-  // get keys to map to buttons reliably
-  const keys = Object.keys(players);
-  tbody.innerHTML = keys.map((k, i) => {
-    const p = players[k] || {};
-    const status = p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>';
-    const actions = window.IS_ADMIN ? `<button class="btn btn-primary" onclick="markPaid('${k}')">Paid</button>
-      <button class="btn btn-ghost" onclick="deletePlayer('${k}')">Delete</button>` : '';
-    return `<tr>
-      <td>${i+1}</td>
-      <td class="left">${escapeHtml(p.name)}</td>
-      <td>${mask(p.uid)}</td>
-      <td>${mask(p.wp)}</td>
-      <td><b>${escapeHtml(p.code)}</b></td>
-      <td>${status}</td>
-      <td class="admin-only">${actions}</td>
-    </tr>`;
-  }).join('');
 }
 
-// registration
-async function register(){
-  const name = nameIn.value.trim(), uid = uidIn.value.trim(), wp = wpIn.value.trim();
-  if(!name || !uid || !wp) return alert('Fill all fields');
-  if(wp.length < 8) return alert('Enter valid WhatsApp number');
-  // fetch settings fee/up i from server if set; fallback to defaults
-  let fee = DEFAULT_FEE;
-  try{ const s = (await db.ref('settings').once('value')).val(); if(s && s.fee) fee = s.fee; }catch(e){}
+function renderPlayers(){
+  const tbody = playersTable;
+  const arr = Object.entries(players || {});
+  if(arr.length === 0){
+    playersTable.innerHTML = '<tr><td colspan="7" class="muted small">No players registered yet.</td></tr>';
+    return;
+  }
+  let html = '';
+  arr.forEach(([k,p], i) => {
+    const name = escapeHtml(p.name || '');
+    const uid = hideValue(p.uid);
+    const wp = hideValue(p.wp);
+    const code = escapeHtml(p.code || '');
+    const status = p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>';
+    const actions = isAdmin ? `
+      <div style="display:flex;gap:6px;justify-content:center">
+        <button class="btn btn-primary" onclick="markPaid('${k}')">Paid</button>
+        <button class="btn btn-ghost" onclick="markVerified('${k}')">Verify</button>
+        <button class="btn btn-ghost" onclick="viewPlayer('${k}')">View</button>
+        <button class="btn btn-danger" onclick="deletePlayer('${k}')">Delete</button>
+      </div>` : `<div class="small muted">View only</div>`;
+    html += `<tr>
+      <td data-label="#">${i+1}</td>
+      <td data-label="Name" class="wrap-left">${name}</td>
+      <td data-label="UID">${uid}</td>
+      <td data-label="WhatsApp">${wp}</td>
+      <td data-label="Code"><b>${code}</b></td>
+      <td data-label="Status">${status}</td>
+      <td data-label="Actions" class="admin-only">${actions}</td>
+    </tr>`;
+  });
+  playersTable.innerHTML = html;
+}
+
+function hideValue(s){
+  s = (s||'')+'';
+  if(!s) return '';
+  if(s.length <= 4) return '•••' + s;
+  return '•••' + s.slice(-4);
+}
+function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------- registration ---------- */
+function clearRegForm(){
+  document.getElementById('rName').value = '';
+  document.getElementById('rUid').value = '';
+  document.getElementById('rWp').value = '';
+}
+function genCode(){ return (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,5)).toUpperCase(); }
+
+async function regNow(){
+  if(!settings.regOpen) return alert('Registration closed by admin.');
+  const name = document.getElementById('rName').value.trim();
+  const uid = document.getElementById('rUid').value.trim();
+  const wp = document.getElementById('rWp').value.trim();
+  if(!name || !uid || !wp) return alert('Please fill all fields.');
+  if(wp.length < 8) return alert('Enter a valid WhatsApp number.');
+
   const code = genCode();
-  const payload = { name, uid, wp, code, paid:0, createdAt:Date.now() };
+  const payload = { name, uid, wp, code, paid:0, verified:0, createdAt: Date.now() };
   try{
     const ref = db.ref('players');
     const pushRef = await ref.push(payload);
+    const key = pushRef.key;
     alert('Registered! Your code: ' + code + '. Save it.');
-    // show QR for quick payment (Google Chart API)
-    const upi = (await db.ref('settings/upi').once('value')).val() || DEFAULT_UPI;
-    const upiStr = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('EXIST GAMER')}&am=${encodeURIComponent(fee)}&cu=INR&tn=${encodeURIComponent('Entry:'+code)}`;
-    qrImg.src = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiStr)}`;
-    qrBox.classList.remove('hidden');
-    clearForm();
-  }catch(e){ console.error(e); alert('Register failed'); }
+    // show QR
+    qrImg.src = settings.qrFile || DEFAULTS.qrFile;
+    // build upi qr with note including code
+    const upi = settings.upi || DEFAULTS.upi;
+    const amount = settings.fee || DEFAULTS.fee;
+    const upiStr = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent('Entry:'+code)}`;
+    const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiStr)}`;
+    qrImg.src = qrUrl;
+    qrArea.classList.remove('hidden');
+    setTimeout(()=> qrArea.scrollIntoView({behavior:'smooth'}),120);
+    clearRegForm();
+  }catch(e){
+    console.error(e);
+    alert('Registration failed. Check console.');
+  }
 }
 
-regBtn.addEventListener('click', register);
-clearBtn.addEventListener('click', ()=>{ clearForm(); qrBox.classList.add('hidden'); });
-
-function clearForm(){ nameIn.value=''; uidIn.value=''; wpIn.value=''; }
-
-// open UPI link
-openUpi.addEventListener('click', async ()=>{
-  const upi = (await db.ref('settings/upi').once('value')).val() || DEFAULT_UPI;
-  const fee = (await db.ref('settings/fee').once('value')).val() || DEFAULT_FEE;
-  const link = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('EXIST GAMER')}&am=${encodeURIComponent(fee)}&cu=INR&tn=${encodeURIComponent('Tournament')}`;
-  // try android intent then fallback
-  const intent = `intent://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('EXIST GAMER')}&am=${encodeURIComponent(fee)}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+/* ---------- UPI / WhatsApp ---------- */
+function buildUpiLink(){
+  const upi = settings.upi || DEFAULTS.upi;
+  const amount = settings.fee || DEFAULTS.fee;
+  const tn = 'Tournament Fee';
+  return `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(tn)}`;
+}
+function openUPI(){
+  const link = buildUpiLink();
+  // try intent then fallback
+  const intent = `intent://pay?pa=${encodeURIComponent(settings.upi||DEFAULTS.upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(settings.fee||DEFAULTS.fee)}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
   window.location.href = intent;
-  setTimeout(()=>window.location.href = link, 1200);
-});
+  setTimeout(()=> window.location.href = link, 1200);
+}
+function sendWhatsAppProof(){
+  const adminNum = (settings.adminNum || '').replace(/\D/g,'') || '9170856377';
+  const msg = `Hi admin, I have paid for ${settings.name || 'tournament'}. Code: `;
+  const wa = `https://wa.me/${adminNum}?text=${encodeURIComponent(msg)}`;
+  window.open(wa,'_blank');
+}
 
-// admin unlock
-window.IS_ADMIN = false;
-unlockBtn.addEventListener('click', async ()=>{
+/* ---------- admin actions ---------- */
+async function unlockAdmin(){
   const pin = prompt('Enter admin PIN:');
   if(!pin) return;
   try{
     const snap = await db.ref('settings/adminPin').once('value');
-    const real = snap.exists() ? snap.val() : DEFAULT_ADMIN_PIN;
+    const real = snap.exists() ? snap.val() : DEFAULTS.adminPin;
     if(String(pin) === String(real)){
-      window.IS_ADMIN = true;
+      isAdmin = true;
       document.querySelectorAll('.admin-only').forEach(x=> x.style.display = '');
+      adminPanel.style.display = '';
+      applySettings();
       alert('Admin unlocked');
     } else alert('Wrong PIN');
   }catch(e){
-    if(pin === DEFAULT_ADMIN_PIN){ window.IS_ADMIN = true; document.querySelectorAll('.admin-only').forEach(x=> x.style.display=''); alert('Admin unlocked (fallback)'); }
+    if(pin === DEFAULTS.adminPin){ isAdmin = true; document.querySelectorAll('.admin-only').forEach(x=> x.style.display=''); adminPanel.style.display=''; applySettings(); alert('Admin unlocked (fallback)'); }
     else alert('Wrong PIN');
   }
-});
+}
 
-// admin actions
-window.markPaid = async function(key){
-  if(!window.IS_ADMIN) return alert('Admin only');
-  if(!confirm('Mark as paid?')) return;
-  try{ await db.ref('players/'+key).update({ paid:1 }); alert('Marked paid'); }catch(e){ console.error(e); alert('Fail'); }
-};
-window.deletePlayer = async function(key){
-  if(!window.IS_ADMIN) return alert('Admin only');
-  if(!confirm('Delete player?')) return;
-  try{ await db.ref('players/'+key).remove(); alert('Deleted'); }catch(e){ console.error(e); alert('Fail'); }
-};
+async function saveSettings(){
+  if(!isAdmin) return alert('Admin only');
+  const s = {
+    name: document.getElementById('setName').value.trim() || settings.name,
+    map: document.getElementById('setMap').value.trim() || settings.map,
+    fee: Number(document.getElementById('setFee').value) || settings.fee,
+    slots: Number(document.getElementById('setSlots').value) || settings.slots,
+    p1: Number(document.getElementById('setP1').value) || settings.p1,
+    p2: Number(document.getElementById('setP2').value) || settings.p2,
+    p3: Number(document.getElementById('setP3').value) || settings.p3,
+    perKill: Number(document.getElementById('setKill').value) || settings.perKill,
+    upi: document.getElementById('setUpi').value.trim() || settings.upi,
+    regOpen: Number(document.getElementById('setReg').value),
+    roomId: document.getElementById('setRoomId').value.trim() || settings.roomId,
+    roomPass: document.getElementById('setRoomPass').value.trim() || settings.roomPass,
+    adminPin: document.getElementById('setAdminPin').value.trim() || settings.adminPin,
+    qrFile: document.getElementById('setQrFile').value.trim() || settings.qrFile
+  };
+  try{
+    await db.ref('settings').set(s);
+    alert('Settings saved.');
+  }catch(e){ console.error(e); alert('Save failed'); }
+}
+
+async function importSample(){
+  if(!isAdmin) return alert('Admin only');
+  const sample = [
+    {name:"Inferno", uid:"3889662216", wp:"917000000001", code:"A1B2C3", paid:1, verified:1, createdAt:Date.now()},
+    {name:"Action Bolt", uid:"4344524799", wp:"917000000002", code:"D4E5F6", paid:0, verified:0, createdAt:Date.now()}
+  ];
+  try{
+    const ref = db.ref('players');
+    for(const p of sample) await ref.push(p);
+    alert('Sample players imported');
+  }catch(e){ console.error(e); alert('Import failed'); }
+}
+
+async function clearAllPlayers(){
+  if(!isAdmin) return alert('Admin only');
+  if(!confirm('Clear all registered players?')) return;
+  try{ await db.ref('players').set(null); alert('Players cleared'); }catch(e){ console.error(e); alert('Failed'); }
+}
+
+/* per-player actions */
+async function markPaid(key){
+  if(!isAdmin) return alert('Admin only');
+  try{ await db.ref('players/'+key).update({ paid:1 }); }catch(e){ console.error(e); alert('Fail'); }
+}
+async function markVerified(key){
+  if(!isAdmin) return alert('Admin only');
+  try{ await db.ref('players/'+key).update({ verified:1 }); }catch(e){ console.error(e); alert('Fail'); }
+}
+async function deletePlayer(key){
+  if(!isAdmin) return alert('Admin only');
+  if(!confirm('Delete this player?')) return;
+  try{ await db.ref('players/'+key).remove(); }catch(e){ console.error(e); alert('Fail'); }
+}
+async function viewPlayer(key){
+  const snap = await db.ref('players/'+key).once('value');
+  const p = snap.val();
+  if(!p) return alert('Not found');
+  alert(`Name: ${p.name}\nUID: ${p.uid}\nWhatsApp: ${p.wp}\nCode: ${p.code}\nPaid: ${p.paid? 'Yes':'No'}`);
+}
+
+/* ---------- expose to window ---------- */
+window.markPaid = markPaid;
+window.markVerified = markVerified;
+window.deletePlayer = deletePlayer;
+window.viewPlayer = viewPlayer;
+
+/* ---------- utilities ---------- */
+function genShortCode(){ return (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,5)).toUpperCase(); }
+
+/* ---------- debug / load ---------- */
+function renderPlayers(){ // re-render using current players state
+  const tbody = document.getElementById('playersTable');
+  const arr = Object.entries(players || {});
+  if(arr.length === 0){ tbody.innerHTML = '<tr><td colspan="7" class="muted small">No players registered yet.</td></tr>'; return;}
+  let html = '';
+  arr.forEach(([k,p], i)=> {
+    const name = escapeHtml(p.name||'');
+    const uid = hideValue(p.uid);
+    const wp = hideValue(p.wp);
+    const code = escapeHtml(p.code||'');
+    const status = p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>';
+    const actions = isAdmin ? `<div style="display:flex;gap:6px;justify-content:center">
+      <button class="btn btn-primary" onclick="markPaid('${k}')">Paid</button>
+      <button class="btn btn-ghost" onclick="markVerified('${k}')">Verify</button>
+      <button class="btn btn-ghost" onclick="viewPlayer('${k}')">View</button>
+      <button class="btn btn-danger" onclick="deletePlayer('${k}')">Delete</button>
+    </div>` : '<div class="small muted">View only</div>';
+    html += `<tr>
+      <td>${i+1}</td>
+      <td class="wrap-left">${name}</td>
+      <td>${uid}</td>
+      <td>${wp}</td>
+      <td><b>${code}</b></td>
+      <td>${status}</td>
+      <td class="admin-only">${actions}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+/* ---------- listeners ---------- */
+db.ref('players').on('value', snap => { players = snap.val() || {}; renderPlayers(); slotsInfo.textContent = `Slots: ${settings.slots} • Filled: ${Object.keys(players).length}`; });
+db.ref('settings').on('value', snap => { const s = snap.val(); if(s) settings = {...DEFAULTS, ...s}; applySettings(); });
+
+/* ---------- final helpers ---------- */
+function hideValue(s){ s = (s||'')+''; if(!s) return ''; if(s.length<=4) return '•••'+s; return '•••'+s.slice(-4); }
+function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
 </script>
 </body>
 </html>
