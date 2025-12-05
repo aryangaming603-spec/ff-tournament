@@ -184,7 +184,7 @@ const db = firebase.database();
 /* ---------- defaults & state ---------- */
 const DEFAULTS = {
   name: "EXIST GAMER", map: "Bermuda", fee:25, slots:48,
-  p1:150,p2:100,p3:50,perKill:6,upi:"9170856377-3@ybl",
+  p1:150,p2:100,p3:50,perKill:6,upi:"9170856377@fam",
   regOpen:1,roomId:"",roomPass:"",adminPin:"786786",qrFile:""
 };
 let settings = {...DEFAULTS};
@@ -252,7 +252,7 @@ function fillAdminInputs(){
   setP2.value = settings.p2 || "";
   setP3.value = settings.p3 || "";
   setKill.value = settings.perKill || "";
-  setUpi.value = settings.upi || "";
+  setUpi.value = settings.upi || to"";
   setReg.value = settings.regOpen ? "1" : "0";
   setRoomId.value = settings.roomId || "";
   setRoomPass.value = settings.roomPass || "";
