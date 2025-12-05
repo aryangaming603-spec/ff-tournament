@@ -358,76 +358,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
       }
 
       // wire WhatsApp proof button with code
-      if(waProofBtn){
-        waProofBtn.onclick = function(){
-          const adminNum = (settings.adminNum || '').replace(/\D/g,'') || '9170856377';
-          const msg = `I have paid for ${settings.name||DEFAULTS.name}. Code: ${code}. Please verify.`;
-          const wa = `https://wa.me/${adminNum}?text=${encodeURIComponent(msg)}`;
-          window.open(wa, '_blank');
-        };
-      }
 
-      // clear form
-      clearRegForm();
-    }catch(e){
-      console.error('reg error', e);
-      alert('Registration failed. See console.');
-    }
-  };
-
-  // If your page used payRegBtn/regNowBtn wiring, re-attach to ensure correct handler
-  try {
-    const pb = document.getElementById('payRegBtn');
-    if(pb){ pb.removeEventListener && pb.removeEventListener('click', regNow); pb.addEventListener('click', regNow); }
-    const rb = document.getElementById('regNowBtn');
-    if(rb){ rb.removeEventListener && rb.removeEventListener('click', regNow); rb.addEventListener('click', regNow); }
-  } catch(e){ /* ignore */ }
-
-  // small helper: ensure admin inputs populated after settings loaded
-  window.applySettings = window.applySettings || function(){
-    // try to set fields if present
-    try{
-      titleHeader && (titleHeader.textContent = `${settings.name} — Solo`);
-      descEl && (descEl.textContent = `Mode: Solo • Map: ${settings.map} • Prizes: ${settings.p1}/${settings.p2}/${settings.p3}`);
-      infoUpi && (infoUpi.textContent = settings.upi || DEFAULTS.upi);
-      feeInfo && (feeInfo.textContent = `₹${settings.fee}`);
-      pkill && (pkill.textContent = `₹${settings.perKill}`);
-      regInfo && (regInfo.textContent = settings.regOpen ? "Open" : "Closed");
-      infoRoom && (infoRoom.textContent = settings.roomId ? `${settings.roomId} (${settings.roomPass ? "set":"no pass"})` : 'Not set');
-      // fill admin inputs when visible
-      if(isAdmin){
-        setName && (setName.value = settings.name || '');
-        setMap && (setMap.value = settings.map || '');
-        setFee && (setFee.value = settings.fee || '');
-        setSlots && (setSlots.value = settings.slots || '');
-        setP1 && (setP1.value = settings.p1 || '');
-        setP2 && (setP2.value = settings.p2 || '');
-        setP3 && (setP3.value = settings.p3 || '');
-        setKill && (setKill.value = settings.perKill || '');
-        setUpi && (setUpi.value = settings.upi || '');
-        setReg && (setReg.value = settings.regOpen ? '1' : '0');
-        setRoomId && (setRoomId.value = settings.roomId || '');
-        setRoomPass && (setRoomPass.value = settings.roomPass || '');
-        setAdminPin && (setAdminPin.value = settings.adminPin || '');
-        setQrFile && (setQrFile.value = settings.qrFile || '');
-      }
-    }catch(err){
-      console.warn('applySettings patch error', err);
-    }
-  };
-
-  // ensure listeners exist for save buttons (id may exist later, so try again soon)
-  function ensureAdminButtons(){
-    const sbtn = document.getElementById('saveSettingsBtn');
-    if(sbtn && !sbtn.__wired){ sbtn.addEventListener('click', saveSettings); sbtn.__wired = true; }
-    const imbtn = document.getElementById('importSampleBtn');
-    if(imbtn && !imbtn.__wired){ imbtn.addEventListener('click', importSample); imbtn.__wired = true; }
-    const clrbtn = document.getElementById('clearPlayersBtn');
-    if(clrbtn && !clrbtn.__wired){ clrbtn.addEventListener('click', clearAllPlayers); clrbtn.__wired = true; }
-  }
-  setTimeout(ensureAdminButtons, 300);
-  setTimeout(ensureAdminButtons, 1200);
-})();
 // ----------------- FIREBASE CONFIG (change if needed) -----------------
 const firebaseConfig = {
   apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
