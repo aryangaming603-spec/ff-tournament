@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin — EXIST GAMER</title>
+<style>
+  body{font-family:Inter,system-ui,Arial,sans-serif;background:#0b0b0c;color:#fff;margin:0;padding:18px}
+  .wrap{max-width:1000px;margin:12px auto}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);margin-bottom:12px}
+  h1{margin:0;color:#EFB810}
+  label{display:block;margin-top:8px;font-size:13px;color:#b6a990}
+  input,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff;margin-top:6px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+  .btn-primary{background:#EFB810;color:#111}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:#EFB810}
+  .btn-danger{background:#ff3b30;color:#fff}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left;font-size:14px}
+  .small{font-size:13px;color:#b6a990}
+  .status-paid{color:#b7f3c5}
+  .status-pend{color:#f3d7c7}
+  @media(max-width:800px){ .row{grid-template-columns:1fr} table{font-size:13px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>EXIST GAMER — Admin</h1>
+    <p class="small">Manage tournament settings and players. This page is protected by admin PIN.</p>
+  </div>
+
+  <div id="adminUI" class="hidden">
+    <div class="card">
+      <h3 style="margin:0">Tournament Settings</h3>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label>Tournament Name</label>
+          <input id="setName" placeholder="EXIST GAMER">
+        </div>
+        <div>
+          <label>Map</label>
+          <input id="setMap" placeholder="Bermuda">
+        </div>
+        <div>
+          <label>Entry Fee (₹)</label>
+          <input id="setFee" type="number">
+        </div>
+        <div>
+          <label>Slots</label>
+          <input id="setSlots" type="number">
+        </div>
+        <div>
+          <label>Winner1 (₹)</label>
+          <input id="setP1" type="number">
+        </div>
+        <div>
+          <label>Winner2 (₹)</label>
+          <input id="setP2" type="number">
+        </div>
+        <div>
+          <label>Winner3 (₹)</label>
+          <input id="setP3" type="number">
+        </div>
+        <div>
+          <label>Per Kill (₹)</label>
+          <input id="setKill" type="number">
+        </div>
+        <div>
+          <label>UPI ID</label>
+          <input id="setUpi" placeholder="9170856377-3@ybl">
+        </div>
+        <div>
+          <label>Admin PIN</label>
+          <input id="setAdminPin" placeholder="786786">
+        </div>
+        <div>
+          <label>Room ID</label>
+          <input id="setRoomId" placeholder="">
+        </div>
+        <div>
+          <label>Room Password</label>
+          <input id="setRoomPass" placeholder="">
+        </div>
+        <div>
+          <label>Registration</label>
+          <select id="setReg"><option value="1">Open</option><option value="0">Closed</option></select>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="saveBtn" class="btn btn-primary">Save Settings</button>
+        <button id="refreshBtn" class="btn btn-ghost">Refresh From Server</button>
+      </div>
+      <div class="small" style="margin-top:8px">Settings are stored in Firebase at <code>/settings</code>.</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0">Registered Players</h3>
+      <div class="small" style="margin-top:6px">Mark Paid / Verify / Delete players from here.</div>
+      <div style="margin-top:10px;overflow:auto;max-height:480px">
+        <table id="playersTbl">
+          <thead><tr><th>#</th><th>Name</th><th>UID</th><th>WA</th><th>Code</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="importBtn" class="btn btn-ghost">Import Sample</button>
+        <button id="clearBtn" class="btn btn-danger">Clear All Players</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0">Quick Controls</h3>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="showSettingsInIndex" class="btn btn-ghost">Open Index Page</button>
+        <button id="openVerify" class="btn btn-ghost">Open Verify Page</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lockedUI" class="card">
+    <p class="small">Enter admin PIN to unlock.</p>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="pinInput" placeholder="Enter PIN" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff;width:200px">
+      <button id="unlockBtn" class="btn btn-primary">Unlock</button>
+    </div>
+    <div id="lockMsg" class="small" style="margin-top:8px;color:#f3d7c7"></div>
+  </div>
+</div>
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+/* ---------- CONFIG ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
+  authDomain: "exist-gamer.firebaseapp.com",
+  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "exist-gamer",
+  storageBucket: "exist-gamer.firebasestorage.app",
+  messagingSenderId: "868288388784",
+  appId: "1:868288388784:web:b4a8b933ccbeb95b392575",
+  measurementId: "G-BNFXCZQTJW"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---------- state ---------- */
+const DEFAULTS = { name:"EXIST GAMER", map:"Bermuda", fee:25, slots:48, p1:150,p2:100,p3:50,perKill:6,upi:"9170856377-3@ybl", regOpen:1, roomId:"", roomPass:"", adminPin:"786786" };
+let settings = {...DEFAULTS};
+let players = {};
+let ADMIN_UNLOCKED = false;
+
+/* ---------- refs ---------- */
+const adminUI = document.getElementById('adminUI');
+const lockedUI = document.getElementById('lockedUI');
+const pinInput = document.getElementById('pinInput');
+const unlockBtn = document.getElementById('unlockBtn');
+const lockMsg = document.getElementById('lockMsg');
+
+const setName = document.getElementById('setName'), setMap = document.getElementById('setMap'), setFee = document.getElementById('setFee'), setSlots = document.getElementById('setSlots');
+const setP1 = document.getElementById('setP1'), setP2 = document.getElementById('setP2'), setP3 = document.getElementById('setP3'), setKill = document.getElementById('setKill');
+const setUpi = document.getElementById('setUpi'), setReg = document.getElementById('setReg'), setRoomId = document.getElementById('setRoomId'), setRoomPass = document.getElementById('setRoomPass'), setAdminPin = document.getElementById('setAdminPin');
+
+const playersTbl = document.querySelector('#playersTbl tbody');
+const saveBtn = document.getElementById('saveBtn'), refreshBtn = document.getElementById('refreshBtn'), importBtn = document.getElementById('importBtn'), clearBtn = document.getElementById('clearBtn');
+const showSettingsInIndex = document.getElementById('showSettingsInIndex'), openVerify = document.getElementById('openVerify');
+
+/* ---------- helpers ---------- */
+function escapeHtml(s){ return (''+s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function hideVal(s){ s=''+(s||''); return s.length<=4? '•••'+s : '•••'+s.slice(-4); }
+
+/* ---------- load live ---------- */
+db.ref('settings').on('value', snap => {
+  const s = snap.val() || {};
+  settings = {...DEFAULTS, ...s};
+  // if admin already unlocked, populate fields
+  if(ADMIN_UNLOCKED) fillForm();
+});
+
+db.ref('players').on('value', snap => {
+  players = snap.val() || {};
+  if(ADMIN_UNLOCKED) renderPlayers();
+});
+
+/* ---------- unlock logic ---------- */
+async function checkPin(pin){
+  try{
+    const snap = await db.ref('settings/adminPin').once('value');
+    const real = snap.exists() ? snap.val() : DEFAULTS.adminPin;
+    return String(pin) === String(real);
+  }catch(e){
+    console.error(e);
+    return String(pin) === String(DEFAULTS.adminPin);
+  }
+}
+
+unlockBtn.addEventListener('click', async ()=>{
+  const pin = (pinInput.value||'').trim();
+  if(!pin){ lockMsg.textContent = 'Enter PIN'; return; }
+  lockMsg.textContent = 'Checking...';
+  const ok = await checkPin(pin);
+  if(ok){
+    ADMIN_UNLOCKED = true;
+    lockedUI.style.display = 'none';
+    adminUI.classList.remove('hidden');
+    adminUI.style.display = '';
+    fillForm();
+    renderPlayers();
+    lockMsg.textContent = '';
+  } else {
+    lockMsg.textContent = 'Wrong PIN';
+  }
+});
+
+/* ---------- admin UI ---------- */
+function fillForm(){
+  setName.value = settings.name || '';
+  setMap.value = settings.map || '';
+  setFee.value = settings.fee || '';
+  setSlots.value = settings.slots || '';
+  setP1.value = settings.p1 || '';
+  setP2.value = settings.p2 || '';
+  setP3.value = settings.p3 || '';
+  setKill.value = settings.perKill || '';
+  setUpi.value = settings.upi || '';
+  setReg.value = settings.regOpen ? '1' : '0';
+  setRoomId.value = settings.roomId || '';
+  setRoomPass.value = settings.roomPass || '';
+  setAdminPin.value = settings.adminPin || '';
+}
+
+saveBtn.addEventListener('click', async ()=>{
+  if(!ADMIN_UNLOCKED) return alert('Unlock admin first');
+  const s = {
+    name: (setName.value||'').trim() || DEFAULTS.name,
+    map: (setMap.value||'').trim() || DEFAULTS.map,
+    fee: Number(setFee.value) || DEFAULTS.fee,
+    slots: Number(setSlots.value) || DEFAULTS.slots,
+    p1: Number(setP1.value) || DEFAULTS.p1,
+    p2: Number(setP2.value) || DEFAULTS.p2,
+    p3: Number(setP3.value) || DEFAULTS.p3,
+    perKill: Number(setKill.value) || DEFAULTS.perKill,
+    upi: (setUpi.value||'').trim() || DEFAULTS.upi,
+    regOpen: Number(setReg.value),
+    roomId: (setRoomId.value||'').trim() || '',
+    roomPass: (setRoomPass.value||'').trim() || '',
+    adminPin: (setAdminPin.value||'').trim() || DEFAULTS.adminPin
+  };
+  try{
+    await db.ref('settings').set(s);
+    alert('Settings saved');
+  }catch(e){ console.error(e); alert('Save failed'); }
+});
+
+refreshBtn.addEventListener('click', async ()=> {
+  const snap = await db.ref('settings').once('value');
+  settings = snap.val() || DEFAULTS;
+  fillForm();
+  alert('Refreshed from server');
+});
+
+/* ---------- players render & actions ---------- */
+function renderPlayers(){
+  playersTbl.innerHTML = '';
+  const arr = Object.entries(players || {});
+  if(arr.length === 0){ playersTbl.innerHTML = '<tr><td colspan="7" class="small">No players</td></tr>'; return; }
+  arr.forEach(([key,p],i)=>{
+    const paid = p.paid ? '<span class="status-paid">Paid</span>' : '<span class="status-pend">Pending</span>';
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${i+1}</td>
+      <td>${escapeHtml(p.name||'')}</td>
+      <td>${hideVal(p.uid||'')}</td>
+      <td>${hideVal(p.wp||'')}</td>
+      <td><b>${escapeHtml(p.code||'')}</b></td>
+      <td>${paid}</td>
+      <td>
+        <button class="btn btn-primary" data-action="paid" data-key="${key}">Paid</button>
+        <button class="btn btn-ghost" data-action="verify" data-key="${key}">Verify</button>
+        <button class="btn btn-ghost" data-action="view" data-key="${key}">View</button>
+        <button class="btn btn-danger" data-action="del" data-key="${key}">Delete</button>
+      </td>`;
+    playersTbl.appendChild(row);
+  });
+  // attach handlers (event delegation)
+  playersTbl.querySelectorAll('button').forEach(btn=>{
+    btn.onclick = async function(){
+      const action = this.getAttribute('data-action');
+      const key = this.getAttribute('data-key');
+      if(action==='paid'){ if(!confirm('Mark Paid?')) return; await db.ref('players/'+key).update({paid:1}); }
+      if(action==='verify'){ if(!confirm('Mark Verified?')) return; await db.ref('players/'+key).update({verified:1}); }
+      if(action==='del'){ if(!confirm('Delete player?')) return; await db.ref('players/'+key).remove(); }
+      if(action==='view'){ const snap = await db.ref('players/'+key).once('value'); const p = snap.val()||{}; alert(`Name: ${p.name}\nUID: ${p.uid}\nWA: ${p.wp}\nCode: ${p.code}\nPaid: ${p.paid? 'Yes':'No'}`); }
+    };
+  });
+}
+
+/* ---------- import / clear ---------- */
+importBtn.addEventListener('click', async ()=>{
+  if(!ADMIN_UNLOCKED) return alert('Unlock admin first');
+  const sample = [
+    {name:"Inferno", uid:"3889662216", wp:"917000000001", code:"A1B2C3", paid:1, verified:1, createdAt:Date.now()},
+    {name:"Action Bolt", uid:"4344524799", wp:"917000000002", code:"D4E5F6", paid:0, verified:0, createdAt:Date.now()}
+  ];
+  try{
+    const ref = db.ref('players');
+    for(const p of sample) await ref.push(p);
+    alert('Sample imported');
+  }catch(e){ console.error(e); alert('Import failed'); }
+});
+
+clearBtn.addEventListener('click', async ()=>{
+  if(!ADMIN_UNLOCKED) return alert('Unlock admin first');
+  if(!confirm('Clear ALL players?')) return;
+  try{ await db.ref('players').set(null); alert('Players cleared'); }catch(e){ console.error(e); alert('Failed'); }
+});
+
+/* ---------- quick links ---------- */
+showSettingsInIndex.addEventListener('click', ()=> {
+  window.open('index.html','_blank');
+});
+openVerify.addEventListener('click', ()=> {
+  window.open('verify.html','_blank');
+});
+
+</script>
+</body>
+</html>
