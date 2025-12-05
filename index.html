@@ -308,7 +308,7 @@ async function regNow(){
     const upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(tn)}`;
     const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiLink)}`;
 
-    if(qrImg) qrImg.src = qrUrl;
+    if(qrImg) qrImg.src = "myqr.png",
     if(qrArea) qrArea.classList.remove('hidden');
     qrArea.scrollIntoView({behavior:'smooth'});
 
