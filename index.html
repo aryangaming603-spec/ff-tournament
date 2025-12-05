@@ -219,6 +219,215 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;back
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
+  /* ======= ADMIN + QR + REG FIX PATCH =======
+   Paste this inside your existing <script> in index.html.
+   It provides:
+   - robust admin-show (unlock or ?admin=1)
+   - showAdminUI() helper
+   - improved regNow() that sets lastCode, generates QR and wires OpenUPI & WhatsApp proof with code
+   - ensures saveSettings writes to /settings
+   ======= */
+
+(function(){
+  // safe guard: require db exists
+  if(typeof db === 'undefined'){
+    console.warn('Firebase db not found — ensure firebase initialized above this patch.');
+    return;
+  }
+
+  // helper to force show admin UI
+  window.showAdminUI = function(){
+    isAdmin = true;
+    // show admin-only elements
+    document.querySelectorAll('.admin-only').forEach(el=>{
+      el.style.display = ''; 
+      // remove visibility safeguards
+      el.classList.remove('hidden');
+    });
+    // show admin panel
+    const ap = document.getElementById('adminPanel') || document.getElementById('adminSettingsCard');
+    if(ap) ap.style.display = '';
+    // populate admin inputs from settings (if available)
+    if(window.settings){
+      // small delay to ensure inputs exist
+      setTimeout(()=> applySettings(), 50);
+    }
+  };
+
+  // override/unify unlockAdmin to call showAdminUI on success
+  window.unlockAdmin = async function(){
+    const pin = prompt('Enter admin PIN:');
+    if(!pin) return;
+    try{
+      const snap = await db.ref('settings/adminPin').once('value');
+      const real = snap.exists() ? snap.val() : (DEFAULTS && DEFAULTS.adminPin ? DEFAULTS.adminPin : '786786');
+      if(String(pin) === String(real)){
+        showAdminUI();
+        alert('Admin unlocked');
+      } else {
+        alert('Wrong PIN');
+      }
+    } catch(e){
+      // fallback to default
+      if(pin === (DEFAULTS && DEFAULTS.adminPin ? DEFAULTS.adminPin : '786786')){
+        showAdminUI();
+        alert('Admin unlocked (fallback)');
+      } else {
+        console.error(e);
+        alert('Error checking PIN');
+      }
+    }
+  };
+
+  // ensure ?admin=1 auto enables admin
+  if(location.search.includes('admin=1')){
+    showAdminUI();
+  }
+
+  // ensure saveSettings exists and writes to DB
+  window.saveSettings = async function(){
+    // require admin
+    if(!isAdmin) return alert('Admin only');
+    const s = {
+      name: (setName && setName.value) ? setName.value.trim() : settings.name,
+      map: (setMap && setMap.value) ? setMap.value.trim() : settings.map,
+      fee: Number((setFee && setFee.value) ? setFee.value : settings.fee) || settings.fee,
+      slots: Number((setSlots && setSlots.value) ? setSlots.value : settings.slots) || settings.slots,
+      p1: Number((setP1 && setP1.value) ? setP1.value : settings.p1) || settings.p1,
+      p2: Number((setP2 && setP2.value) ? setP2.value : settings.p2) || settings.p2,
+      p3: Number((setP3 && setP3.value) ? setP3.value : settings.p3) || settings.p3,
+      perKill: Number((setKill && setKill.value) ? setKill.value : settings.perKill) || settings.perKill,
+      upi: (setUpi && setUpi.value) ? setUpi.value.trim() : settings.upi,
+      regOpen: Number((setReg && setReg.value) ? setReg.value : settings.regOpen) || settings.regOpen,
+      roomId: (setRoomId && setRoomId.value) ? setRoomId.value.trim() : settings.roomId,
+      roomPass: (setRoomPass && setRoomPass.value) ? setRoomPass.value.trim() : settings.roomPass,
+      adminPin: (setAdminPin && setAdminPin.value) ? setAdminPin.value.trim() : settings.adminPin,
+      qrFile: (setQrFile && setQrFile.value) ? setQrFile.value.trim() : settings.qrFile
+    };
+    try{
+      await db.ref('settings').set(s);
+      // update local
+      settings = {...settings, ...s};
+      applySettings();
+      alert('Settings saved to server.');
+    }catch(err){
+      console.error('saveSettings err', err);
+      alert('Failed saving settings. Check console.');
+    }
+  };
+
+  // Keep last generated code so OpenUPI & WA proof include it
+  window._lastGeneratedCode = null;
+
+  // Improved regNow: writes to /players then shows QR + wires openUpi & waProof to include code
+  window.regNow = async function(){
+    if(!settings.regOpen) return alert('Registration closed by admin.');
+    const name = (rName && rName.value) ? rName.value.trim() : '';
+    const uid = (rUid && rUid.value) ? rUid.value.trim() : '';
+    const wp = (rWp && rWp.value) ? rWp.value.trim() : '';
+    if(!name || !uid || !wp) return alert('Please fill all fields.');
+    if(wp.length < 8) return alert('Enter valid WhatsApp number.');
+
+    const code = genCode();
+    const payload = { name, uid, wp, code, paid:0, verified:0, createdAt: Date.now() };
+    try{
+      const ref = db.ref('players');
+      await ref.push(payload);
+      _lastGeneratedCode = code; // store
+      alert('Registered! Your code: ' + code + '. Save it.');
+
+      // build UPI link with code in note
+      const upi = settings.upi || DEFAULTS.upi;
+      const amount = settings.fee || DEFAULTS.fee;
+      const tn = 'Entry:' + code;
+      const upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(tn)}`;
+      const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiLink)}`;
+
+      // show QR
+      if(qrImg) qrImg.src = qrUrl;
+      if(qrArea) qrArea.classList.remove('hidden');
+
+      // wire openUpi button to include the same link (so it opens app)
+      if(openUpiBtn){
+        openUpiBtn.onclick = function(){
+          // try intent first
+          const intent = `intent://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(settings.name||DEFAULTS.name)}&am=${encodeURIComponent(amount)}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+          window.location.href = intent;
+          setTimeout(()=> { window.location.href = upiLink; }, 1000);
+        };
+      }
+
+      // wire WhatsApp proof button with code
+      if(waProofBtn){
+        waProofBtn.onclick = function(){
+          const adminNum = (settings.adminNum || '').replace(/\D/g,'') || '9170856377';
+          const msg = `I have paid for ${settings.name||DEFAULTS.name}. Code: ${code}. Please verify.`;
+          const wa = `https://wa.me/${adminNum}?text=${encodeURIComponent(msg)}`;
+          window.open(wa, '_blank');
+        };
+      }
+
+      // clear form
+      clearRegForm();
+    }catch(e){
+      console.error('reg error', e);
+      alert('Registration failed. See console.');
+    }
+  };
+
+  // If your page used payRegBtn/regNowBtn wiring, re-attach to ensure correct handler
+  try {
+    const pb = document.getElementById('payRegBtn');
+    if(pb){ pb.removeEventListener && pb.removeEventListener('click', regNow); pb.addEventListener('click', regNow); }
+    const rb = document.getElementById('regNowBtn');
+    if(rb){ rb.removeEventListener && rb.removeEventListener('click', regNow); rb.addEventListener('click', regNow); }
+  } catch(e){ /* ignore */ }
+
+  // small helper: ensure admin inputs populated after settings loaded
+  window.applySettings = window.applySettings || function(){
+    // try to set fields if present
+    try{
+      titleHeader && (titleHeader.textContent = `${settings.name} — Solo`);
+      descEl && (descEl.textContent = `Mode: Solo • Map: ${settings.map} • Prizes: ${settings.p1}/${settings.p2}/${settings.p3}`);
+      infoUpi && (infoUpi.textContent = settings.upi || DEFAULTS.upi);
+      feeInfo && (feeInfo.textContent = `₹${settings.fee}`);
+      pkill && (pkill.textContent = `₹${settings.perKill}`);
+      regInfo && (regInfo.textContent = settings.regOpen ? "Open" : "Closed");
+      infoRoom && (infoRoom.textContent = settings.roomId ? `${settings.roomId} (${settings.roomPass ? "set":"no pass"})` : 'Not set');
+      // fill admin inputs when visible
+      if(isAdmin){
+        setName && (setName.value = settings.name || '');
+        setMap && (setMap.value = settings.map || '');
+        setFee && (setFee.value = settings.fee || '');
+        setSlots && (setSlots.value = settings.slots || '');
+        setP1 && (setP1.value = settings.p1 || '');
+        setP2 && (setP2.value = settings.p2 || '');
+        setP3 && (setP3.value = settings.p3 || '');
+        setKill && (setKill.value = settings.perKill || '');
+        setUpi && (setUpi.value = settings.upi || '');
+        setReg && (setReg.value = settings.regOpen ? '1' : '0');
+        setRoomId && (setRoomId.value = settings.roomId || '');
+        setRoomPass && (setRoomPass.value = settings.roomPass || '');
+        setAdminPin && (setAdminPin.value = settings.adminPin || '');
+        setQrFile && (setQrFile.value = settings.qrFile || '');
+      }
+    }catch(err){
+      console.warn('applySettings patch error', err);
+    }
+  };
+
+  // ensure listeners exist for save buttons (id may exist later, so try again soon)
+  function ensureAdminButtons(){
+    const sbtn = document.getElementById('saveSettingsBtn');
+    if(sbtn && !sbtn.__wired){ sbtn.addEventListener('click', saveSettings); sbtn.__wired = true; }
+    const imbtn = document.getElementById('importSampleBtn');
+    if(imbtn && !imbtn.__wired){ imbtn.addEventListener('click', importSample); imbtn.__wired = true; }
+    const clrbtn = document.getElementById('clearPlayersBtn');
+    if(clrbtn && !clrbtn.__wired){ clrbtn.addEventListener('click', clearAllPlayers); clrbtn.__wired = true; }
+  }
+  setTimeout(ensureAdminButtons, 300);
+  setTimeout(ensureAdminButtons, 1200);
+})();
 // ----------------- FIREBASE CONFIG (change if needed) -----------------
 const firebaseConfig = {
   apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
