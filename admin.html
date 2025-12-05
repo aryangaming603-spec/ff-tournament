@@ -327,6 +327,57 @@ openVerify.addEventListener('click', ()=> {
   window.open('verify.html','_blank');
 });
 
+  // ---------- Force-save settings helper (paste into admin.html <script>) ----------
+async function forceSaveSettings(){
+  if(!ADMIN_UNLOCKED){
+    alert('Unlock admin first');
+    return;
+  }
+
+  // read values from inputs (fallback to current settings)
+  const s = {
+    name: (document.getElementById('setName')?.value || settings.name || "EXIST GAMER").trim(),
+    map: (document.getElementById('setMap')?.value || settings.map || "Bermuda").trim(),
+    fee: Number(document.getElementById('setFee')?.value) || Number(settings.fee) || 25,
+    slots: Number(document.getElementById('setSlots')?.value) || Number(settings.slots) || 48,
+    p1: Number(document.getElementById('setP1')?.value) || Number(settings.p1) || 150,
+    p2: Number(document.getElementById('setP2')?.value) || Number(settings.p2) || 100,
+    p3: Number(document.getElementById('setP3')?.value) || Number(settings.p3) || 50,
+    perKill: Number(document.getElementById('setKill')?.value) || Number(settings.perKill) || 6,
+    upi: (document.getElementById('setUpi')?.value || settings.upi || "9170856377-3@ybl").trim(),
+    regOpen: Number(document.getElementById('setReg')?.value || settings.regOpen || 1),
+    roomId: (document.getElementById('setRoomId')?.value || settings.roomId || "").trim(),
+    roomPass: (document.getElementById('setRoomPass')?.value || settings.roomPass || "").trim(),
+    adminPin: (document.getElementById('setAdminPin')?.value || settings.adminPin || "786786").trim(),
+    qrFile: (document.getElementById('setQrFile')?.value || settings.qrFile || "").trim()
+  };
+
+  try{
+    // write to /settings
+    await db.ref('settings').set(s);
+    // also write same object to an alternate path for debugging (if index.html reads another path)
+    await db.ref('config').set(s);
+
+    // update local var + UI
+    settings = {...settings, ...s};
+    if(typeof fillForm === 'function') fillForm();
+    if(typeof applySettings === 'function') applySettings();
+
+    alert('Settings saved to /settings and /config. Check Firebase console to confirm.');
+    console.log('Saved settings:', s);
+  }catch(err){
+    console.error('forceSaveSettings failed', err);
+    alert('Save failed — see console (or share error).');
+  }
+}
+
+// attach to Save button if exists
+const _saveBtn = document.getElementById('saveBtn');
+if(_saveBtn){
+  _saveBtn.removeEventListener && _saveBtn.removeEventListener('click', forceSaveSettings).catch(()=>{});
+  _saveBtn.addEventListener('click', forceSaveSettings);
+  console.log('forceSaveSettings attached to saveBtn');
+}
 </script>
 </body>
 </html>
