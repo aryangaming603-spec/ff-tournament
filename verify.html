@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Verify — EXIST GAMER</title>
+<style>
+body{font-family:Inter,system-ui,Arial,sans-serif;background:#040405;color:#fff;margin:0;padding:18px}
+.container{max-width:720px;margin:20px auto}
+.card{background:#0b0b0c;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+.input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
+.btn{padding:8px 10px;border-radius:8px;border:none;background:#EFB810;color:#101010;font-weight:800;cursor:pointer}
+.small{color:#b6a990}
+.result{margin-top:12px;padding:12px;border-radius:8px}
+.status-paid{background:#113c12;color:#d1f7d8;padding:8px;border-radius:8px}
+.status-pend{background:#3f2b15;color:#f3e8d7;padding:8px;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h2 style="margin:0">Verify Registration</h2>
+    <p class="small">Enter UID or Code to check payment & get room details (only visible if paid/verified).</p>
+
+    <label style="margin-top:10px">UID or Code</label>
+    <input id="q" class="input" placeholder="Enter UID or Code">
+
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="searchBtn" class="btn">Search</button>
+      <button id="showAllBtn" class="btn" style="background:#444;color:#fff">Show all paid</button>
+    </div>
+
+    <div id="out" class="result"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
+  authDomain: "exist-gamer.firebaseapp.com",
+  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "exist-gamer",
+  storageBucket: "exist-gamer.firebasestorage.app",
+  messagingSenderId: "868288388784",
+  appId: "1:868288388784:web:b4a8b933ccbeb95b392575",
+  measurementId: "G-BNFXCZQTJW"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const q = document.getElementById('q');
+const out = document.getElementById('out');
+const searchBtn = document.getElementById('searchBtn');
+const showAllBtn = document.getElementById('showAllBtn');
+
+searchBtn.addEventListener('click', async ()=>{
+  const v = (q.value||'').trim();
+  if(!v) return alert('Enter UID or Code');
+  out.innerHTML = '<div class="small">Searching...</div>';
+  const snap = await db.ref('players').once('value');
+  const players = snap.val() || {};
+  const found = Object.values(players).filter(p => (p.uid && String(p.uid).includes(v)) || (p.code && String(p.code).toUpperCase()===v.toUpperCase()));
+  if(found.length === 0){ out.innerHTML = '<div class="small">No record found.</div>'; return; }
+  // show matches
+  out.innerHTML = found.map(p=>{
+    const paid = p.paid ? true : false;
+    const row = `<div style="margin-bottom:10px">
+      <div><strong>${p.name}</strong> — Code: <b>${p.code}</b></div>
+      <div class="small">UID: ${p.uid} • WA: ${p.wp}</div>
+      <div style="height:6px"></div>
+      ${ paid ? `<div class="status-paid">Paid — Room: ${ ( (window.settings && window.settings.roomId) ? window.settings.roomId : (p.roomId || 'N/A') ) } Password: ${ ( (window.settings && window.settings.roomPass) ? window.settings.roomPass : (p.roomPass || 'N/A') ) }</div>` : `<div class="status-pend">Pending — Admin will verify payment</div>` }
+    </div>`;
+    return row;
+  }).join('');
+});
+
+// show all paid
+showAllBtn.addEventListener('click', async ()=>{
+  out.innerHTML = '<div class="small">Loading...</div>';
+  const snap = await db.ref('players').once('value');
+  const players = snap.val() || {};
+  const paid = Object.values(players).filter(p=>p.paid);
+  if(paid.length===0){ out.innerHTML = '<div class="small">No paid players yet.</div>'; return;}
+  out.innerHTML = paid.map((p,i)=>`<div style="margin-bottom:10px"><strong>${i+1}. ${p.name}</strong> — Code: <b>${p.code}</b><div class="small">UID: ${p.uid}</div></div>`).join('');
+});
+
+// load settings (to show rooms)
+db.ref('settings').on('value', s=>{
+  window.settings = s.val() || {};
+});
+</script>
+</body>
+</html>
