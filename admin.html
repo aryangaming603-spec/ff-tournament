@@ -97,6 +97,12 @@ input{
 
 </div>
 
+  <div class="card">
+  <h3>🗑 Delete Match</h3>
+
+  <div id="matchList"></div>
+  </div>
+
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -226,6 +232,35 @@ function saveMatch(){
   });
 
   alert("✅ Match Saved!");
+}
+
+  /* LOAD MATCH LIST */
+db.ref('matches').on('value', snap=>{
+  const matches = snap.val() || {};
+  const div = document.getElementById('matchList');
+
+  if(!div) return;
+
+  div.innerHTML = "";
+
+  Object.entries(matches).forEach(([id,m],i)=>{
+    div.innerHTML += `
+      <div style="margin-top:8px">
+        Match ${i+1}
+        <button onclick="deleteMatch('${id}')" class="btn btn-danger">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+});
+
+/* DELETE MATCH */
+function deleteMatch(id){
+  if(confirm("Delete this match?")){
+    db.ref('matches/'+id).remove();
+    alert("Match Deleted ❌");
+  }
 }
 </script>
 
