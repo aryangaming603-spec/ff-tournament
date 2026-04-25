@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EXIST GAMER — Tournament</title>
-
-  <button onclick="window.location.href='leaderboard.html'" class="btn btn-ghost">
-🏆 Leaderboard
-  </button>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EXIST GAMER</title>
 
 <style>
 :root{
-  --gold:#EFB810;
+  --glass: rgba(255,255,255,0.12);
+  --border: rgba(255,255,255,0.2);
+  --gold:#ffd700;
 }
 
-/* BODY */
+/* 🌌 BACKGROUND (iPhone sky feel) */
 body{
   margin:0;
-  font-family:Inter;
-  background: radial-gradient(circle at top,#111,#000);
-  color:#fff;
+  font-family: Inter;
+  background: linear-gradient(135deg,#87ceeb,#5aa9ff,#1e3c72);
+  min-height:100vh;
+  color:white;
 }
 
 /* CONTAINER */
@@ -29,29 +28,47 @@ body{
   padding:15px;
 }
 
-/* GLASS CARD */
-.card{
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(20px);
-  border-radius:20px;
-  padding:15px;
-  margin-top:15px;
-  border:1px solid rgba(255,255,255,0.1);
-  box-shadow:0 8px 30px rgba(0,0,0,0.6);
-  transition:0.3s;
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
 }
 
-.card:hover{
-  transform:translateY(-3px);
+h1{
+  margin:0;
+  color:white;
+}
+
+/* 💎 GLASS CARD */
+.card{
+  background:var(--glass);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+
+  border-radius:25px;
+  padding:15px;
+  margin-top:15px;
+
+  border:1px solid var(--border);
+
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.3),
+    inset 0 1px 1px rgba(255,255,255,0.2);
+
+  width:100%;
+  overflow:hidden; /* FIX overflow */
 }
 
 /* BUTTON */
 .btn{
   padding:12px;
-  border-radius:50px;
   border:none;
-  font-weight:bold;
+  border-radius:50px;
   cursor:pointer;
+  font-weight:bold;
+  width:100%;
 }
 
 .btn-primary{
@@ -60,48 +77,49 @@ body{
 }
 
 .btn-ghost{
-  background:transparent;
-  border:1px solid rgba(255,255,255,0.1);
-  color:gold;
+  background:rgba(255,255,255,0.2);
+  color:white;
 }
 
 /* INPUT */
 input{
   width:100%;
   padding:12px;
-  border-radius:15px;
-  border:1px solid rgba(255,255,255,0.1);
-  background:rgba(255,255,255,0.05);
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.1);
   color:white;
   margin-top:8px;
 }
 
-/* HEADER */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  <button onclick="window.location.href='leaderboard.html'" class="btn btn-ghost">
-🏆 Leaderboard
-</button>
+/* GRID */
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
 }
 
-h1{
-  color:gold;
+@media(max-width:800px){
+  .row{
+    grid-template-columns:1fr;
+  }
 }
 
 /* TABLE */
 table{
   width:100%;
+  margin-top:10px;
+  border-collapse:collapse;
 }
 
-td,th{
+td{
   padding:10px;
 }
 
-/* MOBILE */
-@media(max-width:800px){
-  .header{flex-direction:column;gap:10px}
+/* SMALL */
+.small{
+  font-size:13px;
+  opacity:0.8;
 }
 </style>
 </head>
@@ -114,20 +132,24 @@ td,th{
 <div class="header">
   <div>
     <h1>🔥 EXIST GAMER</h1>
-    <p>Solo Tournament</p>
+    <div class="small">Pro Tournament System</div>
   </div>
 
-  <div>
-    <button onclick="unlockAdmin()" class="btn btn-ghost">Admin</button>
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <button onclick="go('leaderboard.html')" class="btn btn-ghost">🏆</button>
+    <button onclick="go('verify.html')" class="btn btn-ghost">🔍</button>
+    <button onclick="goAdmin()" class="btn btn-ghost">⚙️</button>
   </div>
 </div>
 
 <!-- TOURNAMENT -->
 <div class="card">
-  <h2 id="title">Tournament</h2>
-  <p id="info">Loading...</p>
+  <h2 id="title">Loading...</h2>
+  <p id="info" class="small"></p>
 
-  <button onclick="toggleQR()" class="btn btn-primary">Pay & Register</button>
+  <button onclick="toggleQR()" class="btn btn-primary">
+    💰 Pay & Register
+  </button>
 </div>
 
 <!-- REGISTER -->
@@ -138,7 +160,25 @@ td,th{
   <input id="uid" placeholder="UID">
   <input id="wp" placeholder="WhatsApp">
 
-  <button onclick="register()" class="btn btn-primary">Register</button>
+</div>
+
+<!-- PAYMENT -->
+<div id="paymentBox" class="card" style="display:none;text-align:center">
+
+  <h3>💰 Complete Payment</h3>
+
+  <img src="qr.png" style="width:200px;border-radius:15px">
+
+  <p>UPI: <b id="upiText">loading...</b></p>
+
+  <button onclick="openUPI()" class="btn btn-primary">
+    Open UPI
+  </button>
+
+  <button onclick="sendProof()" class="btn btn-ghost" style="margin-top:8px">
+    Send Proof
+  </button>
+
 </div>
 
 <!-- PLAYERS -->
@@ -156,101 +196,78 @@ td,th{
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
-  authDomain: "exist-gamer.firebaseapp.com",
-  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "exist-gamer"
+  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let players = {};
+let settings={};
 
 /* LOAD SETTINGS */
 db.ref('settings').on('value', snap=>{
-  const s = snap.val();
-  document.getElementById('title').innerText = s.name;
+  settings = snap.val()||{};
+  document.getElementById('title').innerText = settings.name || "Tournament";
   document.getElementById('info').innerText =
-    "Entry ₹"+s.fee+" | Map "+s.map;
+    "Entry ₹"+(settings.fee||25)+" | Map "+(settings.map||"Bermuda");
+
+  document.getElementById('upiText').innerText = settings.upi;
 });
 
 /* LOAD PLAYERS */
 db.ref('players').on('value', snap=>{
-  players = snap.val()||{};
-  render();
-});
-
-/* RENDER */
-function render(){
+  const players = snap.val()||{};
   let html="";
   let i=1;
 
-  Object.entries(players).forEach(([k,p])=>{
-    html += `
-    <tr>
+  Object.values(players).forEach(p=>{
+    html += `<tr>
       <td>${i++}</td>
       <td>${p.name}</td>
-      <td>${p.paid ? "Paid" : "Pending"}</td>
+      <td>${p.paid ? "✅" : "⏳"}</td>
     </tr>`;
   });
 
   document.getElementById('table').innerHTML = html;
+});
+
+/* NAV */
+function go(page){
+  window.location.href = page;
 }
 
-/* REGISTER */
-function register(){
-  const name = document.getElementById('name').value;
-  const uid = document.getElementById('uid').value;
-  const wp = document.getElementById('wp').value;
-
-  <div id="paymentBox" class="card" style="display:none;text-align:center">
-
-  <h3>💰 Complete Payment</h3>
-
-  <img src="qr.png" style="width:200px;border-radius:15px;margin-top:10px">
-
-  <p style="margin-top:10px">
-    UPI ID: <b id="upiText">loading...</b>
-  </p>
-
-  <button onclick="openUPI()" class="btn btn-primary">
-    📱 Open UPI App
-  </button>
-
-  <button onclick="sendProof()" class="btn btn-ghost" style="margin-top:8px">
-    📩 Send Payment Proof
-  </button>
-
-  <p class="small" style="margin-top:10px">
-    Payment ke baad WhatsApp pe screenshot bhejna zaruri hai
-  </p>
-
-</div>
-  if(!name||!uid||!wp){
-    alert("Fill all fields");
-    return;
-  }
-
-  db.ref('players').push({
-    name, uid, wp,
-    paid:0
-  });
-
-  alert("Registered!");
-}
-
-/* ADMIN */
-async function unlockAdmin(){
+async function goAdmin(){
   const pin = prompt("Enter PIN");
-
   const snap = await db.ref('settings/adminPin').once('value');
-  const real = snap.val();
-
-  if(pin == real){
+  if(pin == snap.val()){
     window.open("admin.html","_blank");
   } else {
     alert("Wrong PIN");
   }
+}
+
+/* PAYMENT */
+function toggleQR(){
+  const n=document.getElementById('name').value;
+  const u=document.getElementById('uid').value;
+  const w=document.getElementById('wp').value;
+
+  if(!n||!u||!w){
+    alert("Fill details first");
+    return;
+  }
+
+  document.getElementById('paymentBox').style.display="block";
+}
+
+function openUPI(){
+  const link = `upi://pay?pa=${settings.upi}&pn=EXIST GAMER&am=${settings.fee}&cu=INR`;
+  window.location.href = link;
+}
+
+function sendProof(){
+  const msg="I have paid, please verify.";
+  window.open("https://wa.me/9170856377?text="+encodeURIComponent(msg));
 }
 </script>
 
