@@ -143,6 +143,19 @@ td{
 </div>
 
 <!-- TOURNAMENT -->
+
+  <div class="card" style="margin-top:10px">
+
+  <div style="display:flex;justify-content:space-between">
+    <span>🎮 Slots</span>
+    <span id="slotText">0 / 48</span>
+  </div>
+
+  <div style="margin-top:8px;height:10px;background:rgba(255,255,255,0.2);border-radius:10px;overflow:hidden">
+    <div id="slotBar" style="height:100%;width:0%;background:linear-gradient(90deg,#00ffcc,#00ff66)"></div>
+  </div>
+
+  </div>
 <div class="card">
   <h2 id="title">Loading...</h2>
   <p id="info" class="small"></p>
@@ -268,6 +281,32 @@ function openUPI(){
 function sendProof(){
   const msg="I have paid, please verify.";
   window.open("https://wa.me/9170856377?text="+encodeURIComponent(msg));
+}
+
+  db.ref('players').on('value', snap=>{
+  const players = snap.val() || {};
+  const filled = Object.keys(players).length;
+  const total = settings.slots || 48;
+
+  const percent = (filled / total) * 100;
+
+  document.getElementById('slotText').innerText =
+    filled + " / " + total;
+
+  document.getElementById('slotBar').style.width =
+    percent + "%";
+});
+
+  const bar = document.getElementById('slotBar');
+
+if(percent > 80){
+  bar.style.background = "red";
+}
+else if(percent > 50){
+  bar.style.background = "orange";
+}
+else{
+  bar.style.background = "lime";
 }
 </script>
 
