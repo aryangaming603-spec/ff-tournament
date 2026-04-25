@@ -1,31 +1,27 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin — EXIST GAMER</title>
 
 <style>
 body{
-  font-family:Inter,system-ui;
+  font-family:Inter;
   background:#000;
   color:#fff;
-  margin:0;
   padding:15px;
 }
 
-/* GLASS CARD */
 .card{
   background:rgba(255,255,255,0.05);
   backdrop-filter:blur(20px);
   border-radius:20px;
-  border:1px solid rgba(255,255,255,0.1);
   padding:15px;
   margin-bottom:15px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.1);
 }
 
-/* BUTTON */
 .btn{
   padding:10px;
   border:none;
@@ -54,67 +50,49 @@ input{
   color:#fff;
 }
 
-table{
-  width:100%;
-  margin-top:10px;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:8px;
-  border-bottom:1px solid rgba(255,255,255,0.05);
-}
-
-.small{
-  color:#aaa;
-  font-size:13px;
-}
+.small{color:#aaa;font-size:13px}
 </style>
 </head>
 
 <body>
 
-<div class="card">
-<h2>🔥 EXIST GAMER ADMIN</h2>
-</div>
-
-<!-- LOCK -->
+<!-- LOGIN -->
 <div id="lockBox" class="card">
+  <h3>🔐 Admin Login</h3>
   <input id="pin" placeholder="Enter PIN">
-  <button class="btn btn-primary" onclick="unlock()">Unlock</button>
+  <button onclick="unlock()" class="btn btn-primary">Unlock</button>
   <p id="msg" class="small"></p>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" style="display:none">
 
+<!-- STATS -->
 <div class="card">
-<h3>📊 Stats</h3>
-<p id="stats" class="small"></p>
+  <h3>📊 Stats</h3>
+  <p id="stats"></p>
 </div>
 
+<!-- PLAYERS -->
 <div class="card">
-<input id="search" placeholder="Search player...">
+  <h3>👥 Players</h3>
+  <input id="search" placeholder="Search player...">
+
+  <table id="table"></table>
+
+  <button onclick="clearAll()" class="btn btn-danger">Clear All</button>
 </div>
 
+<!-- ADD MATCH -->
 <div class="card">
-<h3>👥 Players</h3>
+  <h3>🎮 Add Match</h3>
 
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Name</th>
-<th>UID</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
+  <input id="roomId" placeholder="Room ID">
+  <input id="roomPass" placeholder="Room Password">
 
-<tbody id="table"></tbody>
-</table>
+  <div id="matchPlayers"></div>
 
-<button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+  <button onclick="saveMatch()" class="btn btn-primary">Save Match</button>
 </div>
 
 </div>
@@ -136,7 +114,7 @@ const db = firebase.database();
 
 let players = {};
 
-/* UNLOCK */
+/* LOGIN */
 async function unlock(){
   const pin = document.getElementById('pin').value;
   const snap = await db.ref('settings/adminPin').once('value');
@@ -154,31 +132,28 @@ async function unlock(){
 db.ref('players').on('value', snap=>{
   players = snap.val() || {};
   render();
+  loadMatchPlayers();
 });
 
 /* RENDER */
 function render(){
   const table = document.getElementById('table');
   table.innerHTML="";
+  let i=1, paid=0;
 
-  let i=1;
-  let paid=0;
-
-  Object.entries(players).forEach(([key,p])=>{
+  Object.entries(players).forEach(([id,p])=>{
     if(p.paid) paid++;
 
     table.innerHTML += `
     <tr>
       <td>${i++}</td>
       <td>${p.name}</td>
-      <td>${p.uid}</td>
-      <td>${p.paid ? 'Paid' : 'Pending'}</td>
+      <td>${p.paid ? "Paid" : "Pending"}</td>
       <td>
-        <button onclick="markPaid('${key}')" class="btn btn-primary">Paid</button>
-        <button onclick="del('${key}')" class="btn btn-danger">X</button>
+        <button onclick="markPaid('${id}')" class="btn btn-primary">Paid</button>
+        <button onclick="del('${id}')" class="btn btn-danger">X</button>
       </td>
-    </tr>
-    `;
+    </tr>`;
   });
 
   document.getElementById('stats').innerText =
@@ -203,12 +178,55 @@ function clearAll(){
 /* SEARCH */
 document.getElementById('search').addEventListener('input', e=>{
   const val = e.target.value.toLowerCase();
-
   document.querySelectorAll('#table tr').forEach(row=>{
     row.style.display =
       row.innerText.toLowerCase().includes(val) ? '' : 'none';
   });
 });
+
+/* LOAD MATCH PLAYERS */
+function loadMatchPlayers(){
+  const div = document.getElementById('matchPlayers');
+  div.innerHTML="";
+
+  Object.entries(players).forEach(([id,p])=>{
+    if(p.paid){
+      div.innerHTML += `
+        <div style="margin-top:8px">
+          <b>${p.name}</b>
+          <input id="kill_${id}" placeholder="Kills" type="number">
+        </div>`;
+    }
+  });
+}
+
+/* SAVE MATCH */
+function saveMatch(){
+  const roomId = document.getElementById('roomId').value;
+  const roomPass = document.getElementById('roomPass').value;
+
+  let matchPlayers = [];
+
+  Object.entries(players).forEach(([id,p])=>{
+    if(p.paid){
+      const kills = document.getElementById('kill_'+id).value || 0;
+
+      matchPlayers.push({
+        name:p.name,
+        kills:Number(kills)
+      });
+    }
+  });
+
+  db.ref('matches').push({
+    roomId,
+    roomPass,
+    players:matchPlayers,
+    createdAt:Date.now()
+  });
+
+  alert("✅ Match Saved!");
+}
 </script>
 
 </body>
