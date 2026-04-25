@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leaderboard — EXIST GAMER</title>
+
+<style>
+body{
+  font-family:Inter;
+  background: radial-gradient(circle at top,#111,#000);
+  color:#fff;
+  margin:0;
+  padding:15px;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+}
+
+.card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  border-radius:20px;
+  padding:15px;
+  margin-top:15px;
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+h1{
+  color:gold;
+  text-align:center;
+}
+
+.match{
+  margin-top:15px;
+}
+
+.player{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.rank{
+  font-weight:bold;
+  color:gold;
+}
+
+.small{
+  color:#aaa;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏆 Leaderboard</h1>
+
+<div id="board"></div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBh3Bu4R28g93x32DXW_-OIrscbqjIrT4k",
+  authDomain: "exist-gamer.firebaseapp.com",
+  databaseURL: "https://exist-gamer-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "exist-gamer"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* LOAD MATCHES */
+db.ref('matches').on('value', snap=>{
+  const matches = snap.val() || {};
+  render(matches);
+});
+
+function render(matches){
+  const board = document.getElementById('board');
+  board.innerHTML="";
+
+  const list = Object.values(matches).slice(-10).reverse();
+
+  if(list.length===0){
+    board.innerHTML = "<div class='small'>No matches yet</div>";
+    return;
+  }
+
+  list.forEach((m,i)=>{
+    let html = `
+    <div class="card match">
+      <h3>Match ${i+1}</h3>
+    `;
+
+    m.players.sort((a,b)=>b.kills - a.kills);
+
+    m.players.forEach((p,index)=>{
+      html += `
+      <div class="player">
+        <div class="rank">#${index+1}</div>
+        <div>${p.name}</div>
+        <div>🔥 ${p.kills}</div>
+      </div>
+      `;
+    });
+
+    html += "</div>";
+    board.innerHTML += html;
+  });
+}
+</script>
+
+</body>
+</html>
