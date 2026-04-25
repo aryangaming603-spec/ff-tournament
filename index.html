@@ -7,23 +7,22 @@
 
 <style>
 :root{
-  --glass: rgba(255,255,255,0.12);
-  --border: rgba(255,255,255,0.2);
-  --gold:#ffd700;
+  --glass: rgba(255,255,255,0.15);
+  --border: rgba(255,255,255,0.25);
 }
 
-/* 🌌 BACKGROUND (iPhone sky feel) */
+/* 🌌 BACKGROUND (iPhone + gaming) */
 body{
   margin:0;
   font-family: Inter;
-  background: linear-gradient(135deg,#87ceeb,#5aa9ff,#1e3c72);
-  min-height:100vh;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
+  min-height:100vh;
 }
 
 /* CONTAINER */
 .container{
-  max-width:1100px;
+  max-width:1000px;
   margin:auto;
   padding:15px;
 }
@@ -32,20 +31,17 @@ body{
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   flex-wrap:wrap;
 }
 
-h1{
-  margin:0;
-  color:white;
-}
-
-/* 💎 GLASS CARD */
+/* 💎 CARD */
 .card{
+  width:100%;
+  max-width:100%;
+  overflow:hidden;
+
   background:var(--glass);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+  backdrop-filter:blur(25px);
 
   border-radius:25px;
   padding:15px;
@@ -53,12 +49,7 @@ h1{
 
   border:1px solid var(--border);
 
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.3),
-    inset 0 1px 1px rgba(255,255,255,0.2);
-
-  width:100%;
-  overflow:hidden; /* FIX overflow */
+  box-shadow:0 10px 40px rgba(0,0,0,0.4);
 }
 
 /* BUTTON */
@@ -66,14 +57,14 @@ h1{
   padding:12px;
   border:none;
   border-radius:50px;
-  cursor:pointer;
-  font-weight:bold;
   width:100%;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 .btn-primary{
   background:linear-gradient(135deg,#ffd700,#ffb300);
-  color:#111;
+  color:black;
 }
 
 .btn-ghost{
@@ -85,41 +76,34 @@ h1{
 input{
   width:100%;
   padding:12px;
+  margin-top:8px;
   border-radius:20px;
   border:1px solid var(--border);
   background:rgba(255,255,255,0.1);
   color:white;
-  margin-top:8px;
-}
-
-/* GRID */
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-}
-
-@media(max-width:800px){
-  .row{
-    grid-template-columns:1fr;
-  }
 }
 
 /* TABLE */
 table{
   width:100%;
-  margin-top:10px;
-  border-collapse:collapse;
 }
 
 td{
-  padding:10px;
+  padding:8px;
 }
 
-/* SMALL */
-.small{
-  font-size:13px;
-  opacity:0.8;
+/* SLOT BAR */
+.bar{
+  height:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.2);
+  overflow:hidden;
+}
+
+.bar-inner{
+  height:100%;
+  width:0%;
+  background:lime;
 }
 </style>
 </head>
@@ -130,68 +114,58 @@ td{
 
 <!-- HEADER -->
 <div class="header">
-  <div>
-    <h1>🔥 EXIST GAMER</h1>
-    <div class="small">Pro Tournament System</div>
-  </div>
+  <h2>🔥 EXIST GAMER</h2>
 
-  <div style="display:flex;gap:10px;margin-top:10px">
+  <div style="display:flex;gap:8px">
     <button onclick="go('leaderboard.html')" class="btn btn-ghost">🏆</button>
     <button onclick="go('verify.html')" class="btn btn-ghost">🔍</button>
-    <button onclick="goAdmin()" class="btn btn-ghost">⚙️</button>
+    <button onclick="admin()" class="btn btn-ghost">⚙️</button>
   </div>
 </div>
 
 <!-- TOURNAMENT -->
-
-  <div class="card" style="margin-top:10px">
-
-  <div style="display:flex;justify-content:space-between">
-    <span>🎮 Slots</span>
-    <span id="slotText">0 / 48</span>
-  </div>
-
-  <div style="margin-top:8px;height:10px;background:rgba(255,255,255,0.2);border-radius:10px;overflow:hidden">
-    <div id="slotBar" style="height:100%;width:0%;background:linear-gradient(90deg,#00ffcc,#00ff66)"></div>
-  </div>
-
-  </div>
 <div class="card">
-  <h2 id="title">Loading...</h2>
-  <p id="info" class="small"></p>
+  <h3 id="title">Loading...</h3>
+  <p id="info"></p>
 
-  <button onclick="toggleQR()" class="btn btn-primary">
+  <button onclick="startPayment()" class="btn btn-primary">
     💰 Pay & Register
   </button>
+
+  <!-- SLOT -->
+  <div style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between">
+      <span>Slots</span>
+      <span id="slotText">0/48</span>
+    </div>
+
+    <div class="bar">
+      <div id="bar" class="bar-inner"></div>
+    </div>
+  </div>
 </div>
 
 <!-- REGISTER -->
 <div class="card">
-  <h3>Register</h3>
-
   <input id="name" placeholder="Name">
   <input id="uid" placeholder="UID">
   <input id="wp" placeholder="WhatsApp">
-
 </div>
 
 <!-- PAYMENT -->
 <div id="paymentBox" class="card" style="display:none;text-align:center">
+  <h3>💰 Payment</h3>
 
-  <h3>💰 Complete Payment</h3>
+  <img src="qr.png" style="width:180px;border-radius:15px">
 
-  <img src="qr.png" style="width:200px;border-radius:15px">
+  <p>UPI: <b id="upi"></b></p>
 
-  <p>UPI: <b id="upiText">loading...</b></p>
-
-  <button onclick="openUPI()" class="btn btn-primary">
-    Open UPI
-  </button>
-
+  <button onclick="openUPI()" class="btn btn-primary">Open UPI</button>
   <button onclick="sendProof()" class="btn btn-ghost" style="margin-top:8px">
     Send Proof
   </button>
 
+  <p id="codeBox"></p>
 </div>
 
 <!-- PLAYERS -->
@@ -215,98 +189,91 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let settings={};
+let settings = {};
+let lastCode = "";
 
-/* LOAD SETTINGS */
+/* SETTINGS */
 db.ref('settings').on('value', snap=>{
   settings = snap.val()||{};
-  document.getElementById('title').innerText = settings.name || "Tournament";
+  document.getElementById('title').innerText = settings.name;
   document.getElementById('info').innerText =
-    "Entry ₹"+(settings.fee||25)+" | Map "+(settings.map||"Bermuda");
-
-  document.getElementById('upiText').innerText = settings.upi;
+    "Entry ₹"+settings.fee+" | "+settings.map;
+  document.getElementById('upi').innerText = settings.upi;
 });
 
-/* LOAD PLAYERS */
+/* PLAYERS */
 db.ref('players').on('value', snap=>{
-  const players = snap.val()||{};
-  let html="";
-  let i=1;
+  const p = snap.val()||{};
+  let html="", i=1;
 
-  Object.values(players).forEach(p=>{
-    html += `<tr>
+  const filled = Object.keys(p).length;
+  const total = settings.slots || 48;
+
+  const percent = (filled/total)*100;
+
+  document.getElementById('slotText').innerText = filled+"/"+total;
+  document.getElementById('bar').style.width = percent+"%";
+
+  Object.values(p).forEach(x=>{
+    html+=`<tr>
       <td>${i++}</td>
-      <td>${p.name}</td>
-      <td>${p.paid ? "✅" : "⏳"}</td>
+      <td>${x.name}</td>
+      <td>${x.paid?"✅":"⏳"}</td>
     </tr>`;
   });
 
   document.getElementById('table').innerHTML = html;
 });
 
-/* NAV */
-function go(page){
-  window.location.href = page;
+/* CODE */
+function code(){
+  return Math.random().toString(36).substr(2,6).toUpperCase();
 }
 
-async function goAdmin(){
-  const pin = prompt("Enter PIN");
-  const snap = await db.ref('settings/adminPin').once('value');
-  if(pin == snap.val()){
-    window.open("admin.html","_blank");
-  } else {
-    alert("Wrong PIN");
-  }
-}
+/* REGISTER + PAYMENT */
+function startPayment(){
+  const name = document.getElementById('name').value;
+  const uid = document.getElementById('uid').value;
+  const wp = document.getElementById('wp').value;
 
-/* PAYMENT */
-function toggleQR(){
-  const n=document.getElementById('name').value;
-  const u=document.getElementById('uid').value;
-  const w=document.getElementById('wp').value;
-
-  if(!n||!u||!w){
-    alert("Fill details first");
+  if(!name||!uid||!wp){
+    alert("Fill details");
     return;
   }
 
+  lastCode = code();
+
+  db.ref('players').push({
+    name, uid, wp,
+    code:lastCode,
+    paid:0
+  });
+
   document.getElementById('paymentBox').style.display="block";
+
+  document.getElementById('codeBox').innerHTML =
+    "Your Code: <b>"+lastCode+"</b>";
 }
 
+/* PAYMENT */
 function openUPI(){
-  const link = `upi://pay?pa=${settings.upi}&pn=EXIST GAMER&am=${settings.fee}&cu=INR`;
-  window.location.href = link;
+  const link=`upi://pay?pa=${settings.upi}&pn=EXIST GAMER&am=${settings.fee}&cu=INR`;
+  window.location.href=link;
 }
 
 function sendProof(){
-  const msg="I have paid, please verify.";
+  const msg=`Paid\nCode: ${lastCode}`;
   window.open("https://wa.me/9170856377?text="+encodeURIComponent(msg));
 }
 
-  db.ref('players').on('value', snap=>{
-  const players = snap.val() || {};
-  const filled = Object.keys(players).length;
-  const total = settings.slots || 48;
+/* NAV */
+function go(p){ window.location.href=p; }
 
-  const percent = (filled / total) * 100;
-
-  document.getElementById('slotText').innerText =
-    filled + " / " + total;
-
-  document.getElementById('slotBar').style.width =
-    percent + "%";
-});
-
-  const bar = document.getElementById('slotBar');
-
-if(percent > 80){
-  bar.style.background = "red";
-}
-else if(percent > 50){
-  bar.style.background = "orange";
-}
-else{
-  bar.style.background = "lime";
+async function admin(){
+  const pin=prompt("Enter PIN");
+  const snap=await db.ref('settings/adminPin').once('value');
+  if(pin==snap.val()) window.open("admin.html");
+  else alert("Wrong");
 }
 </script>
 
